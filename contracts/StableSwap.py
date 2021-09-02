@@ -1,3 +1,4 @@
+
 import smartpy as sp
 fa12 = sp.io.import_script_from_url("https://smartpy.io/templates/FA1.2.py")
 
@@ -19,7 +20,7 @@ class StableSwap(sp.Contract):
     
     def transfer_tokens(self, from_, to, amount):
         """ Utility Function to transfer FA1.2 Tokens."""
-        sp.verify(amount > sp.nat(0), 'INSUFFICIENT_TOKENS')
+        sp.verify(amount > sp.nat(0), 'INSUFFICIENT_TOKENS[transfer_token]')
         
         # approve_type = sp.TRecord(spender = sp.TAddress, value = sp.TNat).layout(("spender", "value"))
         # approve_data = sp.record(spender=sp.self_address, value=amount)
@@ -76,18 +77,18 @@ class StableSwap(sp.Contract):
     
     @sp.entry_point
     def tez_to_token(self):
-        sp.verify(sp.amount > sp.mutez(1), message="NOT_ENOUGH_TEZ")
+        sp.verify(sp.amount > sp.mutez(0), message="NOT_ENOUGH_TEZ") 
         # fee: 0.2% => 0.2/100 => 1/500
-        token_in_nat = sp.utils.mutez_to_nat(sp.amount)
-        fee = token_in_nat / self.data.fee_rate
+        tez_in_nat = sp.utils.mutez_to_nat(sp.amount) # 1000
+        fee = tez_in_nat / self.data.fee_rate # 2
+        new_token_pool = self.data.invariant / sp.as_nat(sp.utils.mutez_to_nat(self.data.tez_pool) - fee) # 10002
+        # `token_out` is the amount of token the user will get.
+        token_out =  new_token_pool - self.data.token_pool # 2
         self.data.tez_pool += sp.amount
-        new_token_pool = self.data.invariant / sp.as_nat(sp.utils.mutez_to_nat(self.data.tez_pool) - fee)
         self.data.token_pool = new_token_pool
         self.data.invariant = new_token_pool * sp.utils.mutez_to_nat(self.data.tez_pool)
         
         
-        # `token_out` is the amount of token the user will get.
-        token_out = self.data.token_pool - new_token_pool
         self.transfer_tokens(from_=sp.self_address, to=sp.sender, amount=sp.as_nat(token_out))
     
     @sp.entry_point
@@ -107,11 +108,6 @@ class StableSwap(sp.Contract):
         tez_out = self.data.tez_pool - sp.utils.nat_to_mutez(new_tez_pool)
         # Transfer the swapped tezos.
         self.transfer_tez(to_=sp.sender, amount=tez_out)
-
-
-
-
-        
 
 
 @sp.add_test(name="StableSwap Tests")
@@ -140,20 +136,23 @@ def test():
 
     stable_swap = StableSwap(_fee_rate = sp.nat(500), _token_address=token.address)
     scenario += stable_swap
-    token.mint(address=alice.address, value=sp.nat(10000)).run(sender=token_admin)
+    token.mint(address=alice.address, value=sp.nat(20000)).run(sender=token_admin)
     token.mint(address=bob.address, value=sp.nat(1000)).run(sender=token_admin)
 
     # Initialize the exchange.
     # Approve to spend by stable_swap address
-    token.approve(sp.record(spender=stable_swap.address, value=sp.nat(20))).run(sender=alice)
-    stable_swap.initialize_enchange(sp.record(token_amount=sp.nat(20))).run(sender=alice, amount=sp.mutez(10000))
+    token.approve(sp.record(spender=stable_swap.address, value=sp.nat(10000))).run(sender=alice)
+    stable_swap.initialize_enchange(sp.record(token_amount=sp.nat(10000))).run(sender=alice, amount=sp.mutez(10000))
 
     # Approving again to provide liquidity.
-    token.approve(sp.record(spender=stable_swap.address, value=sp.nat(100))).run(sender=bob)
-    stable_swap.invest_liquidity(sp.record(token_amount=sp.nat(100))).run(sender=bob, amount=sp.mutez(10000000))
+    # token.approve(sp.record(spender=stable_swap.address, value=sp.nat(100))).run(sender=bob)
+    # stable_swap.invest_liquidity(sp.record(token_amount=sp.nat(100))).run(sender=bob, amount=sp.mutez(10000000))
 
-    # Swap 10 tokens in xtz
-    token.approve(sp.record(spender=stable_swap.address, value=sp.nat(1))).run(sender=alice)
-    stable_swap.token_to_tez(sp.record(token_amount=sp.nat(1))).run(sender=alice)
+    # # Swap 10 tokens in xtz
+    # token.approve(sp.record(spender=stable_swap.address, value=sp.nat(1))).run(sender=alice)
+    # stable_swap.token_to_tez(sp.record(token_amount=sp.nat(1))).run(sender=alice)
+
+    stable_swap.tez_to_token().run(sender=bob, amount=sp.mutez(1000))
 
         
+

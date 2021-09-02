@@ -1,3 +1,4 @@
+
 import smartpy as sp
 fa12 = sp.io.import_script_from_url("https://smartpy.io/templates/FA1.2.py")
 
@@ -58,13 +59,25 @@ class StableSwap(sp.Contract):
 
         self.transfer_tokens(from_=sp.sender, to=sp.self_address, amount=token_amount.value)
     
-    # @sp.entry_point
-    # def invest_liquidity()
+    @sp.entry_point
+    def invest_liquidity(self, params):
+        sp.set_type(params, sp.TRecord(token_amount=sp.TNat))
+        sp.verify(params.token_amount > sp.nat(0), message="NOT_ENOUGH_TOKEN")
+        sp.verify(sp.amount > sp.mutez(0), message="NOT_ENOUGH_TOKEN")
+
+        self.data.tez_pool += sp.amount
+        self.data.token_pool += params.token_amount
+        self.data.invariant = sp.utils.mutez_to_nat(self.data.tez_pool) * self.data.token_pool
+        
+        self.transfer_tokens(from_=sp.sender, to=sp.self_address, amount=params.token_amount)
+        
+
 
 @sp.add_test(name="StableSwap Tests")
 def test():
     token_admin = sp.test_account("Token Admin")
     alice = sp.test_account("Alice")
+    bob = sp.test_account("Bob")
     scenario = sp.test_scenario()
 
     token_metadata = {
@@ -87,11 +100,17 @@ def test():
     stable_swap = StableSwap(_fee_rate = sp.nat(500), _token_address=token.address)
     scenario += stable_swap
     token.mint(address=alice.address, value=sp.nat(10000)).run(sender=token_admin)
+    token.mint(address=bob.address, value=sp.nat(1000)).run(sender=token_admin)
 
     # Initialize the exchange.
     # Approve to spend by stable_swap address
     token.approve(sp.record(spender=stable_swap.address, value=sp.nat(20))).run(sender=alice)
     stable_swap.initialize_enchange(sp.record(token_amount=sp.nat(20))).run(sender=alice, amount=sp.mutez(10000))
 
+    # Approving again to provide liquidity.
+    token.approve(sp.record(spender=stable_swap.address, value=sp.nat(100))).run(sender=bob)
+    stable_swap.invest_liquidity(sp.record(token_amount=sp.nat(100))).run(sender=bob, amount=sp.mutez(10000000))
+
 
         
+

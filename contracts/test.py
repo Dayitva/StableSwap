@@ -1,4 +1,4 @@
-A = 85
+A = 89963077314166901255
 N_COINS = 2
 PRECISION = 10 ** 18
 A_MULTIPLIER = 10000
@@ -63,5 +63,5 @@ def get_y(i, j, x):
         
     return y
 
-print("For", amount_to_be_swapped, "kUSD, you get", get_y(1, 1, amount_to_be_swapped), "USDtz")
-# print("For", amount_to_be_swapped, "you get", get_y(0, 1, 100))
+#print("For", amount_to_be_swapped, "kUSD, you get", get_y(1, 1, amount_to_be_swapped), "USDtz")
+print("For", amount_to_be_swapped, "you get", get_y(0, 1, 100))

@@ -1,97 +1,108 @@
-import smartpy as sp
+#!/usr/bin/env python3
+
+A = 85       #Higher A, more towards x+y=k
+             #Lower A, more towards xy=k
+N_COINS = 2  #diff tokens in pool
 
 
-class Dex(sp.Contract):
-    def __init__(self, feeRate: sp.TNat):
-        self.init(
-            feeRate=sp.nat(feeRate),
-            invariant=sp.mutez(0)
-        )
+token_pool = [1210, 1200]
+amount_to_be_swapped = 5
+coins = ['USDtz', 'kUSD']
+amount_to_be_added = 5
 
-    @sp.entry_point
-    def InitializeExchange(self, params):
-        token_amount = sp.as_nat(params.token_amount)
+def get_D():
+    S = 0
+    xp = token_pool
+    
+    for _x in xp:
+        S += _x
+        
+    if S == 0:
+        return 0
 
-        sp.verify(self.data.invariant == sp.mutez(0), message="Wrong invariant")
-        sp.verify(((sp.amount > sp.mutez(1)) & (
-            sp.amount < sp.tez(500000000))), message="Wrong amount")
-        sp.verify(token_amount > sp.nat(10), message="Wrong tokenAmount")
+    Dprev = 0
+    D = S
+    
+    Ann = A * N_COINS
+    
+    while abs(D - Dprev) > 0.001:
+        D_P = D
+        for x in xp:
+            D_P = D_P * D / (N_COINS * x)
+        Dprev = D
+        D = (Ann * S + D_P * N_COINS) * D / ((Ann - 1) * D + (N_COINS + 1) * D_P)
 
-        # TODO WE NEED TO DEFINE OUR Curve Invariant
-        # self.data.invariant = sp.split_tokens(self.data.tezPool, self.data.tokenPool, sp.nat(1))
+    return D
 
-        # TODO set up links to our USDtz, kUSD addresses, so that we can add Liq to that address
-        # pass 
+def get_y(i, j, x, _xp):
+    D = get_D()
+    c = D
+    S_ = 0
+    Ann = A * N_COINS
 
-        # TODO WE NEED TO Init a data structure to act as a Pool with USDtz + kUSD, roughly implemented below
-        # IDEA We can also just maintain a single map with the $ balances, divest in a way that maintains pool balance
-        USDtz_LP_balances = sp.big_map(tkey = sp.TAddress, tvalue = sp.TInt)
-        total_USDtz = sp.nat(0)
-        kUSD_LP_balances = sp.big_map(tkey = sp.TAddress, tvalue = sp.TInt)
-        total_kUSD = sp.nat(0)
-        total_supply = sp.nat(0)
+    _x = 0
+    for _i in range(N_COINS):
+        if _i == i:
+            _x = x
+        elif _i != j:
+            _x = _xp[_i]
+        else:
+            continue
+        S_ += _x
+        c = c * D / (_x * N_COINS)
+        
+    c = c * D / (Ann * N_COINS)
+    b = S_ + D / Ann  # - D
+    y_prev = 0
+    y = D
+    
+    while abs(y - y_prev) > 0.001:
+        y_prev = y
+        y = (y*y + c) / (2 * y + b - D)
+        
+    return y
 
-    @sp.entry_point
-    def AddLiquidity(self, params):
-        sp.verify(sp.amount > sp.nat(0), message="Invalid amount")
+def exchange(i, j, dx):
+    xp = token_pool
 
-        # TODO update the Invariant
-        # self.data.invariant = sp.split_tokens(self.data.tezPool, self.data.tokenPool, sp.nat(1))
+    x = xp[i] + dx
+    y = get_y(i, j, x, xp)
+    dy = (xp[j] - y)
 
-        # TODO update the local data structures
-        sp.if self.data.balances.contains(params.address):
-            self.data.USDtz_LP_balances[params.address] += sp.amount
-            self.data.kUSD_LP_balances[params.address] += sp.amount
-        sp.else:
-            self.data.USDtz_LP_balances[params.address] = sp.amount
-            self.data.kUSD_LP_balances[params.address] = sp.amount
+    token_pool[i] += dx
+    token_pool[j] -= dy
+    return dy
 
-        self.total_USDtz += sp.amount
-        self.total_kUSD += sp.amount
-        self.total_supply += 2*sp.amount
+def add_liquidity(i, dx):
+    token_supply = 0
+    for k in token_pool:
+        token_supply += k
 
-        # FIXME make the actual tansfer of tokens, unsure of Implementation
-        # sp.transfer(sp.record(account_from=sp.sender,
-        #                       destination=self.data.address,
-        #                       value=tokensRequired),
-        #             sp.mutez(0),
-        #             token_contract)
+    # Initial invariant
+    D0 = 0
+    if token_supply > 0:
+        D0 = get_D()
 
-    @sp.entry_point
-    def RemoveLiquidity(self, params):
-        sp.verify(sp.amount > 0, "Invalid Amount")
-        sp.verify(self.data.USDtz_LP_balances.contains(sp.sender) | self.data.kUSD_LP_balances.contains(sp.sender), "Source account not found")
-        sp.verify((self.data.USDtz_LP_balances.contains(sp.sender) + self.data.kUSD_LP_balances.contains(sp.sender)) - sp.amount >= 0, "Insufficient Balance")
+    # Take coins from the sender
+    if dx > 0:
+        ### TODO Transfer tokens to our token addresses
+        pass
+        
+    token_pool[i] = token_pool[i] + dx
 
-        # TODO Divest in a way that maintains/restores Pool Balance
-        # FIXME Calculate the best payout, store in USDtz_divest and kUSD_divest
-        USDtz_divest = 0
-        kUSD_divest = 0 
-        # self.data.USDtz_LP_balances[sp.sender] -= USDtz_divest
-        # self.data.kUSD_LP_balances[sp.sender] -= kUSD_divest
-        sp.if self.data.USDtz_LP_balances[sp.sender] == 0:
-            del self.data.USDtz_LP_balances[sp.sender]
-        sp.if self.data.kUSD_LP_balances[sp.sender] == 0:
-            del self.data.kUSD_LP_balances[sp.sender]
+    # Invariant after change
+    D1 = get_D()
+    return D1 - D0
 
-        # TODO update the local data structures
-        self.total_USDtz -= USDtz_divest
-        self.total_kUSD -= kUSD_divest
-        self.total_supply -= sp.amount
+def remove_liquidity(dx):
+    token_supply = 0
+    for k in token_pool:
+        token_supply += k
 
-        # TODO update the Invariant 
-        # sp.if self.data.totalShares == 0:
-        #     self.data.invariant = sp.mutez(0)
-        # sp.else:
-        #     self.data.invariant = sp.split_tokens(self.data.tezPool, self.data.tokenPool, sp.nat(1))
+   ### TODO Make on contract changes & transfer to LP address(es)
 
 
-        # FIXME make the actual tansfer of tokens, unsure of Implementation
-        # sp.transfer(sp.record(account_from=self.data.address,
-        #                       destination=sp.sender,
-        #                       value=tokensDivested),
-        #             spmutez(0),
-        #             token_contract)
+print("For", amount_to_be_swapped, "of token 1 you get", exchange(1, 0, amount_to_be_swapped), "of token 0.")
+print("For", amount_to_be_swapped, "of token 1 you get", exchange(1, 0, amount_to_be_swapped), "of token 0.")
 
-        # TODO send the tokens to the LP address, maybe separate for kUSD and USDtz
-        sp.send(sp.sender, sp.amount).
+print("For providing", amount_to_be_added, "of token 0, you make a profit of", amount_to_be_added - add_liquidity(1, amount_to_be_added), ".")

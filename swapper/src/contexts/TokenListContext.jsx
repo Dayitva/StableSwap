@@ -1,6 +1,6 @@
 /* Global State Variable to show/hide TokenList */
 import React, { createContext, useState } from "react";
-import {tokenList} from '../utils/tokenList'
+import {tokenList} from '../utils/tokenList';
 
 // `false` here is default value which mean the List will be hidden.
 const TokenListContext = createContext(false);

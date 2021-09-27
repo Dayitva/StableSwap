@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import Navbar from "./components/Navbar";
 import Swap from "./components/Swap";
 import TokenSelector from "./components/TokenSelector";
@@ -7,7 +7,7 @@ import { TokenListContext } from "./contexts/TokenListContext";
 function App() {
   const { show } = useContext(TokenListContext);
   return (
-    <div className="min-h-screen bg-dark relative">
+    <div className="min-h-screen bg-dark relative text-white">
       <Navbar />
       {show ? (
         <div className="absolute inset-0 bg-black z-50 bg-opacity-40 flex items-start pt-36 justify-center">

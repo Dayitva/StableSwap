@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useContext } from "react";
 import {XIcon} from '@heroicons/react/solid';
 import {TokenListContext} from '../contexts/TokenListContext';
 import {tokenList} from '../utils/tokenList';
@@ -6,8 +6,8 @@ import {tokenList} from '../utils/tokenList';
 function TokenSelector() {
   const {setShow, show, setToken} = useContext(TokenListContext);
   return (
-    <div className="w-[30rem] bg-gray-900 rounded-md shadow-2xl">
-      <div className="p-3 flex items-center justify-between border-b-[1px] border-gray-700">
+    <div className="w-[30rem] bg-gray-900 rounded-md shadow-2xl" style={{width: '30rem'}}>
+      <div className="p-3 flex items-center justify-between border-b border-gray-700">
         <h2>Select a token</h2>
         <button onClick={() => {setShow(!show)}}>
           <XIcon className="w-4 h-4"/>

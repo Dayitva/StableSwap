@@ -1,4 +1,4 @@
-import React, {useContext} from 'react'
+import React from 'react'
 import {ChevronDownIcon} from '@heroicons/react/solid';
 
 function TokenSwitch({click, token}) {
@@ -10,6 +10,7 @@ function TokenSwitch({click, token}) {
       <img 
         src={token.imageUrl}
         className="w-6 h-6"
+        alt={token.symbol}
       />
       <span className="text-sm">{token.symbol}</span>
       <ChevronDownIcon className="w-6 h-6" />

@@ -31,4 +31,11 @@ export const tokenList = [
     imageUrl:
       "https://img.templewallet.com/insecure/fit/64/64/ce/0/plain/https://github.com/StakerDAO/resources/raw/main/stkr.png",
   },
+  {
+    id: 5,
+    symbol: "uUSD",
+    name: "Youves USD",
+    imageUrl:
+      "https://img.templewallet.com/insecure/fit/64/64/ce/0/plain/https://tezblock.io/submodules/tezos_assets/imgs/KT1XRPEPXbZK25r3Htzp2o1x7xdMMmfocKNW.png",
+  },
 ];

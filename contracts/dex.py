@@ -111,26 +111,26 @@ class Dex(sp.Contract):
         self.data.token_pool[j].pool -= dy
         return dy
 
-    # def add_liquidity(i, dx):
-    #     token_supply = 0
-    #     sp.for k in self.data.token_pool:
-    #         token_supply += k
+    def add_liquidity(i, dx):
+        token_supply = 0
+        sp.for k in self.data.token_pool:
+            token_supply += k
 
-    #     # Initial invariant
-    #     D0 = 0
-    #     sp.if token_supply > 0:
-    #         D0 = get_D()
+        # Initial invariant
+        D0 = 0
+        sp.if token_supply > 0:
+            D0 = get_D()
 
-    #     # Take coins from the sender
-    #     sp.if dx > 0:
-    #         ### TODO Transfer tokens to our token addresses
-    #         pass
+        # Take coins from the sender
+        sp.if dx > 0:
+            ### TODO Transfer tokens to our token addresses
+            pass
             
-    #     self.data.token_pool[i] = self.data.token_pool[i] + dx
+        self.data.token_pool[i] = self.data.token_pool[i] + dx
 
-    #     # Invariant after change
-    #     D1 = get_D()
-    #     return D1 - D0
+        # Invariant after change
+        D1 = get_D()
+        return D1 - D0
 
     # def remove_liquidity(dx):
     #     token_supply = 0

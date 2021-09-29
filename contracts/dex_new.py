@@ -233,7 +233,7 @@ class Dex(sp.Contract):
     @sp.entry_point
     def remove_liquidity(self, dx):
         pool_record = self.data.token_pool.values()
-        token_supply = sp.local('ts', sp.nat(0))
+        token_supply = sp.local('ts1', sp.nat(0))
         _x = sp.local('_x3', sp.nat(0))
         sp.while _x.value < sp.len(pool_record):
             token_supply.value += self.data.token_pool[_x.value].pool

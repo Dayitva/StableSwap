@@ -1,6 +1,9 @@
 # Swapper
 A client for StableSwap.
 
+## How to setup the frontend
+By doing `yarn install` and then `yarn start` to run.
+
 ## Contracts.
 Below are some of the deployed FA1.2 token contract.
 

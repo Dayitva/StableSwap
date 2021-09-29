@@ -5,11 +5,13 @@ import {BeaconWallet} from '@taquito/beacon-wallet';
 import {TezosToolkit} from '@taquito/taquito';
 import CONFIG from '../config';
 import {TezosContext} from '../contexts/TezosContext';
+import { ErrorContext } from "../contexts/ErrorContext";
+
 
 
 
 function Navbar() {
-
+  const {showMessage} = useContext(ErrorContext);
   const {tezos, setTezos, address, setAddress} = useContext(TezosContext);
 
   async function connectToWallet() {
@@ -29,6 +31,7 @@ function Navbar() {
       setTezos(tezos);
       setAddress(pkh);
     } else {
+      showMessage("💳️ Wallet is already connected.")
       console.log('Already there.')
     }
   }

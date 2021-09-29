@@ -330,8 +330,10 @@ def test():
     # Approve to spend by stable_swap address
 
     dex = Dex(
-        x_address = kusd.address,
-        y_address = usdtz.address,
+        # x_address = kusd.address,
+        x_address = sp.address('KT1WJUr74D5bkiQM2RE1PALV7R8MUzzmDzQ9'),
+        # y_address = usdtz.address,
+        y_address = sp.address('KT1CNQL6xRn5JaTUcMmxwSc5YQjwpyHkDR5r'),
         _admin = admin
     )
     
@@ -356,8 +358,8 @@ def test():
     )).run(sender=bob)
     scenario += dex.exchange(i=0, j=1, dx=5000 * DECIMALS).run(sender=bob)
 
-    kusd.approve(sp.record(
-        spender=dex.address, 
-        value=sp.nat(100 * DECIMALS
-    ))).run(sender=alice)
+    # kusd.approve(sp.record(
+    #     spender=dex.address, 
+    #     value=sp.nat(100 * DECIMALS
+    # ))).run(sender=alice)
     scenario += dex.add_liquidity(i=0, dx=100 * DECIMALS).run(sender=alice)

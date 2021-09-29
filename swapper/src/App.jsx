@@ -1,4 +1,5 @@
 import React, { useContext } from "react";
+import Error from "./components/error/Error";
 import Navbar from "./components/Navbar";
 import Swap from "./components/Swap";
 import TokenSelector from "./components/TokenSelector";
@@ -24,6 +25,7 @@ function App() {
           <Swap />
         </div>
       </div>
+      <Error />
     </div>
   );
 }

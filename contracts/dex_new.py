@@ -229,40 +229,61 @@ class Dex(sp.Contract):
         # sp.trace('D0')
         # sp.trace(D0.value)
         sp.trace(D1.value-D0.value)
-        # return D1 - D0    
 
-    # @sp.entry_point
-    # def remove_liquidity(self, dx):
-    #     pool_record = self.data.token_pool.values()
-    #     token_supply = sp.local('ts', sp.nat(0))
-    #     _x = sp.local('_x3', sp.nat(0))
-    #     sp.while _x.value < sp.len(pool_record):
-    #         token_supply.value += self.data.token_pool[_x.value].pool
-    #         _x.value += 1
+    @sp.entry_point
+    def remove_liquidity(self, dx):
+        pool_record = self.data.token_pool.values()
+        token_supply = sp.local('ts', sp.nat(0))
+        _x = sp.local('_x3', sp.nat(0))
+        sp.while _x.value < sp.len(pool_record):
+            token_supply.value += self.data.token_pool[_x.value].pool
+            _x.value += 1
 
-    #     # Initial invariant
-    #     D0 = sp.local('D0', sp.nat(0))
-    #     sp.if token_supply.value > 0:
-    #         D0.value = self.get_D()
 
-    #     # Take coins from the sender
-    #     self.transfer(
-    #         from_=sp.sender, 
-    #         to=sp.self_address, 
-    #         amount=dx,
-    #         token_id = i
-    #     )
-            
-    #     self.data.token_pool[i].pool = self.data.token_pool[i].pool + dx
+        val1 = sp.local('val1', sp.nat(0))
+        val1.value = (token_supply.value - dx)/2
 
-    #     # Invariant after change
-    #     D1 = sp.local('D1', self.get_D())
-    #     # sp.trace('D1')
-    #     # sp.trace(D1.value)
-    #     # sp.trace('D0')
-    #     # sp.trace(D0.value)
-    #     sp.trace(D1.value-D0.value)
-        # return D1 - D0
+        tok0_ret = sp.local('tk1_ret', sp.nat(0))
+        tok1_ret = sp.local('tk2_ret', sp.nat(0))
+        sp.if(val1.value > tok0_ret.value):
+            tok0_ret.value = val1.value - self.data.token_pool[0].pool
+        sp.if(val1.value > tok1_ret.value):
+            tok1_ret.value = val1.value - self.data.token_pool[1].pool
+
+        # # Initial invariant
+        # D0 = sp.local('D0', sp.nat(0))
+        # sp.if token_supply.value > 0:
+        #     D0.value = self.get_D()
+
+        # Trasfer tok0 to the sender
+        sp.if(tok0_ret.value > 0):
+            self.transfer(
+                from_=sp.self_address, 
+                to=sp.sender, 
+                amount=dx,
+                token_id = 0
+            )            
+            self.data.token_pool[0].pool = self.data.token_pool[0].pool - tok0_ret.value
+
+        # Trasfer tok1 to the sender
+        sp.if(tok1_ret.value > 0): 
+            self.transfer(
+                from_=sp.self_address, 
+                to=sp.sender, 
+                amount=dx,
+                token_id = 1
+            )  
+            self.data.token_pool[1].pool = self.data.token_pool[1].pool - tok1_ret.value
+
+        # Invariant after change
+        # D1 = sp.local('D1', self.get_D())
+        # sp.trace('D1')
+        # sp.trace(D1.value)
+        # sp.trace('D0')
+        # sp.trace(D0.value)
+        # sp.trace(D1.value-D0.value)
+        # return D1 - D0 
+
 
 @sp.add_test(name = "StableSwap")
 def test():

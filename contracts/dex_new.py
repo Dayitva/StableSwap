@@ -29,7 +29,7 @@ class Dex(sp.Contract):
             admin = _admin
         )
    
-    #     # TODO: Keep track of liquidity providers.
+    # TODO: Keep track of liquidity providers by issueing LP tokens.
 
     def transfer(self, from_, to, amount, token_id):
         """ Utility Function to transfer x FA1.2 Tokens. """
@@ -46,19 +46,29 @@ class Dex(sp.Contract):
             self.data.token_pool[token_id].address, 
             "transfer"
         ).open_some()
-        sp.transfer(transfer_data, sp.mutez(0), token_contract)    
-
-    def get_D(self):
-        S = sp.local('S', sp.nat(0))
+        sp.transfer(transfer_data, sp.mutez(0), token_contract)
+        
+    def get_total_supply(self):
+        """ Utility Function to calculate the total supply """
+        token_supply = sp.local('ts', sp.nat(0))
+        sp.trace(token_supply.value)
         pool_record = self.data.token_pool.values()
-
+        
         _x = sp.local('_x', sp.nat(0))
         sp.while _x.value < sp.len(pool_record):
-            S.value += self.data.token_pool[_x.value].pool
+            token_supply.value += self.data.token_pool[_x.value].pool
             _x.value += 1
+            sp.trace(_x.value)
             
-        # sp.if S.value == 0:
-        #     return 0
+        return token_supply.value
+
+    def get_D(self):
+        """ Utility Function to calculate the invariant """
+        S = sp.local('S', self.get_total_supply())
+        pool_record = self.data.token_pool.values()
+        
+        sp.if S.value == 0:
+            return 0
 
         Dprev = sp.local('Dprev', sp.nat(0))
         D = sp.local('D', S.value)
@@ -102,10 +112,10 @@ class Dex(sp.Contract):
 
     def get_y(self, i, j, x):
         D = sp.local('D1', self.get_D())
-        # sp.trace(D.value)
         c = sp.local('c', D.value)
-        # S_ = sp.local('S_', sp.nat(0))
         Ann = sp.local('Ann1', self.data.A * self.data.N_COINS)
+        
+        # S_ = sp.local('S_', sp.nat(0))
 
         # _x = sp.local('_x1', sp.nat(0))
         # sp.for _i in sp.range(0, self.data.N_COINS, step=1):
@@ -134,7 +144,6 @@ class Dex(sp.Contract):
 
         # sp.trace(y.value)   
         return y.value
-
          
     @sp.entry_point
     def initialize_exchange(self, token1_amount, token2_amount):
@@ -189,7 +198,7 @@ class Dex(sp.Contract):
         self.data.token_pool[j].pool = sp.as_nat(self.data.token_pool[j].pool - dy.value)
         
         # sp.trace(dy.value)
-        # return dy
+
         sp.if dy.value > 0:
             self.transfer(
                 from_=sp.self_address,
@@ -200,13 +209,8 @@ class Dex(sp.Contract):
     
     @sp.entry_point
     def add_liquidity(self, i, dx):
-        pool_record = self.data.token_pool.values()
-        token_supply = sp.local('ts', sp.nat(0))
-        _x = sp.local('_x2', sp.nat(0))
-        sp.while _x.value < sp.len(pool_record):
-            token_supply.value += self.data.token_pool[_x.value].pool
-            _x.value += 1
-
+        token_supply = sp.local('ts1', self.get_total_supply())
+        
         # Initial invariant
         D0 = sp.local('D0', sp.nat(0))
         sp.if token_supply.value > 0:
@@ -224,31 +228,28 @@ class Dex(sp.Contract):
 
         # Invariant after change
         D1 = sp.local('D1', self.get_D())
-        # sp.trace('D1')
-        # sp.trace(D1.value)
-        # sp.trace('D0')
-        # sp.trace(D0.value)
+        
+        sp.trace('D1')
+        sp.trace(D1.value)
+        sp.trace('D0')
+        sp.trace(D0.value)
+        sp.trace("Invariant difference")
         sp.trace(D1.value-D0.value)
 
     @sp.entry_point
     def remove_liquidity(self, dx):
-        pool_record = self.data.token_pool.values()
-        token_supply = sp.local('ts1', sp.nat(0))
-        _x = sp.local('_x3', sp.nat(0))
-        sp.while _x.value < sp.len(pool_record):
-            token_supply.value += self.data.token_pool[_x.value].pool
-            _x.value += 1
-
+        token_supply = sp.local('ts2', self.get_total_supply())
 
         val1 = sp.local('val1', sp.nat(0))
-        val1.value = (token_supply.value - dx)/2
+        val1.value = sp.as_nat(token_supply.value - dx)/2
 
         tok0_ret = sp.local('tk1_ret', sp.nat(0))
         tok1_ret = sp.local('tk2_ret', sp.nat(0))
+        
         sp.if val1.value > tok0_ret.value:
-            tok0_ret.value = val1.value - self.data.token_pool[0].pool
+            tok0_ret.value = sp.as_nat(val1.value - self.data.token_pool[0].pool)
         sp.if val1.value > tok1_ret.value:
-            tok1_ret.value = val1.value - self.data.token_pool[1].pool
+            tok1_ret.value = sp.as_nat(val1.value - self.data.token_pool[1].pool)
 
         # # Initial invariant
         # D0 = sp.local('D0', sp.nat(0))
@@ -263,7 +264,7 @@ class Dex(sp.Contract):
                 amount=dx,
                 token_id = 0
             )            
-            self.data.token_pool[0].pool = self.data.token_pool[0].pool - tok0_ret.value
+            self.data.token_pool[0].pool = sp.as_nat(self.data.token_pool[0].pool - tok0_ret.value)
 
         # Trasfer tok1 to the sender
         sp.if tok1_ret.value > 0: 
@@ -273,7 +274,7 @@ class Dex(sp.Contract):
                 amount=dx,
                 token_id = 1
             )  
-            self.data.token_pool[1].pool = self.data.token_pool[1].pool - tok1_ret.value
+            self.data.token_pool[1].pool = sp.as_nat(self.data.token_pool[1].pool - tok1_ret.value)
 
         # Invariant after change
         # D1 = sp.local('D1', self.get_D())
@@ -284,6 +285,27 @@ class Dex(sp.Contract):
         # sp.trace(D1.value-D0.value)
         # return D1 - D0 
 
+    @sp.offchain_view(pure = True)
+    def get_totalSupply(self):
+        """Returns the total supply"""
+        pool_record = self.data.token_pool.values()
+        token_supply = sp.local('_ts1', sp.nat(0))
+        
+        _x = sp.local('_x4', sp.nat(0))
+        sp.while _x.value < sp.len(pool_record):
+            token_supply.value += self.data.token_pool[_x.value].pool
+            _x.value += 1
+        
+        sp.result(token_supply.value)
+        # ​sp.result(self.data.token_pool[0].pool + self.data.token_pool[1].pool)
+
+    @sp.offchain_view(pure = True)
+    def get_dy(self, params):
+        """Returns the number of tokens user will get after the swap"""
+        x = self.data.token_pool[params.i].pool + params.dx
+        y = self.get_y(params.i, params.j, x)
+        dy = sp.as_nat(self.data.token_pool[params.j].pool - y)
+        sp.result(dy)
 
 @sp.add_test(name = "StableSwap")
 def test():
@@ -352,8 +374,8 @@ def test():
 
     dex = Dex(
         # x_address = kusd.address,
-        x_address = sp.address('KT1WJUr74D5bkiQM2RE1PALV7R8MUzzmDzQ9'),
         # y_address = usdtz.address,
+        x_address = sp.address('KT1WJUr74D5bkiQM2RE1PALV7R8MUzzmDzQ9'),
         y_address = sp.address('KT1CNQL6xRn5JaTUcMmxwSc5YQjwpyHkDR5r'),
         _admin = admin
     )
@@ -384,3 +406,4 @@ def test():
     #     value=sp.nat(100 * DECIMALS
     # ))).run(sender=alice)
     scenario += dex.add_liquidity(i=0, dx=100 * DECIMALS).run(sender=alice)
+    # scenario += dex.get_dy(params={"i":0, "j":1, "dx":100})

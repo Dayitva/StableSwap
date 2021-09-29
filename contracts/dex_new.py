@@ -245,9 +245,9 @@ class Dex(sp.Contract):
 
         tok0_ret = sp.local('tk1_ret', sp.nat(0))
         tok1_ret = sp.local('tk2_ret', sp.nat(0))
-        sp.if(val1.value > tok0_ret.value):
+        sp.if val1.value > tok0_ret.value:
             tok0_ret.value = val1.value - self.data.token_pool[0].pool
-        sp.if(val1.value > tok1_ret.value):
+        sp.if val1.value > tok1_ret.value:
             tok1_ret.value = val1.value - self.data.token_pool[1].pool
 
         # # Initial invariant
@@ -256,7 +256,7 @@ class Dex(sp.Contract):
         #     D0.value = self.get_D()
 
         # Trasfer tok0 to the sender
-        sp.if(tok0_ret.value > 0):
+        sp.if tok0_ret.value > 0:
             self.transfer(
                 from_=sp.self_address, 
                 to=sp.sender, 
@@ -266,7 +266,7 @@ class Dex(sp.Contract):
             self.data.token_pool[0].pool = self.data.token_pool[0].pool - tok0_ret.value
 
         # Trasfer tok1 to the sender
-        sp.if(tok1_ret.value > 0): 
+        sp.if tok1_ret.value > 0: 
             self.transfer(
                 from_=sp.self_address, 
                 to=sp.sender, 

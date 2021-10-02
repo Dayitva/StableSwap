@@ -3,7 +3,6 @@ import InputBox from './swap/InputBox';
 import Button from './forms/Button';
 import {TokenListContext} from '../contexts/TokenListContext';
 import {TezosContext} from '../contexts/TezosContext';
-// import {tokenList} from '../utils/tokenList';
 import {RefreshIcon, CalculatorIcon} from '@heroicons/react/outline';
 import {getDecimals} from '../utils/wallet';
 import CONFIG from '../config';
@@ -32,10 +31,10 @@ function Swap() {
       const amount = parseInt(fromValue) * 10 ** fromToken.decimals
       console.log(`Amount to exchange: ${amount} ${typeof amount}`)
       const batch = await tezos.wallet.batch()
-        .withContractCall(fromTokenContract.methods.approve(
-          CONFIG.StableSwapAddress,
-          fromValue * 10 ** fromToken.decimals
-        ))
+        // .withContractCall(fromTokenContract.methods.approve(
+        //   CONFIG.StableSwapAddress,
+        //   fromValue * 10 ** fromToken.decimals
+        // ))
         .withContractCall(stableSwapContract.methods.exchange(
           amount,
           fromToken.tokenId,

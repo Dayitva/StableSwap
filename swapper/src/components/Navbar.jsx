@@ -1,38 +1,37 @@
-import React, {useContext} from "react";
-import Button from './forms/Button';
+import React, { useContext } from "react";
+import Button from "./forms/Button";
 // import {connectToWallet} from '../utils/wallet';
-import {BeaconWallet} from '@taquito/beacon-wallet';
-import {TezosToolkit} from '@taquito/taquito';
-import CONFIG from '../config';
-import {TezosContext} from '../contexts/TezosContext';
+import { BeaconWallet } from "@taquito/beacon-wallet";
+import { TezosToolkit } from "@taquito/taquito";
+import CONFIG from "../config";
+import { TezosContext } from "../contexts/TezosContext";
 import { ErrorContext } from "../contexts/ErrorContext";
-
-
-
+import Jdenticon from "react-jdenticon";
+import { NavLink } from "react-router-dom";
 
 function Navbar() {
-  const {showMessage} = useContext(ErrorContext);
-  const {tezos, setTezos, address, setAddress} = useContext(TezosContext);
+  const { showMessage } = useContext(ErrorContext);
+  const { tezos, setTezos, address, setAddress } = useContext(TezosContext);
 
   async function connectToWallet() {
-    console.log(tezos)
+    console.log(tezos);
     if (!tezos) {
       const tezos = new TezosToolkit(CONFIG.rpcUrl);
       const options = {
-        name: 'StableSwap',
+        name: "StableSwap",
         preferredNetwork: CONFIG.preferredNetwork,
-      }
+      };
       const wallet = new BeaconWallet(options);
       await wallet.requestPermissions({
-        network: {type: CONFIG.preferredNetwork}
+        network: { type: CONFIG.preferredNetwork },
       });
       tezos.setWalletProvider(wallet);
       const pkh = await tezos.wallet.pkh();
       setTezos(tezos);
       setAddress(pkh);
     } else {
-      showMessage("💳️ Wallet is already connected.")
-      console.log('Already there.')
+      showMessage("💳️ Wallet is already connected.");
+      console.log("Already there.");
     }
   }
 
@@ -44,14 +43,31 @@ function Navbar() {
         </h1>
         <div>
           <ul className="flex items-center space-x-10 text-sm">
-            <li><a href="#!" className="text-gray-400 hover:text-gray-100">Home</a></li>
-            <li><a href="#!" className="text-gray-400 hover:text-gray-100">About Us</a></li>
-            <li><a href="#!" className="text-gray-400 hover:text-gray-100">Docs</a></li>
+            <li>
+              <NavLink to="/" className="text-gray-400 hover:text-gray-100">
+                Home
+              </NavLink>
+            </li>
+            <li>
+              <a href="#!" className="text-gray-400 hover:text-gray-100">
+                About Us
+              </a>
+            </li>
+            <li>
+              <a href="#!" className="text-gray-400 hover:text-gray-100">
+                Docs
+              </a>
+            </li>
           </ul>
         </div>
-        <div>
-          <Button 
-            text={ tezos ? `${address.slice(0, 5)}...${address.slice(32, 36)}` :  "CONNECT" }
+        <div className="flex items-center space-x-2">
+          {address ? <Jdenticon size="42" value={address} /> : ""}
+          <Button
+            text={
+              tezos
+                ? `${address.slice(0, 5)}...${address.slice(32, 36)}`
+                : "CONNECT"
+            }
             bg="bg-gradient-to-r from-purple-500 to-blue-500"
             onClick={connectToWallet}
           />

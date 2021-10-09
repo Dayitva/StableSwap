@@ -1,7 +1,6 @@
 import smartpy as sp
 fa12 = sp.io.import_script_from_url("https://smartpy.io/templates/FA1.2.py")
 
-
 class Token(fa12.FA12):
     """ Test FA1.2 Token """
     pass
@@ -54,7 +53,6 @@ class Dex(sp.Contract):
         ).open_some()
         sp.transfer(transfer_value, sp.mutez(0), contract)
 
-    #     # TODO: Keep track of liquidity providers.
     def transfer(self, from_, to, amount, token_id):
         """ Utility Function to transfer x FA1.2 Tokens. """
         sp.verify(amount > sp.nat(0), 'INSUFFICIENT_TOKENS[transfer_token]')
@@ -160,6 +158,7 @@ class Dex(sp.Contract):
         """ Initialize the exchange with the token2 and token2 amounts."""
         sp.verify(token1_amount > sp.nat(0), "INVALID_AMOUNT")
         sp.verify(token2_amount > sp.nat(0), "INVALID_AMOUNT")
+        
         # Transfer tokens from the user's account to our contract's address.
         self.transfer(
             sp.sender,
@@ -173,6 +172,7 @@ class Dex(sp.Contract):
             token2_amount,
             1
         )
+        
         # Update the storage.
         self.data.token_pool[0].pool = token1_amount
         self.data.token_pool[1].pool = token2_amount
@@ -190,12 +190,14 @@ class Dex(sp.Contract):
         sp.verify(j >= 0, "Invalid Token")
         sp.verify(i < self.data.N_COINS, "Invalid Token")
         sp.verify(j < self.data.N_COINS, "Invalid Token")
+        
         self.transfer(
             from_=sp.sender,
             to=sp.self_address,
             amount=dx,
             token_id=i
         )
+        
         x = self.data.token_pool[i].pool + dx
         y = self.get_y(i, j, x)
         dy = sp.local('dy', sp.as_nat(self.data.token_pool[j].pool - y))
@@ -356,8 +358,10 @@ def test():
     alice = sp.test_account("Alice")
     bob = sp.test_account("Robert")
     token_admin = sp.test_account("Token Admin")
+    
     DECIMALS = 10 ** 9
     scenario = sp.test_scenario()
+    
     token1_metadata = {
         "decimals": "9",
         "name": "USD Tez",
@@ -390,6 +394,7 @@ def test():
         token_metadata=token2_metadata,
         contract_metadata=contract2_metadata
     )
+    
     scenario += usdtz
     scenario += kusd
 
@@ -438,7 +443,6 @@ def test():
     #     contract_metadata=lp_contract_metadata
     # )
     # dex.set_lp_address(lp.address).run(sender=admin)
-
 
     kusd.approve(sp.record(
         spender=dex.address,

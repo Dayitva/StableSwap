@@ -1,9 +1,8 @@
 // This is the homepage.
 import React, { useContext } from "react";
-import { TokenListContext } from "../contexts/TokenListContext";
+import Swap from "../components/Swap";
 
-function Swap() {
-  const { show } = useContext(TokenListContext);
+function Exchange() {
   return (
     <div>
       <div className="pt-16">
@@ -18,4 +17,4 @@ function Swap() {
   );
 }
 
-export default Swap;
+export default Exchange;

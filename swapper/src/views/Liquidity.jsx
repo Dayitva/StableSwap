@@ -1,7 +1,4 @@
 import React, { useContext } from "react";
-import { ErrorContext } from "../contexts/ErrorContext";
-import { TezosContext } from "../contexts/TezosContext";
-import { TokenListContext } from "../contexts/TokenListContext";
 import AddLiquidity from "../components/AddLiquidity";
 
 function Liquidity() {

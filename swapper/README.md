@@ -35,3 +35,18 @@ Below are some of the deployed StableSwap Contracts.
 - How it is different.
 
 - For scaling this we're raising funds.
+
+## What is left ?
+
+1. Issuing and withdraing of LP Tokens.
+2. Introduction of fee.
+3. Landing Page.
+4. Factory contract, to add multiple
+
+<!-- {
+  (address1, address2): pool_address,
+  (address1, address2): pool_address,
+  (address1, address2): pool_address,
+} -->
+
+##

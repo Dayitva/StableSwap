@@ -9,6 +9,12 @@ import { ErrorContext } from "../contexts/ErrorContext";
 import Jdenticon from "react-jdenticon";
 import { NavLink } from "react-router-dom";
 
+const routes = [
+  { id: 1, name: "Home", path: "/" },
+  { id: 2, name: "Exchange", path: "/exchange" },
+  { id: 3, name: "Liquidity", path: "/liquidity" },
+];
+
 function Navbar() {
   const { showMessage } = useContext(ErrorContext);
   const { tezos, setTezos, address, setAddress } = useContext(TezosContext);
@@ -36,28 +42,25 @@ function Navbar() {
   }
 
   return (
-    <div className="fixed left-0 right-0 top-0 h-16 shadow-md border-b-2 border-gray-900">
+    <div className="fixed left-0 right-0 top-0 h-16 shadow-md border-b-2 border-gray-900 z-40 bg-dark">
       <nav className="flex items-center container mx-auto h-full justify-between">
         <h1 className="font-semibold uppercase text-lg text-gray-200">
-          🔄 StableSwap
+          🔄 Liquibrium
         </h1>
         <div>
           <ul className="flex items-center space-x-10 text-sm">
-            <li>
-              <NavLink to="/" className="text-gray-400 hover:text-gray-100">
-                Home
-              </NavLink>
-            </li>
-            <li>
-              <a href="#!" className="text-gray-400 hover:text-gray-100">
-                About Us
-              </a>
-            </li>
-            <li>
-              <a href="#!" className="text-gray-400 hover:text-gray-100">
-                Docs
-              </a>
-            </li>
+            {routes.map((route) => {
+              return (
+                <li id={route.id}>
+                  <NavLink
+                    to={route.path}
+                    className="text-gray-400 hover:text-gray-100"
+                  >
+                    {route.name}
+                  </NavLink>
+                </li>
+              );
+            })}
           </ul>
         </div>
         <div className="flex items-center space-x-2">

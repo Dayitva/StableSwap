@@ -4,17 +4,13 @@ import smartpy as sp
 fa12 = sp.io.import_script_from_url("https://smartpy.io/templates/FA1.2.py")
 
 
-class USDTZ(fa12.FA12):
+class Token(fa12.FA12):
     """ Test USDTZ FA1.2 Token """
-    pass
-
-class KUSD(fa12.FA12):
-    """ Test KUSD FA1.2 Token """
     pass
 
 
 class StableSwap(sp.Contract):
-    def __init__(self, _fee_rate, x_address, y_address, _admin):
+    def __init__(self, _fee_rate, x_address, y_address, _admin, sp_address):
         self.init(
             invariant = sp.nat(0),
             x_pool = sp.nat(0),
@@ -24,7 +20,8 @@ class StableSwap(sp.Contract):
             fee_rate = _fee_rate,
             total_x_fee = sp.nat(0),
             total_y_fee = sp.nat(0),
-            admin = _admin
+            admin = _admin,
+            lp_address = sp_address,
         )
     
     def check_admin(self):
@@ -63,10 +60,41 @@ class StableSwap(sp.Contract):
             "transfer"
         ).open_some()
         sp.transfer(transfer_data, sp.mutez(0), token_contract)
-    
-    def transfer_tez(self, to_, amount: sp.TMutez):
-        """ Utility function to transfer tezos. """
-        sp.send(to_, amount, message="SENDING_TEZ")
+
+   def mint_lp(self, amount):
+        """Mint `amount` LP tokens to `sp.sender` account."""
+        transfet_type = sp.TRecord(
+            address=sp.TAddress,
+            value=sp.TNat,
+        )
+        transfer_value = sp.record(
+            address=sp.sender,
+            value=amount,
+        )
+        contract = sp.contract(
+            transfet_type,
+            self.data.lp_address,
+            'mint'
+        )
+        sp.transfer(transfer_value, sp.mutez(0), contract)
+
+    def burn_lp(self, amount):
+        """ Burn `amount` LP Tokens. """
+        transfet_type = sp.TRecord(
+            address=sp.TAddress,
+            value=sp.TNat,
+        )
+        transfer_value = sp.record(
+            address=sp.sender,
+            value=amount,
+        )
+        contract = sp.contract(
+            transfet_type,
+            self.data.lp_address,
+            'burn'
+        )
+        sp.transfer(transfer_value, sp.mutez(0), contract)
+
     
     @sp.entry_point
     def initialize_enchange(self, params):
@@ -187,13 +215,13 @@ def test():
     usdtz_contract_metadata = {
         "" : "ipfs://QmaiAUj1FFNGYTu8rLBjc3eeN9cSKwaF8EGMBNDmhzPNFd",
     }
-    kusd = KUSD(
+    kusd = Token(
         token_admin.address,
         config              = fa12.FA12_config(support_upgradable_metadata = True),
         token_metadata      = kusd_token_metadata,
         contract_metadata   = kusd_contract_metadata
     )
-    usdtz = USDTZ(
+    usdtz = Token(
         token_admin.address,
         config              = fa12.FA12_config(support_upgradable_metadata = True),
         token_metadata      = usdtz_token_metadata,

@@ -1,12 +1,12 @@
 import React, { useContext } from "react";
 import Error from "./components/error/Error";
 import Navbar from "./components/Navbar";
-import Swap from "./components/Swap";
 import TokenSelector from "./components/TokenSelector";
 
 // Importing the routes
 import Exchange from "./views/Exchange";
 import Liquidity from "./views/Liquidity";
+import Home from "./views/Home";
 
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 import { TokenListContext } from "./contexts/TokenListContext";
@@ -31,7 +31,8 @@ function App() {
         )}
         <Error />
         <Switch>
-          <Route path="/" component={Exchange} exact />
+          <Route path="/" component={Home} exact />
+          <Route path="/exchange" component={Exchange} exact />
           <Route path="/liquidity" component={Liquidity} exact />
         </Switch>
       </BrowserRouter>

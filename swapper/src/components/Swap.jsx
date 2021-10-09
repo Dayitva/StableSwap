@@ -1,51 +1,60 @@
-import React, { useContext, useState } from 'react';
-import InputBox from './swap/InputBox';
-import Button from './forms/Button';
-import {TokenListContext} from '../contexts/TokenListContext';
-import {TezosContext} from '../contexts/TezosContext';
-import {RefreshIcon, CalculatorIcon} from '@heroicons/react/outline';
-import {getDecimals} from '../utils/wallet';
-import CONFIG from '../config';
-import {ErrorContext} from '../contexts/ErrorContext';
-
+import React, { useContext, useState } from "react";
+import InputBox from "./swap/InputBox";
+import Button from "./forms/Button";
+import { TokenListContext } from "../contexts/TokenListContext";
+import { TezosContext } from "../contexts/TezosContext";
+import { RefreshIcon, CalculatorIcon } from "@heroicons/react/outline";
+import { getDecimals } from "../utils/wallet";
+import CONFIG from "../config";
+import { ErrorContext } from "../contexts/ErrorContext";
 
 function Swap() {
-  const {changeWhich, setFromToken, setToToken, fromToken, toToken} = useContext(TokenListContext);
-  const {showMessage} = useContext(ErrorContext);
-  const {tezos} = useContext(TezosContext);
+  const { changeWhich, setFromToken, setToToken, fromToken, toToken } =
+    useContext(TokenListContext);
+  const { showMessage } = useContext(ErrorContext);
+  const { tezos } = useContext(TezosContext);
+  const [fromValue, setFromValue] = useState(0);
+  const [toValue, setToValue] = useState(0);
+
   const handleInterChange = () => {
-    const oldFromToken = fromToken
-    setFromToken(toToken)
-    setToToken(oldFromToken)
-  }
+    const oldFromToken = fromToken;
+    setFromToken(toToken);
+    setToToken(oldFromToken);
+  };
   function calculateOutTokens() {
-    if (!tezos) {return 0}
+    // if (!tezos) {
+    //   return 0;
+    // }
     const decimals = getDecimals(tezos, fromToken.address);
-    console.log(decimals)
+    console.log(decimals);
   }
 
   async function exchangeTokens() {
     try {
       const fromTokenContract = await tezos.wallet.at(fromToken.address);
-      const stableSwapContract = await tezos.wallet.at(CONFIG.StableSwapAddress);
-      const amount = parseInt(fromValue) * 10 ** fromToken.decimals
-      console.log(`Amount to exchange: ${amount} ${typeof amount}`)
-      const batch = await tezos.wallet.batch()
+      const stableSwapContract = await tezos.wallet.at(
+        CONFIG.StableSwapAddress
+      );
+      const amount = parseInt(fromValue) * 10 ** fromToken.decimals;
+      console.log(`Amount to exchange: ${amount} ${typeof amount}`);
+      const batch = await tezos.wallet
+        .batch()
         // .withContractCall(fromTokenContract.methods.approve(
         //   CONFIG.StableSwapAddress,
         //   fromValue * 10 ** fromToken.decimals
         // ))
-        .withContractCall(stableSwapContract.methods.exchange(
-          amount,
-          fromToken.tokenId,
-          toToken.tokenId
-        ));
+        .withContractCall(
+          stableSwapContract.methods.exchange(
+            amount,
+            fromToken.tokenId,
+            toToken.tokenId
+          )
+        );
 
       const batchOp = await batch.send();
-      console.log('Operation hash:', batchOp.hash);
+      console.log("Operation hash:", batchOp.hash);
       await batchOp.confirmation();
-    } 
-    catch(err) {
+    } catch (err) {
       showMessage(err.message);
       console.log(err);
     }
@@ -88,11 +97,7 @@ function Swap() {
     // } else {
     //   console.log('An error has occurred');
     // }
-
   }
-  
-  const [fromValue, setFromValue] = useState(0);
-  const [toValue, setToValue] = useState(0);
 
   return (
     <div className="bg-gray-900 border-2 border-gray-700 p-4 rounded-md relative">
@@ -108,14 +113,18 @@ function Swap() {
         </div>
       </div>
       <div className="space-y-4 mt-2">
-        <InputBox 
-          onTokenSwitchClick={()=>{changeWhich('from')}} 
+        <InputBox
+          onTokenSwitchClick={() => {
+            changeWhich("from");
+          }}
           value={fromValue}
           setValue={setFromValue}
           token={fromToken}
         />
-        <InputBox 
-          onTokenSwitchClick={()=>{changeWhich('to')}} 
+        <InputBox
+          onTokenSwitchClick={() => {
+            changeWhich("to");
+          }}
           value={toValue}
           setValue={setToValue}
           token={toToken}
@@ -125,15 +134,15 @@ function Swap() {
         <div className="relative">
           <div className="absolute inset-0 bg-blue-500 blur"></div>
           <Button
-            text="Swap Tokens" 
-            bg="w-full bg-blue-500" 
+            text="Swap Tokens"
+            bg="w-full bg-blue-500"
             padding="py-4 relative"
             onClick={exchangeTokens}
           />
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default Swap
+export default Swap;

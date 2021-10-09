@@ -176,6 +176,7 @@ class Dex(sp.Contract):
         # Update the storage.
         self.data.token_pool[0].pool = token1_amount
         self.data.token_pool[1].pool = token2_amount
+        self.mint_lp(token1_amount + token2_amount)
 
     @sp.entry_point
     def update_A(self, new_A):

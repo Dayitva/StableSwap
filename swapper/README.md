@@ -49,4 +49,7 @@ Below are some of the deployed StableSwap Contracts.
   (address1, address2): pool_address,
 } -->
 
-##
+## What to do ?
+1. Deploy LP Tokens.
+2. Deploy the Modified and LP and initialize the exchange.
+3. Make add_liquidity and remove_liquidity happen on the frontend.

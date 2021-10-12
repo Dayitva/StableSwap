@@ -22,10 +22,13 @@ function AddLiquidity() {
         CONFIG.StableSwapAddress
       );
 
-      const amount = parseInt(fromValue) * 10 ** fromToken.decimals;
+      const amount = parseInt(fromValue * 10 ** fromToken.decimals);
 
       const batch = await tezos.wallet
         .batch()
+        .withContractCall(
+          liquidityTokenContract.methods.approve(CONFIG.StableSwapAddress, amount)
+        )
         .withContractCall(
           stableSwapContract.methods.add_liquidity(amount, fromToken.tokenId)
         );

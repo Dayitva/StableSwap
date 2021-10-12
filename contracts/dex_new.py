@@ -469,3 +469,11 @@ def test():
     ))).run(sender=alice)
     dex.add_liquidity(i=0, dx=100 * DECIMALS).run(sender=alice)
     dex.remove_liquidity(50 * DECIMALS).run(sender=alice)
+
+
+sp.add_compilation_target("Dex Compilation Target", Dex(
+    x_address=sp.address('KT1WJUr74D5bkiQM2RE1PALV7R8MUzzmDzQ9'),
+    y_address=sp.address('KT1CNQL6xRn5JaTUcMmxwSc5YQjwpyHkDR5r'),
+    _lp_token=sp.address('KT1AEd7ZCSdpZhNNnEwZU9sNFSkib2s7e61f'),
+    _admin=sp.address("tz1WNKahMHz1bkuAfZrsvtmjBhh4GJzw8YcU")
+))

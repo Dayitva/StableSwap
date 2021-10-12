@@ -1,11 +1,22 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import PlainInputBox from './PlainInputBox';
 import Button from './forms/Button';
+import { ErrorContext } from "../contexts/ErrorContext";
+import { TezosContext } from '../contexts/TezosContext';
+import CONFIG from '../config';
 
 function RemoveLiquidity() {
   const [lpAmount, setLpAmount] = useState(0);
-  function removeLiquidity() {
+  const { showMessage } = useContext(ErrorContext);
+  const {tezos} = useContext(TezosContext);
 
+  async function removeLiquidity() {
+    const stableSwapContract = await tezos.wallet.at(CONFIG.StableSwapAddress);
+    const amount = parseInt(lpAmount * 10 ** 9);
+    const op = await stableSwapContract.methods.remove_liquidity(amount).send();
+    showMessage(`✅ ${op.opHash}`)
+    const result = op.confirmation();
+    console.log(result);
   }
 
   return (

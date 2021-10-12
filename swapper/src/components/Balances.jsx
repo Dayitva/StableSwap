@@ -17,7 +17,7 @@ function Balances({kusdAmount, usdTzAmount, lpAmount}) {
           💦
         </span>
         <span>
-          {lpAmount}
+          {parseFloat(lpAmount / 10 ** 9).toFixed(2)}
         </span>
       </div>
       <div className={balanceClass}>
@@ -27,7 +27,7 @@ function Balances({kusdAmount, usdTzAmount, lpAmount}) {
           className="w-4 h-4"
         />
         <span>
-          {kusdAmount}
+          {parseFloat(kusdAmount / 10 ** 9).toFixed(2)}
         </span>
       </div>
       <div className={balanceClass}>
@@ -38,7 +38,7 @@ function Balances({kusdAmount, usdTzAmount, lpAmount}) {
         />
         
         <span className="">
-          {usdTzAmount}
+          {parseFloat(usdTzAmount / 10 ** 9).toFixed(2)}
         </span>
       </div>
     </div>

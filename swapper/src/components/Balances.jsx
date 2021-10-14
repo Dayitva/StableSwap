@@ -12,6 +12,7 @@ function Balances({kusdAmount, usdTzAmount, lpAmount}) {
   return (
     <div className="bg-gray-800 p-4 rounded-md 
       text-gray-100 flex items-center justify-around">
+      <span className="text-gray-500 text-xs font-medium absolute top-2 left-2">Balance</span>
       <div className={balanceClass}>
         <span className="">
           💦

@@ -1,4 +1,4 @@
-export default {
+const config = {
   rpcUrl: 'https://granadanet.smartpy.io',
   KusdAddress: 'KT1WJUr74D5bkiQM2RE1PALV7R8MUzzmDzQ9',
   kusdBigmapId: 65911,
@@ -9,3 +9,5 @@ export default {
   preferredNetwork: 'granadanet',
   feeRate: 500,
 }
+
+export default config;

@@ -51,7 +51,7 @@ function Navbar() {
           <ul className="flex items-center space-x-10 text-sm">
             {routes.map((route) => {
               return (
-                <li id={route.id}>
+                <li key={route.id}>
                   <NavLink
                     to={route.path}
                     className="text-gray-400 hover:text-gray-100"

@@ -1,5 +1,5 @@
 // This is the homepage.
-import React, { useContext } from "react";
+import React from "react";
 import Swap from "../components/Swap";
 
 function Exchange() {

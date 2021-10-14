@@ -1,15 +1,16 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useCallback } from "react";
 import AddLiquidity from "../components/AddLiquidity";
 import Balances from "../components/Balances";
 import RemoveLiquidity from "../components/RemoveLiquidity";
 import { TezosContext } from "../contexts/TezosContext";
 import CONFIG from "../config";
 import axios from 'axios'
+import PoolStats from "../components/PoolStats";
 
 function Liquidity() {
-  const [kusdAmount, setKusdAmount] = useState(0.0);
-  const [usdtzAmount, setUsdtzAmount] = useState(0.0);
-  const [lpamount, setLpAmount] = useState(0.0);
+  const [kusdAmount, setKusdAmount] = useState(0);
+  const [usdtzAmount, setUsdtzAmount] = useState(0);
+  const [lpamount, setLpAmount] = useState(0);
 
   const {address, tezos} = useContext(TezosContext); 
 
@@ -33,7 +34,7 @@ function Liquidity() {
     }
   }
 
-  async function updateBalances() {
+  const updateBalances = useCallback(async () =>  {
     if (tezos) {
       const lp = await getBalance(
         address,
@@ -54,14 +55,12 @@ function Liquidity() {
       setKusdAmount(kusd)
       console.log({usdtz, kusd, lp})
     }
-  }
-
+  }, [address, tezos]);
+  
+  
   useEffect(() => {
-    fireHook();
-    async function fireHook() {
-      updateBalances();
-    }
-  }, [address])
+    updateBalances();
+  }, [updateBalances])
 
   return (
     <div>
@@ -74,6 +73,11 @@ function Liquidity() {
             lpAmount={lpamount}
             usdTzAmount={usdtzAmount}
           />
+        </div>
+
+        <div className="mt-8 mx-auto max-w-2xl relative">
+          {/* Wrapper for swap component... */}
+          <PoolStats />
         </div>
         {/* Main Content Goes Here... */}
         <div className="mt-20 mx-auto max-w-2xl relative">

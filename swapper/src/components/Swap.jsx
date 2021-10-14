@@ -7,12 +7,15 @@ import { RefreshIcon, CalculatorIcon } from "@heroicons/react/outline";
 import { getDecimals } from "../utils/wallet";
 import CONFIG from "../config";
 import { ErrorContext } from "../contexts/ErrorContext";
+import { LoadingContext } from "../contexts/LoadingContext";
 
 function Swap() {
   const { changeWhich, setFromToken, setToToken, fromToken, toToken } =
     useContext(TokenListContext);
   const { showMessage } = useContext(ErrorContext);
   const { tezos } = useContext(TezosContext);
+  const { setShowLoading } = useContext(LoadingContext);
+
   const [fromValue, setFromValue] = useState(0);
   const [toValue, setToValue] = useState(0);
 
@@ -31,6 +34,7 @@ function Swap() {
 
   async function exchangeTokens() {
     try {
+      setShowLoading(true);
       const fromTokenContract = await tezos.wallet.at(fromToken.address);
       const stableSwapContract = await tezos.wallet.at(
         CONFIG.StableSwapAddress
@@ -39,10 +43,10 @@ function Swap() {
       console.log(`Amount to exchange: ${amount} ${typeof amount}`);
       const batch = await tezos.wallet
         .batch()
-        // .withContractCall(fromTokenContract.methods.approve(
-        //   CONFIG.StableSwapAddress,
-        //   fromValue * 10 ** fromToken.decimals
-        // ))
+        .withContractCall(fromTokenContract.methods.approve(
+          CONFIG.StableSwapAddress,
+          fromValue * 10 ** fromToken.decimals
+        ))
         .withContractCall(
           stableSwapContract.methods.exchange(
             amount,
@@ -52,9 +56,11 @@ function Swap() {
         );
 
       const batchOp = await batch.send();
+      setShowLoading(false);
       console.log("Operation hash:", batchOp.hash);
       await batchOp.confirmation();
     } catch (err) {
+      setShowLoading(false);
       showMessage(err.message);
       console.log(err);
     }

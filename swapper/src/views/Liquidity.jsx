@@ -33,35 +33,35 @@ function Liquidity() {
     }
   }
 
-  async function updateBalances() {
-    if (tezos) {
-      const lp = await getBalance(
-        address,
-        CONFIG.lpBigmapId
-      );
-      setLpAmount(lp);
-
-      const usdtz = await getBalance(
-        address,
-        CONFIG.usdtzBigmapId
-      );
-      setUsdtzAmount(usdtz);
-
-      const kusd = await getBalance(
-        address,
-        CONFIG.kusdBigmapId
-      )
-      setKusdAmount(kusd)
-      console.log({usdtz, kusd, lp})
-    }
-  }
-
   useEffect(() => {
+    async function updateBalances() {
+      if (tezos) {
+        const lp = await getBalance(
+          address,
+          CONFIG.lpBigmapId
+        );
+        setLpAmount(lp);
+  
+        const usdtz = await getBalance(
+          address,
+          CONFIG.usdtzBigmapId
+        );
+        setUsdtzAmount(usdtz);
+  
+        const kusd = await getBalance(
+          address,
+          CONFIG.kusdBigmapId
+        )
+        setKusdAmount(kusd)
+        console.log({usdtz, kusd, lp})
+      }
+    }
+    
     fireHook();
     async function fireHook() {
-      updateBalances();
+      await updateBalances();
     }
-  }, [address])
+  }, [address, tezos])
 
   return (
     <div>

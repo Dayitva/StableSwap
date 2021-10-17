@@ -1,8 +1,9 @@
 import React from "react";
 import DemoImage from "../assets/demo.png";
 import SwapImage from "../assets/swap.png";
-import TeamMemberDaitva from "../assets/dayitva.jpg";
+import TeamMemberDayitva from "../assets/dayitva.jpg";
 import TeamMemberVivek from "../assets/vivek.png";
+import TeamMemberDev from "../assets/dev.jpeg";
 import Button from "../components/forms/Button";
 import FeatureCard from "../components/FeatureCard";
 import TeamCard from "../components/TeamCard";
@@ -48,13 +49,22 @@ function Home() {
         className="flex items-center justify-center space-x-0 
       space-y-10 md:space-y-0 py-40 my-4 flex-col lg:flex-row lg:space-x-4"
       >
-        <FeatureCard title="Exchange Tokens">
+        <FeatureCard
+          title="Exchange Tokens"
+          text="Exchange stablecoins at the lowest slippage"
+        >
           <RefreshIcon className="w-6 h-6" />
         </FeatureCard>
-        <FeatureCard title="Invest Liquidity">
+        <FeatureCard
+          title="Invest Liquidity"
+          text="Get LP tokens for investing liquidity and earn fees"
+        >
           <CurrencyDollarIcon className="w-6 h-6" />
         </FeatureCard>
-        <FeatureCard title="DAO Governance">
+        <FeatureCard
+          title="DAO Governance"
+          text="Be a part of the DAO &amp; govern key decisions"
+        >
           <UserGroupIcon className="w-6 h-6" />
         </FeatureCard>
       </div>
@@ -73,9 +83,9 @@ function Home() {
       space-y-10 md:space-y-0 flex-col lg:flex-row lg:space-x-4"
         >
           <TeamCard
-            imgSrc={TeamMemberDaitva}
+            imgSrc={TeamMemberDayitva}
             imgAlt="Dayitva Goel"
-            twitterUsername="vivekascoder"
+            twitterUsername="Dayitva_Goel"
           />
           <TeamCard
             imgSrc={TeamMemberVivek}
@@ -83,9 +93,9 @@ function Home() {
             twitterUsername="vivekascoder"
           />
           <TeamCard
-            imgSrc={TeamMemberDaitva}
+            imgSrc={TeamMemberDev}
             imgAlt="Dev Churiwala"
-            twitterUsername="vivekascoder"
+            twitterUsername="ChuriwalaDev"
           />
         </div>
       </div>

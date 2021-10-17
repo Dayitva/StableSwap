@@ -4,7 +4,7 @@ import Balances from "../components/Balances";
 import RemoveLiquidity from "../components/RemoveLiquidity";
 import { TezosContext } from "../contexts/TezosContext";
 import CONFIG from "../config";
-import axios from 'axios'
+import axios from 'axios';
 import PoolStats from "../components/PoolStats";
 
 function Liquidity() {

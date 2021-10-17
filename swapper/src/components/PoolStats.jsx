@@ -35,7 +35,7 @@ function PoolStats() {
           className="w-4 h-4"
         />
         <span>
-          {parseFloat(parseInt(tokenPool?.token_pool[0].pool) / 10 ** 9).toFixed(2)}
+          {Number(parseFloat(parseInt(tokenPool?.token_pool[0].pool) / 10 ** 9).toFixed(2)).toLocaleString()}
         </span>
       </div>
       <div className={balanceClass}>
@@ -46,7 +46,7 @@ function PoolStats() {
         />
         
         <span className="">
-          {parseFloat(parseInt(tokenPool?.token_pool[1].pool) / 10 ** 9).toFixed(2)}
+          {Number(parseFloat(parseInt(tokenPool?.token_pool[1].pool) / 10 ** 9).toFixed(2)).toLocaleString()}
         </span>
       </div>
     </div>

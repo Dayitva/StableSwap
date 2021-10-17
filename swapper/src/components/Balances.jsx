@@ -8,17 +8,18 @@ const balanceClass = `bg-gray-900 py-2 px-6 rounded-full flex items-center space
  * @description Component to display the balance of user of a token.
  * @returns JSX
  */
-function Balances({kusdAmount, usdTzAmount, lpAmount}) {
+function Balances({kusdAmount, usdTzAmount, lpAmount, children}) {
   return (
     <div className="bg-gray-800 p-4 rounded-md 
       text-gray-100 flex items-center justify-around">
-      <span className="text-gray-500 text-xs font-medium absolute top-2 left-2">Balance</span>
+      <span className="text-gray-500 text-xs font-medium absolute top-2 left-2">Wallet Balances</span>
+      <br/><br/><br/>
       <div className={balanceClass}>
         <span className="">
           💦
         </span>
         <span>
-          {parseFloat(lpAmount / 10 ** 9).toFixed(2)}
+          {Number(parseFloat(lpAmount / 10 ** 9).toFixed(2)).toLocaleString()}
         </span>
       </div>
       <div className={balanceClass}>
@@ -28,7 +29,7 @@ function Balances({kusdAmount, usdTzAmount, lpAmount}) {
           className="w-4 h-4"
         />
         <span>
-          {parseFloat(kusdAmount / 10 ** 9).toFixed(2)}
+          {Number(parseFloat(kusdAmount / 10 ** 9).toFixed(2)).toLocaleString()}
         </span>
       </div>
       <div className={balanceClass}>
@@ -39,7 +40,7 @@ function Balances({kusdAmount, usdTzAmount, lpAmount}) {
         />
         
         <span className="">
-          {parseFloat(usdTzAmount / 10 ** 9).toFixed(2)}
+          {Number(parseFloat(usdTzAmount / 10 ** 9).toFixed(2)).toLocaleString()}
         </span>
       </div>
     </div>

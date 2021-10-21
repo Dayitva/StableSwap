@@ -26,7 +26,7 @@ function RemoveLiquidity() {
       </div>
       <div className="space-y-4 mt-2">
         <PlainInputBox
-          label={"Amount of Lp"}
+          label={"Amount of LP tokens"}
           value={lpAmount}
           setValue={setLpAmount}
         />

@@ -1,7 +1,7 @@
 import React from "react";
 import Button from "./forms/Button";
 
-function FeatureCard({ title, children }) {
+function FeatureCard({ title, text, children }) {
   return (
     <div>
       <div className="p-7 bg-gray-800 rounded-md w-96">
@@ -14,10 +14,7 @@ function FeatureCard({ title, children }) {
         </div>
         <div>
           <p className="text-sm leading-6 text-center">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Mollitia,
-            totam aut magni earum voluptatibus neque debitis quaerat nihil
-            excepturi? Voluptatum placeat praesentium delectus nam obcaecati
-            velit sed magnam quos,
+            {text}
           </p>
         </div>
         <div className="mt-8">

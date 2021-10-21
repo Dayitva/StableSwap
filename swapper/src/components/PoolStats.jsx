@@ -13,7 +13,7 @@ function PoolStats() {
       `https://api.granadanet.tzkt.io/v1/contracts/${CONFIG.StableSwapAddress}/storage`
     )
     setTokenPool(data);
-    console.log(data)
+    // console.log(data)
   }
 
   useEffect(() => {  

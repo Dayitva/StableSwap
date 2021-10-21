@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import InputBox from "./swap/InputBox";
 import Button from "./forms/Button";
 import { TokenListContext } from "../contexts/TokenListContext";
@@ -9,6 +9,12 @@ import CONFIG from "../config";
 import { ErrorContext } from "../contexts/ErrorContext";
 import { LoadingContext } from "../contexts/LoadingContext";
 
+import { debounce } from "lodash";
+import { getDy } from "../utils/estimates";
+
+import axios from "axios";
+import { useEffect } from "react/cjs/react.development";
+
 function Swap() {
   const { changeWhich, setFromToken, setToToken, fromToken, toToken } =
     useContext(TokenListContext);
@@ -18,6 +24,69 @@ function Swap() {
 
   const [fromValue, setFromValue] = useState(0);
   const [toValue, setToValue] = useState(0);
+  const giveIJ = () => {
+    let i = fromToken.tokenId
+    let j = toToken.tokenId
+    return {i, j}
+  }
+
+  useEffect(() =>{
+    console.log(`From: ${fromToken.symbol}`)
+    console.log(`To: ${toToken.symbol}`)
+  }, [fromToken, toToken])
+
+  const debounceSave = useCallback(
+    debounce((newValue) => updateToPrice(newValue), 1000),
+    [fromToken, toToken]
+  )
+  const debounceToSave = useCallback(
+    debounce((newValue) => updateFromPrice(newValue), 1000),
+    [fromToken, toToken]
+  )
+  function handleFromChangeEvent(newValue) {
+    setFromValue(newValue);
+    debounceSave(newValue)
+  }
+  function handleToChangeEvent(newValue) {
+    setToValue(newValue);
+    debounceToSave(newValue)
+  }
+  async function updateFromPrice(toValue) {
+    console.log(fromToken, toToken)
+    const {data} = await axios.get(
+      `https://api.granadanet.tzkt.io/v1/contracts/${CONFIG.StableSwapAddress}/storage`
+    )
+    let tokenPool = [
+      parseInt(data.token_pool[0].pool), 
+      parseInt(data.token_pool[1].pool),
+    ]
+    let {i, j} = giveIJ()
+    let N_COINS=2;
+    let dx = parseFloat(toValue);
+    let A = parseInt(data.A);
+    let fromValue = getDy(tokenPool, i, j, dx, A, N_COINS);
+    console.log({data, i, j, N_COINS, dx, A, toValue})
+    setFromValue(fromValue || 0);
+  }
+
+  async function updateToPrice(fromValue) {
+    console.log(() =>fromToken.tokenId, () =>toToken.tokenId)
+
+    const {data} = await axios.get(
+      `https://api.granadanet.tzkt.io/v1/contracts/${CONFIG.StableSwapAddress}/storage`
+    )
+    let tokenPool = [
+      parseInt(data.token_pool[0].pool), 
+      parseInt(data.token_pool[1].pool),
+    ]
+    let {i, j} = giveIJ()
+    let N_COINS=2;
+    let dx = parseFloat(fromValue);
+    let A = parseInt(data.A);
+    let toValue = getDy(tokenPool, i, j, dx, A, N_COINS);
+    console.log({data, i, j, N_COINS, dx, A, toValue})
+    setToValue(toValue || 0);
+  }
 
   const handleInterChange = () => {
     const oldFromToken = fromToken;
@@ -64,45 +133,6 @@ function Swap() {
       showMessage(err.message);
       console.log(err);
     }
-
-    // tezos.wallet
-    //   .at(CONFIG.StableSwapAddress)
-    //   .then((contract) => {
-    //       return contract.methods.exchange(
-    //         fromToken.tokenId,
-    //         toToken.tokenId,
-    //         fromValue * 10 ** fromToken.decimals
-    //       ).send()
-    //     }
-    //   )
-    //   .then((op) => {
-    //     console.log(`OpHash:`, op.opHash)
-    //     return op.confirmation();
-    //   })
-    //   .then((result) => {
-    //     console.log(result)
-    //     if (result.completed) {
-    //       console.log(`Transaction correctly processed!
-    //       Block: ${result.block.header.level}
-    //       Chain ID: ${result.block.chain_id}`);
-    //     } else {
-    //       console.log('An error has occurred');
-    //     }
-    //   })
-    // // const op = contract.methods.exchange(
-    //   fromToken.tokenId,
-    //   toToken.tokenId,
-    //   fromValue * 10 ** fromToken.decimals
-    // ).send();
-    // console.log(op.opHash)
-    // const result = await op.confirmation();
-    // if (result.completed) {
-    //   console.log(`Transaction correctly processed!
-    //   Block: ${result.block.header.level}
-    //   Chain ID: ${result.block.chain_id}`);
-    // } else {
-    //   console.log('An error has occurred');
-    // }
   }
 
   return (
@@ -124,7 +154,7 @@ function Swap() {
             changeWhich("from");
           }}
           value={fromValue}
-          setValue={setFromValue}
+          setValue={handleFromChangeEvent}
           token={fromToken}
         />
         <InputBox
@@ -132,7 +162,7 @@ function Swap() {
             changeWhich("to");
           }}
           value={toValue}
-          setValue={setToValue}
+          setValue={handleToChangeEvent}
           token={toToken}
         />
       </div>

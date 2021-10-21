@@ -9,9 +9,9 @@ export const tokenList = [
   // },
   {
     id: 2,
-    symbol: "KUSD",
-    address: 'KT1WJUr74D5bkiQM2RE1PALV7R8MUzzmDzQ9',
-    name: "Kolibri Token",
+    symbol: "kUSD",
+    address: "KT1WJUr74D5bkiQM2RE1PALV7R8MUzzmDzQ9",
+    name: "Kolibri USD",
     imageUrl:
       "https://img.templewallet.com/insecure/fit/64/64/ce/0/plain/https://kolibri-data.s3.amazonaws.com/logo.png",
     tokenId: 0,
@@ -20,8 +20,8 @@ export const tokenList = [
   {
     id: 3,
     symbol: "USDtz",
-    address: 'KT1CNQL6xRn5JaTUcMmxwSc5YQjwpyHkDR5r',
-    name: "USD Tezos",
+    address: "KT1CNQL6xRn5JaTUcMmxwSc5YQjwpyHkDR5r",
+    name: "USD Tez",
     imageUrl:
       "https://img.templewallet.com/insecure/fit/64/64/ce/0/plain/https://quipuswap.com/tokens/usdtz.png",
     tokenId: 1,

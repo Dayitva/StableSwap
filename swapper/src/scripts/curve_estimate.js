@@ -58,18 +58,5 @@ function getDy(tokenPool, i, j, dx, A, N_COINS) {
   let dy = tokenPool[j] - y;
   return (dy / 10 ** 9).toFixed(4);
 }
-
-function estimateTokensByLp(tokenPool, _amount) {
-  let token_supply = tokenPool[0] + tokenPool[1];
-
-  let _x4 = 0;
-  let tokenOut = {};
-  while (_x4 < tokenPool.length) {
-    let value = (tokenPool[_x4] * _amount * 10 ** 9) / token_supply;
-    tokenOut[_x4] = value / 10 ** 9;
-    _x4 += 1;
-  }
-  return tokenOut;
-}
-
-export { getD, getY, getDy, estimateTokensByLp };
+let tokens = getDy([120000 * 10 ** 9, 80000 * 10 ** 9], 0, 1, 100, 4500, 2);
+console.log(tokens);

@@ -24,7 +24,9 @@
     "start": "craco start",
     "build": "craco build",
     "test": "craco test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "curve": "node ./src/scripts/curve_estimate.js",
+    "cpmm": "python ./src/scripts/cpmm_estimate.py"
   },
   "eslintConfig": {
     "extends": [

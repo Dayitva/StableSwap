@@ -13,7 +13,6 @@ import { debounce } from "lodash";
 import { getDy } from "../utils/estimates";
 
 import axios from "axios";
-import { useEffect } from "react/cjs/react.development";
 
 function Swap() {
   const { changeWhich, setFromToken, setToToken, fromToken, toToken } =
@@ -30,22 +29,19 @@ function Swap() {
     return {i, j}
   }
 
-  useEffect(() =>{
-    console.log(`From: ${fromToken.symbol}`)
-    console.log(`To: ${toToken.symbol}`)
-  }, [fromToken, toToken])
 
-  const debounceSave = useCallback(
+  const debounceSave = useCallback(// eslint-disable-line react-hooks/exhaustive-deps
     debounce((newValue) => updateToPrice(newValue), 1000),
     [fromToken, toToken]
-  )
-  const debounceToSave = useCallback(
+    ) 
+
+  const debounceToSave = useCallback(// eslint-disable-line react-hooks/exhaustive-deps
     debounce((newValue) => updateFromPrice(newValue), 1000),
     [fromToken, toToken]
   )
   function handleFromChangeEvent(newValue) {
     setFromValue(newValue);
-    debounceSave(newValue)
+    debounceSave(newValue);
   }
   function handleToChangeEvent(newValue) {
     setToValue(newValue);

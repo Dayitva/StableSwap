@@ -64,7 +64,7 @@ function Liquidity() {
 
   return (
     <div>
-      <div className="pt-16">
+      <div className="py-16">
         {/* The balance Component */}
         <div className="mt-20 mx-auto max-w-2xl relative">
           {/* Wrapper for swap component... */}

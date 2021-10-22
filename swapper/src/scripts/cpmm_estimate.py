@@ -1,6 +1,6 @@
 
-KUSD_POOL = 120000 * 10 ** 9
-USDTZ_POOL = 80000 * 10 ** 9
+KUSD_POOL = 1000000 
+USDTZ_POOL = 1000000 
 token_pool = [
   {'pool': KUSD_POOL, 'name': 'KUSD'},
   {'pool': USDTZ_POOL, 'name': 'USDtz'}
@@ -17,4 +17,6 @@ def exchange(i, j, dx):
   token_out = to_token['pool'] - new_to_token
   return token_out
 
-print(exchange(0, 1, 100 * 10 ** 9)/10 ** 9)
+
+for i in range(1000, 100000, 5000):
+	print(i, exchange(0, 1, i))

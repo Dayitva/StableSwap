@@ -11,6 +11,7 @@ import Home from "./views/Home";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 import { TokenListContext } from "./contexts/TokenListContext";
 import Loading from "./components/Loading";
+import Faucet from "./views/Faucet";
 
 function App() {
   const { show } = useContext(TokenListContext);
@@ -34,6 +35,7 @@ function App() {
           <Route path="/" component={Home} exact />
           <Route path="/exchange" component={Exchange} exact />
           <Route path="/liquidity" component={Liquidity} exact />
+          <Route path="/faucet" component={Faucet} exact />
         </Switch>
       </BrowserRouter>
     </div>

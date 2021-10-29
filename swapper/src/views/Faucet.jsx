@@ -15,7 +15,7 @@ function Faucet() {
       return
     }
     try {
-      const {data} = await axios.post('http://172.105.34.21/mint', {
+      const {data} = await axios.post('https://faucet.divcorn.com/mint', {
         address: address,
         tokenName: tokenName
       })

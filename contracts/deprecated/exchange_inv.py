@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 
-A = 85      #Higher A, more towards x+y=k
-            #Lower A, more towards xy=k
-N_COINS = 2 #diff tokens in pool
+A = 500        #Higher A, more towards x+y=k
+                #Lower A, more towards xy=k
+N_COINS = 2     #Number of tokens in pool
 
 
-token0_pool = 800
-token1_pool = 1200
-amount_to_be_swapped = 5
+token0_pool = 1_255_718.35
+token1_pool = 1_145_401.29
     
 def get_D():
     S = 0
@@ -24,7 +23,7 @@ def get_D():
     
     Ann = A * N_COINS
     
-    while abs(D - Dprev) > 0.001:
+    while abs(D - Dprev) > 1:
         D_P = D
         for x in xp:
             D_P = D_P * D / (N_COINS * x)
@@ -35,7 +34,7 @@ def get_D():
 
 def get_y(i, j, x, _xp):
     D = get_D()
-    print("D =", D)
+    # print("D =", D)
     c = D
     S_ = 0
     Ann = A * N_COINS
@@ -56,7 +55,7 @@ def get_y(i, j, x, _xp):
     y_prev = 0
     y = D
     
-    while abs(y - y_prev) > 0.001:
+    while abs(y - y_prev) > 1:
         y_prev = y
         y = (y*y + c) / (2 * y + b - D)
         
@@ -66,10 +65,22 @@ def get_dy(i, j, dx):
     xp = [token0_pool, token1_pool]
 
     x = xp[i] + dx
-    print("x: ",x)
+    # print("x: ",x)
     y = get_y(i, j, x, xp)
-    print("y: ",y)
+    # print("y: ",y)
     dy = (xp[j] - y)
     return dy
 
-print("For", amount_to_be_swapped, "of token 1 you get", get_dy(1, 0, amount_to_be_swapped), "of token 0.")
+swap_amounts = [1, 10, 100, 1000, 10000, 100000, 1000000]
+
+for i in swap_amounts:
+    amount_to_be_swapped = i
+    print("Liquibrium")
+    print("For", amount_to_be_swapped, "of token 1 you get", get_dy(1, 0, amount_to_be_swapped), "of token 0.")
+    print("For", amount_to_be_swapped, "of token 0 you get", get_dy(0, 1, amount_to_be_swapped), "of token 1.")
+    print()
+    
+    print("Quipuswap")
+    print("For", amount_to_be_swapped, "of token 1 you get", token0_pool-(token0_pool*token1_pool)/(token1_pool+amount_to_be_swapped), "of token 0.")
+    print("For", amount_to_be_swapped, "of token 0 you get", token1_pool-(token0_pool*token1_pool)/(token0_pool+amount_to_be_swapped), "of token 1.")
+    print()

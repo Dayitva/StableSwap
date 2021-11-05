@@ -5,10 +5,31 @@ class Token(fa12.FA12):
     """ Test FA1.2 Token """
     pass
 
+# kUSD = 10**18 (6.42 M) [FA1.2]
+# wBUSD = 10**18 (1.85 M) [FA 2]
+# wDAI = 10**18 (1 M) [FA 2]
+
+# uUSD = 10**12 (8.35 M) [FA 2]
+
+# USDtz = 10**6 (1.87 M) [FA1.2]
+# wUSDC = 10**6 (2.5 M) [FA 2]
+# wUSDT = 10**6 (0.75 M) [FA 2]
+
+PRECISION = 10 ** 18 # The precision to convert to
+PRECISION_MUL = [1, 10**12]
+
 class Dex(sp.Contract):
     def __init__(self, x_address, y_address, _lp_token, _admin):
+        """
+        x_address: The address of the x token
+        y_address: The address of the y token
+        _lp_token: The address of the LP token
+        _admin: The address of the admin
+        N_COINS: The number of coins in the pool
+        A: Amplification factor
+        fee: The fee for the transaction
+        """
         self.init(
-            # invariant = sp.nat(0),
             N_COINS=sp.nat(2),
             A=sp.nat(4500),
             token_pool=sp.map(l={
@@ -16,6 +37,17 @@ class Dex(sp.Contract):
                 1: sp.record(address=y_address, pool=sp.nat(0)),
             }),
             admin=_admin,
+            fee = sp.nat(15),
+            total_lp_issued = sp.nat(0),
+            admin_fee_pool=sp.map(l={
+                0: sp.record(address=x_address, pool=sp.nat(0)),
+                1: sp.record(address=y_address, pool=sp.nat(0)),
+            }),
+            lp_fee_pool=sp.map(l={
+                0: sp.record(address=x_address, pool=sp.nat(0)),
+                1: sp.record(address=y_address, pool=sp.nat(0)),
+            }),
+            tx_origin = _admin,
             lp_token=_lp_token,
         )
 
@@ -34,6 +66,7 @@ class Dex(sp.Contract):
             self.data.lp_token,
             'mint'
         ).open_some()
+        self.data.total_lp_issued += transfer_value
         sp.transfer(transfer_value, sp.mutez(0), contract)
 
     def burn_lp(self, amount):
@@ -51,6 +84,7 @@ class Dex(sp.Contract):
             self.data.lp_token,
             'burn'
         ).open_some()
+        self.data.total_lp_issued -= transfer_value
         sp.transfer(transfer_value, sp.mutez(0), contract)
 
     def transfer(self, from_, to, amount, token_id):
@@ -113,6 +147,20 @@ class Dex(sp.Contract):
 
         return D.value
 
+    # def completeClaim(self):
+    #     contract = sp.contract(
+    #         sp.TPair(
+    #             sp.TAddress,
+    #             sp.TContract(
+    #                 sp.TNat
+    #             )
+    #         ),
+    #         ),
+    #         self.data.lp_token,
+    #         'getBalance'
+    #     ).open_some()
+    #     sp.transfer((sp.sender, sp.self_entry_point(name="completeClaim")), sp.mutez(0), contract)
+
     def get_y(self, i, j, x):
         D = sp.local('D1', self.get_D())
         # sp.trace({"D": D.value})
@@ -147,6 +195,68 @@ class Dex(sp.Contract):
                 sp.as_nat((2 * y.value + b.value) - D.value)
         # sp.trace({"y": y.value})
         return y.value
+
+    @sp.entry_point
+    def update_fee(self, new_fee):
+        self.fee = new_fee
+
+    @sp.entry_point
+    def claim(self):
+        if(sp.sender == self.data.admin):
+            self.transfer(
+            from_=sp.self_address,
+            to=sp.sender,
+            amount=self.data.admin_fee_pool[0],
+            token_id=0
+            )
+            self.transfer(
+            from_=sp.self_address,
+            to=sp.sender,
+            amount=self.data.admin_fee_pool[1],
+            token_id=1
+            )
+            # Update Pools
+            self.data.token_pool[0].pool -= self.data.admin_fee_pool[0]
+            self.data.token_pool[1].pool -= self.data.admin_fee_pool[1]
+            # Set admin fee 0
+            self.data.admin_fee_pool[0] = sp.nat(0)
+            self.data.admin_fee_pool[0] = sp.nat(0)
+        else:
+            self.data.tx_origin = sp.sender
+            # amount = lp_fees * (lp_bal/total_lp_issued)
+            contract = sp.contract(
+                sp.TPair(
+                    sp.TAddress,
+                    sp.TContract(
+                        sp.TNat
+                    )
+                ),
+                self.data.lp_token,
+                'getBalance'
+            ).open_some()
+            sp.transfer((sp.sender, sp.self_entry_point(name="completeClaim")), sp.mutez(0), contract)
+                
+    @sp.entry_point
+    def completeClaim(balance: sp.TNat):
+        sp.verify(sp.sender == self.data.lp_token)
+        self.transfer(
+            from_=sp.self_address,
+            to=self.data.tx_origin,
+            amount=self.data.lp_fee_pool[0] * (balance/self.data.total_lp_issued),
+            token_id=0
+            )
+            self.transfer(
+            from_=sp.self_address,
+            to=self.data.tx_origin,
+            amount=self.data.lp_fee_pool[1] * (balance/self.data.total_lp_issued),
+            token_id=1
+            )
+            # Update Pools
+            self.data.token_pool[0].pool -= self.data.lp_fee_pool[0] * (balance/self.data.total_lp_issued)
+            self.data.token_pool[1].pool -= self.data.lp_fee_pool[1] * (balance/self.data.total_lp_issued)
+            # Set lp fee 0
+            self.data.lp_fee_pool[0] = sp.nat(0)
+            self.data.lp_fee_pool[0] = sp.nat(0)
 
     @sp.entry_point
     def set_lp_address(self, address: sp.TAddress):
@@ -202,6 +312,10 @@ class Dex(sp.Contract):
         x = self.data.token_pool[i].pool + dx
         y = self.get_y(i, j, x)
         dy = sp.local('dy', sp.as_nat(self.data.token_pool[j].pool - y))
+        fee_collected = sp.local('fee', sp.as_nat((dy.value * self.data.fee) / 10000))
+        dy.value -= fee_collected.value
+        self.data.admin_fee_pool[j] += sp.as_nat(fee_collected.value / 2)
+        self.data.lp_fee_pool[j] += sp.as_nat(fee_collected.value / 2)
         self.data.token_pool[i].pool += dx
         self.data.token_pool[j].pool = sp.as_nat(
             self.data.token_pool[j].pool - dy.value)
@@ -277,59 +391,6 @@ class Dex(sp.Contract):
 
         self.burn_lp(_amount)
 
-    @sp.entry_point
-    def remove_liquidity_old(self, dx):
-        pool_record = self.data.token_pool.values()
-        token_supply = sp.local('ts1_old', sp.nat(0))
-        _x5 = sp.local('_x5', sp.nat(0))
-        sp.while _x5.value < sp.len(pool_record):
-            token_supply.value += self.data.token_pool[_x5.value].pool
-            _x5.value += 1
-        val1 = sp.local('val1', sp.nat(0))
-        # val1.value = sp.as_nat(token_supply.value - dx)/2
-        val1.value = token_supply.value/2
-        tok0_ret = sp.local('tk1_ret', sp.nat(0))
-        tok1_ret = sp.local('tk2_ret', sp.nat(0))
-        sp.if val1.value > self.data.token_pool[0].pool:
-            sp.trace('val1')
-            sp.trace(val1.value)
-            sp.trace(self.data.token_pool[0].pool)
-            tok0_ret.value = sp.as_nat(
-                val1.value - self.data.token_pool[0].pool)
-        sp.if val1.value > self.data.token_pool[1].pool:
-            tok1_ret.value = sp.as_nat(
-                val1.value - self.data.token_pool[1].pool)
-        # # Initial invariant
-        # D0 = sp.local('D0', sp.nat(0))
-        # sp.if token_supply.value > 0:
-        #     D0.value = self.get_D()
-        # Trasfer tok0 to the sender
-        sp.if tok0_ret.value > 0:
-            self.transfer(
-                from_=sp.self_address,
-                to=sp.sender,
-                amount=dx,
-                token_id=0
-            )
-            self.data.token_pool[0].pool = sp.as_nat(
-                self.data.token_pool[0].pool - tok0_ret.value)
-        # Trasfer tok1 to the sender
-        sp.if tok1_ret.value > 0:
-            self.transfer(
-                from_=sp.self_address,
-                to=sp.sender,
-                amount=dx,
-                token_id=1
-            )
-            self.data.token_pool[1].pool = sp.as_nat(
-                self.data.token_pool[1].pool - tok1_ret.value)
-        # Invariant after change
-        # D1 = sp.local('D1', self.get_D())
-        # sp.trace({'D1': D1.value})
-        # sp.trace({'D0': D0.value})
-        # sp.trace({"D1-D0": D1.value-D0.value})
-        # return D1 - D0
-
     @sp.offchain_view(pure=True)
     def get_totalSupply(self):
         """Returns the total supply"""
@@ -353,7 +414,7 @@ class Dex(sp.Contract):
         sp.result(dy)
 
 
-@sp.add_test(name="StableSwap")
+@sp.add_test(name="Liquibrium")
 def test():
     admin = sp.address("tz1d6ZpPZj4Xb9tPbLcnSnRN2VCxRdSz1i4o")
     alice = sp.test_account("Alice")

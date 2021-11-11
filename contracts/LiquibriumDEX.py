@@ -177,7 +177,7 @@ class Dex(sp.Contract):
     @sp.entry_point
     def update_fee(self, new_fee):
         sp.verify(sp.sender == self.data.admin, "NOT_ADMIN")
-        self.fee = new_fee
+        self.data.fee = new_fee
 
     @sp.entry_point
     def admin_claim(self):
@@ -255,9 +255,9 @@ class Dex(sp.Contract):
         x = self.data.token_pool[i].pool + dx
         y = self.get_y(i, j, x)
         dy = sp.local('dy', sp.as_nat(self.data.token_pool[j].pool - y))
-        fee_collected = sp.local('fee', sp.as_nat((dy.value * self.data.fee) / 10000))
-        dy.value -= fee_collected.value
-        self.data.admin_fee_pool[j].pool += sp.as_nat(fee_collected.value / 2)
+        fee_collected = sp.local('fee', ((dy.value * self.data.fee) / 10000))
+        dy.value = sp.as_nat(dy.value - fee_collected.value)
+        self.data.admin_fee_pool[j].pool += (fee_collected.value / 2)
         self.data.token_pool[i].pool += dx
         self.data.token_pool[j].pool = sp.as_nat(
             self.data.token_pool[j].pool - dy.value)

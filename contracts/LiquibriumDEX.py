@@ -185,21 +185,21 @@ class Dex(sp.Contract):
         self.transfer(
         from_=sp.self_address,
         to=sp.sender,
-        amount=self.data.admin_fee_pool[0],
+        amount=self.data.admin_fee_pool[0].pool,
         token_id=0
         )
         self.transfer(
         from_=sp.self_address,
         to=sp.sender,
-        amount=self.data.admin_fee_pool[1],
+        amount=self.data.admin_fee_pool[1].pool,
         token_id=1
         )
         # Update Pools
-        self.data.token_pool[0].pool -= self.data.admin_fee_pool[0]
-        self.data.token_pool[1].pool -= self.data.admin_fee_pool[1]
+        self.data.token_pool[0].pool = sp.as_nat(self.data.token_pool[0].pool - self.data.admin_fee_pool[0].pool)
+        self.data.token_pool[1].pool = sp.as_nat(self.data.token_pool[0].pool - self.data.admin_fee_pool[1].pool)
         # Set admin fee 0
-        self.data.admin_fee_pool[0] = sp.nat(0)
-        self.data.admin_fee_pool[0] = sp.nat(0)
+        self.data.admin_fee_pool[0].pool = sp.nat(0)
+        self.data.admin_fee_pool[0].pool = sp.nat(0)
 
     @sp.entry_point
     def set_lp_address(self, address: sp.TAddress):
@@ -257,7 +257,7 @@ class Dex(sp.Contract):
         dy = sp.local('dy', sp.as_nat(self.data.token_pool[j].pool - y))
         fee_collected = sp.local('fee', sp.as_nat((dy.value * self.data.fee) / 10000))
         dy.value -= fee_collected.value
-        self.data.admin_fee_pool[j] += sp.as_nat(fee_collected.value / 2)
+        self.data.admin_fee_pool[j].pool += sp.as_nat(fee_collected.value / 2)
         self.data.token_pool[i].pool += dx
         self.data.token_pool[j].pool = sp.as_nat(
             self.data.token_pool[j].pool - dy.value)

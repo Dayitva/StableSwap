@@ -32,3 +32,12 @@ Test USDtz address: `KT1CNQL6xRn5JaTUcMmxwSc5YQjwpyHkDR5r`
 Test LP token address: `KT1Nv2h1bHPLYZsGrCdfdvwKzXsZrFEfJnpJ`
 
 Decimals is 9 for all the tokens.
+
+### Some tokens with decimals and standards
++ kUSD = 10**18 (6.42 M) [FA1.2]
++ wBUSD = 10**18 (1.85 M) [FA 2]
++ wDAI = 10**18 (1 M) [FA 2]
++ uUSD = 10**12 (8.35 M) [FA 2]
++ USDtz = 10**6 (1.87 M) [FA1.2]
++ wUSDC = 10**6 (2.5 M) [FA 2]
++ wUSDT = 10**6 (0.75 M) [FA 2]

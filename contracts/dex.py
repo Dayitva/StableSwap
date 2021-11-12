@@ -6,15 +6,6 @@ class Token(fa12.FA12):
     """ Test FA1.2 Token """
     pass
 
-# kUSD = 10**18 (6.42 M) [FA1.2]
-# wBUSD = 10**18 (1.85 M) [FA 2]
-# wDAI = 10**18 (1 M) [FA 2]
-
-# uUSD = 10**12 (8.35 M) [FA 2]
-
-# USDtz = 10**6 (1.87 M) [FA1.2]
-# wUSDC = 10**6 (2.5 M) [FA 2]
-# wUSDT = 10**6 (0.75 M) [FA 2]
 
 PRECISION = 10 ** 18 # The precision to convert to
 PRECISION_MUL = [1, 10**12]

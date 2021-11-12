@@ -25,8 +25,8 @@ class Dex(sp.Contract, TokenUtility):
             N_COINS=sp.nat(2),
             A=sp.nat(4500),
             token_pool=sp.map(l={
-                0: sp.record(address=x_address, pool=sp.nat(0), fa2=False, tokenId=0),
-                1: sp.record(address=y_address, pool=sp.nat(0), fa2=False, tokenId=0),
+                0: sp.record(address=x_address, pool=sp.nat(0), fa2=False, token_id=0),
+                1: sp.record(address=y_address, pool=sp.nat(0), fa2=False, token_id=0),
             }),
             admin=_admin,
             fee = sp.nat(15),
@@ -74,7 +74,7 @@ class Dex(sp.Contract, TokenUtility):
     def transferToTokenId(self, _from, _to, _amount, _token_id=0):
         token = self.data.token_pool.get(_token_id)
         sp.if token.fa2:
-            self.fa2Transfer(_from, _to, _amount, token.tokenId, token.address)
+            self.fa2Transfer(_from, _to, _amount, token.token_id, token.address)
         sp.else:
             self.fa12Transfer(_from, _to, _amount, token.address)
 

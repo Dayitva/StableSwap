@@ -1,4 +1,5 @@
 import smartpy as sp
+from contracts.utility import TokenUtility
 fa12 = sp.io.import_script_from_url("https://smartpy.io/templates/FA1.2.py")
 
 class Token(fa12.FA12):
@@ -18,7 +19,7 @@ class Token(fa12.FA12):
 PRECISION = 10 ** 18 # The precision to convert to
 PRECISION_MUL = [1, 10**12]
 
-class Dex(sp.Contract):
+class Dex(sp.Contract, TokenUtility):
     def __init__(self, x_address, y_address, _lp_token, _admin):
         """
         x_address: The address of the x token
@@ -33,8 +34,8 @@ class Dex(sp.Contract):
             N_COINS=sp.nat(2),
             A=sp.nat(4500),
             token_pool=sp.map(l={
-                0: sp.record(address=x_address, pool=sp.nat(0)),
-                1: sp.record(address=y_address, pool=sp.nat(0)),
+                0: sp.record(address=x_address, pool=sp.nat(0), fa2=False, tokenId=0),
+                1: sp.record(address=y_address, pool=sp.nat(0), fa2=False, tokenId=0),
             }),
             admin=_admin,
             fee = sp.nat(15),
@@ -78,23 +79,13 @@ class Dex(sp.Contract):
             'burn'
         ).open_some()
         sp.transfer(transfer_value, sp.mutez(0), contract)
-
-    def transfer(self, from_, to, amount, token_id):
-        """ Utility Function to transfer x FA1.2 Tokens. """
-        sp.verify(amount > sp.nat(0), 'INSUFFICIENT_TOKENS[transfer_token]')
-
-        transfer_type = sp.TRecord(
-            from_=sp.TAddress,
-            to_=sp.TAddress,
-            value=sp.TNat
-        ).layout(("from_ as from", ("to_ as to", "value")))
-        transfer_data = sp.record(from_=from_, to_=to, value=amount)
-        token_contract = sp.contract(
-            transfer_type,
-            self.data.token_pool[token_id].address,
-            "transfer"
-        ).open_some()
-        sp.transfer(transfer_data, sp.mutez(0), token_contract)
+    
+    def transferToTokenId(self, _from, _to, _amount, _token_id=0):
+        token = self.data.token_pool.get(_token_id)
+        sp.if token.fa2:
+            self.fa2Transfer(_from, _to, _amount, token.tokenId, token.address)
+        sp.else:
+            self.fa12Transfer(_from, _to, _amount, token.address)
 
     def get_D(self):
         S = sp.local('S', sp.nat(0))
@@ -182,17 +173,17 @@ class Dex(sp.Contract):
     @sp.entry_point
     def admin_claim(self):
         sp.verify(sp.sender == self.data.admin, "NOT_ADMIN")
-        self.transfer(
-        from_=sp.self_address,
-        to=sp.sender,
-        amount=self.data.admin_fee_pool[0].pool,
-        token_id=0
+        self.transferToTokenId(
+            _from=sp.self_address,
+            _to=sp.sender,
+            _amount=self.data.admin_fee_pool[0].pool,
+            _token_id=0
         )
-        self.transfer(
-        from_=sp.self_address,
-        to=sp.sender,
-        amount=self.data.admin_fee_pool[1].pool,
-        token_id=1
+        self.transferToTokenId(
+            _from = sp.self_address,
+            _to = sp.sender,
+            _amount = self.data.admin_fee_pool[1].pool,
+            _token_id = 1
         )
         # Update Pools
         self.data.token_pool[0].pool = sp.as_nat(self.data.token_pool[0].pool - self.data.admin_fee_pool[0].pool)
@@ -213,17 +204,17 @@ class Dex(sp.Contract):
         sp.verify(token2_amount > sp.nat(0), "INVALID_AMOUNT")
         
         # Transfer tokens from the user's account to our contract's address.
-        self.transfer(
-            sp.sender,
-            sp.self_address,
-            token1_amount,
-            0
+        self.transferToTokenId(
+            _from=sp.sender,
+            _to = sp.self_address,
+            _amount=token1_amount,
+            _token_id=0
         )
-        self.transfer(
-            sp.sender,
-            sp.self_address,
-            token2_amount,
-            1
+        self.transferToTokenId(
+            _from=sp.sender,
+            _to = sp.self_address,
+            _amount=token2_amount,
+            _token_id=1
         )
         
         # Update the storage.
@@ -245,11 +236,11 @@ class Dex(sp.Contract):
         sp.verify(i < self.data.N_COINS, "Invalid Token")
         sp.verify(j < self.data.N_COINS, "Invalid Token")
         
-        self.transfer(
-            from_=sp.sender,
-            to=sp.self_address,
-            amount=dx,
-            token_id=i
+        self.transferToTokenId(
+            _from=sp.sender,
+            _to=sp.self_address,
+            _amount=dx,
+            _token_id=i
         )
         
         x = self.data.token_pool[i].pool + dx
@@ -265,11 +256,11 @@ class Dex(sp.Contract):
         # sp.trace(dy.value)
         # return dy
         sp.if dy.value > 0:
-            self.transfer(
-                from_=sp.self_address,
-                to=sp.sender,
-                amount=dy.value,
-                token_id=j
+            self.transferToTokenId(
+                _from=sp.self_address,
+                _to=sp.sender,
+                _amount=dy.value,
+                _token_id=j
             )
 
     @sp.entry_point
@@ -299,19 +290,15 @@ class Dex(sp.Contract):
             self.mint_lp(lp_amount)
         
         # Take coins from the sender
-        self.transfer(
-            from_=sp.sender,
-            to=sp.self_address,
-            amount=dx,
-            token_id=i
+        self.transferToTokenId(
+            _from=sp.sender,
+            _to=sp.self_address,
+            _amount=dx,
+            _token_id=i
         )
 
     @sp.entry_point
     def remove_liquidity(self, _amount: sp.TNat):
-        """
-        27508699211: first
-        22466325791: second
-        """
         pool_record = self.data.token_pool.values()
         token_supply = sp.local('ts1', sp.nat(0))
         _x3 = sp.local('_x3', sp.nat(0))
@@ -323,11 +310,11 @@ class Dex(sp.Contract):
         sp.while _x4.value < sp.len(pool_record):
             value = self.data.token_pool[_x4.value].pool * _amount / token_supply.value
             self.data.token_pool[_x4.value].pool = sp.as_nat(self.data.token_pool[_x4.value].pool - value)
-            self.transfer(
-                from_=sp.self_address, 
-                to=sp.sender, 
-                amount=value, 
-                token_id=_x4.value
+            self.transferToTokenId(
+                _from=sp.self_address,
+                _to=sp.sender,
+                _amount=value,
+                _token_id=_x4.value
             )
             _x4.value += 1
 
@@ -345,7 +332,6 @@ class Dex(sp.Contract):
             _x6.value += 1
 
         sp.result(token_supply.value)
-        # ​sp.result(self.data.token_pool[0].pool + self.data.token_pool[1].pool)
 
     @sp.offchain_view(pure=True)
     def get_dy(self, params):
@@ -354,129 +340,3 @@ class Dex(sp.Contract):
         y = self.get_y(params.i, params.j, x)
         dy = sp.as_nat(self.data.token_pool[params.j].pool - y)
         sp.result(dy)
-
-
-@sp.add_test(name="Liquibrium")
-def test():
-    admin = sp.address("tz1d6ZpPZj4Xb9tPbLcnSnRN2VCxRdSz1i4o")
-    alice = sp.test_account("Alice")
-    bob = sp.test_account("Robert")
-    token_admin = sp.test_account("Token Admin")
-    
-    DECIMALS = 10 ** 9
-    scenario = sp.test_scenario()
-    
-    token1_metadata = {
-        "decimals": "9",
-        "name": "USD Tez",
-        "symbol": "USDTz",
-        "icon": 'https://smartpy.io/static/img/logo-only.svg'
-    }
-    contract1_metadata = {
-        "": "ipfs://QmaiAUj1FFNGYTu8rLBjc3eeN9cSKwaF8EGMBNDmhzPNFd",
-    }
-    token2_metadata = {
-        "decimals": "9",
-        "name": "Kolibri USD",
-        "symbol": "KUSD",
-        "icon": 'https://smartpy.io/static/img/logo-only.svg'
-    }
-    contract2_metadata = {
-        "": "ipfs://QmaiAUj1FFNGYTu8rLBjc3eeN9cSKwaF8EGMBNDmhzPNFd",
-    }
-
-    
-    usdtz = Token(
-        token_admin.address,
-        config=fa12.FA12_config(support_upgradable_metadata=True),
-        token_metadata=token1_metadata,
-        contract_metadata=contract1_metadata
-    )
-    kusd = Token(
-        token_admin.address,
-        config=fa12.FA12_config(support_upgradable_metadata=True),
-        token_metadata=token2_metadata,
-        contract_metadata=contract2_metadata
-    )
-    
-    scenario += usdtz
-    scenario += kusd
-
-    kusd.mint(
-        address=alice.address,
-        value=sp.nat(100000 * DECIMALS)
-    ).run(sender=token_admin)
-    kusd.mint(
-        address=bob.address,
-        value=sp.nat(100000 * DECIMALS)
-    ).run(sender=token_admin)
-    usdtz.mint(
-        address=alice.address,
-        value=sp.nat(100000 * DECIMALS)
-    ).run(sender=token_admin)
-    usdtz.mint(
-        address=bob.address,
-        value=sp.nat(100000 * DECIMALS)
-    ).run(sender=token_admin)
-    # Initialize the exchange.
-    # Approve to spend by stable_swap address
-    dex = Dex(
-        x_address=kusd.address,
-        # x_address=sp.address('KT1WJUr74D5bkiQM2RE1PALV7R8MUzzmDzQ9'),
-        y_address=usdtz.address,
-        # y_address=sp.address('KT1CNQL6xRn5JaTUcMmxwSc5YQjwpyHkDR5r'),
-        _lp_token=sp.address('KT1-LP-TOKEN'),
-        _admin=admin
-    )
-
-    # lp_metadata = {
-    #     "decimals": "9",
-    #     "name": "LP Token",
-    #     "symbol": "LP-TOKEN",
-    #     "icon": 'https://smartpy.io/static/img/logo-only.svg'
-    # }
-    # lp_contract_metadata = {
-    #     "": "ipfs://QmaiAUj1FFNGYTu8rLBjc3eeN9cSKwaF8EGMBNDmhzPNFd",
-    # }
-    scenario += dex
-
-    # lp = Token(
-    #     dex.address,
-    #     config=fa12.FA12_config(support_upgradable_metadata=True),
-    #     token_metadata=lp_metadata,
-    #     contract_metadata=lp_contract_metadata
-    # )
-    # dex.set_lp_address(lp.address).run(sender=admin)
-
-    kusd.approve(sp.record(
-        spender=dex.address,
-        value=sp.nat(50_000 * DECIMALS
-                     ))).run(sender=alice)
-    usdtz.approve(sp.record(
-        spender=dex.address,
-        value=sp.nat(50_000 * DECIMALS
-                     ))).run(sender=alice)
-    dex.initialize_exchange(
-        token1_amount=sp.nat(50_000 * DECIMALS),
-        token2_amount=sp.nat(50_000 * DECIMALS)
-    ).run(sender=alice)
-
-    kusd.approve(sp.record(
-        spender=dex.address,
-        value=sp.nat(5000 * DECIMALS)
-    )).run(sender=bob)
-    dex.exchange(i=0, j=1, dx=5000 * DECIMALS).run(sender=bob)
-    kusd.approve(sp.record(
-        spender=dex.address,
-        value=sp.nat(100 * DECIMALS
-    ))).run(sender=alice)
-    dex.add_liquidity(i=0, dx=100 * DECIMALS).run(sender=alice)
-    dex.remove_liquidity(50 * DECIMALS).run(sender=alice)
-
-
-sp.add_compilation_target("Dex Compilation Target", Dex(
-    x_address=sp.address('KT1WJUr74D5bkiQM2RE1PALV7R8MUzzmDzQ9'),
-    y_address=sp.address('KT1CNQL6xRn5JaTUcMmxwSc5YQjwpyHkDR5r'),
-    _lp_token=sp.address('KT1Nv2h1bHPLYZsGrCdfdvwKzXsZrFEfJnpJ'),
-    _admin=sp.address("tz1WNKahMHz1bkuAfZrsvtmjBhh4GJzw8YcU")
-))

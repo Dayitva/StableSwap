@@ -33,10 +33,10 @@ class Dex(sp.Contract):
             N_COINS=sp.nat(2),
             A=sp.nat(85),
             token_pool=sp.map(l={
-                0: sp.record(address=x_address, pool=sp.nat(0), decimals=sp.nat(1000000000000000000)),
-                1: sp.record(address=y_address, pool=sp.nat(0), decimals=sp.nat(1000000)),
+                0: sp.record(address=x_address, pool=sp.nat(0), decimals=sp.nat(10000)),
+                1: sp.record(address=y_address, pool=sp.nat(0), decimals=sp.nat(100)),
             }),
-            eighteen = 1000000000000000000,
+            eighteen = 1000000,
             admin=_admin,
             fee = sp.nat(15),
             admin_fee_pool=sp.map(l={
@@ -335,13 +335,13 @@ class Dex(sp.Contract):
 
         _x4 = sp.local('_x4', sp.nat(0))
         sp.while _x4.value < sp.len(pool_record):
-            value = self.data.token_pool[_x4.value].pool * _amount / token_supply.value
-            self.data.token_pool[_x4.value].pool = sp.as_nat(self.data.token_pool[_x4.value].pool - value)
-            value /= (self.data.eighteen/self.data.token_pool[_x4.value].decimals)
+            value = sp.local('val', self.data.token_pool[_x4.value].pool * _amount / token_supply.value)
+            self.data.token_pool[_x4.value].pool = sp.as_nat(self.data.token_pool[_x4.value].pool - value.value)
+            value.value /= (self.data.eighteen/self.data.token_pool[_x4.value].decimals)
             self.transfer(
                 from_=sp.self_address, 
                 to=sp.sender, 
-                amount=value, 
+                amount=value.value, 
                 token_id=_x4.value
             )
             _x4.value += 1
@@ -378,12 +378,12 @@ def test():
     bob = sp.test_account("Robert")
     token_admin = sp.test_account("Token Admin")
     
-    DECIMALS_0 = 10 ** 6
-    DECIMALS_1 = 10 ** 18
+    DECIMALS_0 = 10 ** 2
+    DECIMALS_1 = 10 ** 4
     scenario = sp.test_scenario()
     
     token1_metadata = {
-        "decimals": "6",
+        "decimals": "2",
         "name": "USD Tez",
         "symbol": "USDTz",
         "icon": 'https://smartpy.io/static/img/logo-only.svg'
@@ -392,7 +392,7 @@ def test():
         "": "ipfs://QmaiAUj1FFNGYTu8rLBjc3eeN9cSKwaF8EGMBNDmhzPNFd",
     }
     token2_metadata = {
-        "decimals": "18",
+        "decimals": "4",
         "name": "Kolibri USD",
         "symbol": "KUSD",
         "icon": 'https://smartpy.io/static/img/logo-only.svg'
@@ -471,6 +471,7 @@ def test():
         token1_amount=sp.nat(50_000 * DECIMALS_1),
         token2_amount=sp.nat(50_000 * DECIMALS_0)
     ).run(sender=alice)
+    dex.remove_liquidity(25000 * (10**6)).run(sender=alice)
     kusd.approve(sp.record(
         spender=dex.address,
         value=sp.nat(5000 * DECIMALS_1)
@@ -481,7 +482,7 @@ def test():
         value=sp.nat(100 * DECIMALS_1
     ))).run(sender=alice)
     dex.add_liquidity(i=0, dx=100 * DECIMALS_1).run(sender=alice)
-    dex.remove_liquidity(50 * (10**18)).run(sender=alice)
+    dex.remove_liquidity(50 * (10**6)).run(sender=alice)
     dex.admin_claim().run(sender=admin)
 sp.add_compilation_target("Dex Compilation Target", Dex(
     x_address=sp.address('KT1WJUr74D5bkiQM2RE1PALV7R8MUzzmDzQ9'),

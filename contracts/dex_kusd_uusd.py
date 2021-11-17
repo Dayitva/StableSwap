@@ -7,9 +7,6 @@ class Token(fa12.FA12):
     pass
 
 
-PRECISION = 10 ** 18 # The precision to convert to
-PRECISION_MUL = [1, 10**12]
-
 class Dex(sp.Contract, TokenUtility):
     def __init__(self, x_address, y_address, _lp_token, _admin):
         """
@@ -26,7 +23,7 @@ class Dex(sp.Contract, TokenUtility):
             A=sp.nat(85),
             token_pool=sp.map(l={
                 0: sp.record(address=x_address, pool=sp.nat(0), fa2=False, token_id=0, decimals = 1000000000000000000),
-                1: sp.record(address=y_address, pool=sp.nat(0), fa2=False, token_id=0, decimals = 1000000),
+                1: sp.record(address=y_address, pool=sp.nat(0), fa2=False, token_id=0, decimals = 1000000000000),
             }),
             admin=_admin,
             eighteen = 1000000000000000000,

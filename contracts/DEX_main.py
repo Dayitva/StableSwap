@@ -183,18 +183,25 @@ class Dex(sp.Contract):
     @sp.entry_point
     def admin_claim(self):
         sp.verify(sp.sender == self.data.admin, "NOT_ADMIN")
-        self.transfer(
-        from_=sp.self_address,
-        to=sp.sender,
-        amount=self.data.admin_fee_pool[0].pool,
-        token_id=0
-        )
-        self.transfer(
-        from_=sp.self_address,
-        to=sp.sender,
-        amount=self.data.admin_fee_pool[1].pool,
-        token_id=1
-        )
+
+        # CHECK
+        # sp.trace({"0 admin fee" : self.data.admin_fee_pool[0].pool})
+        # sp.trace({"1 admin fee" : self.data.admin_fee_pool[1].pool})
+
+        sp.if self.data.admin_fee_pool[0].pool > 0:
+            self.transfer(
+            from_=sp.self_address,
+            to=sp.sender,
+            amount=self.data.admin_fee_pool[0].pool/(self.data.eighteen/self.data.token_pool[0].decimals),
+            token_id=0
+            )
+        sp.if self.data.admin_fee_pool[1].pool > 0:
+            self.transfer(
+            from_=sp.self_address,
+            to=sp.sender,
+            amount=self.data.admin_fee_pool[1].pool/(self.data.eighteen/self.data.token_pool[1].decimals),
+            token_id=1
+            )
         # /(self.data.eighteen/self.data.token_pool[0].decimals)
         # Update Pools
         self.data.token_pool[0].pool = sp.as_nat(self.data.token_pool[0].pool - self.data.admin_fee_pool[0].pool)
@@ -259,6 +266,8 @@ class Dex(sp.Contract):
         dy = sp.local('dy', sp.as_nat(self.data.token_pool[j].pool - y))
         fee_collected = sp.local('fee', ((dy.value * self.data.fee) / 10000))
         dy.value = sp.as_nat(dy.value - fee_collected.value)
+        # CHECK
+        sp.trace({"Fee" : (fee_collected.value / 2)})
         self.data.admin_fee_pool[j].pool += (fee_collected.value / 2)
         self.data.token_pool[i].pool += dx
         self.data.token_pool[j].pool = sp.as_nat(

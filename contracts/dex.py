@@ -23,12 +23,13 @@ class Dex(sp.Contract, TokenUtility):
         """
         self.init(
             N_COINS=sp.nat(2),
-            A=sp.nat(4500),
+            A=sp.nat(85),
             token_pool=sp.map(l={
-                0: sp.record(address=x_address, pool=sp.nat(0), fa2=False, token_id=0),
-                1: sp.record(address=y_address, pool=sp.nat(0), fa2=False, token_id=0),
+                0: sp.record(address=x_address, pool=sp.nat(0), fa2=False, token_id=0, decimals = 1000000000000000000),
+                1: sp.record(address=y_address, pool=sp.nat(0), fa2=False, token_id=0, decimals = 1000000),
             }),
             admin=_admin,
+            eighteen = 1000000000000000000,
             fee = sp.nat(15),
             admin_fee_pool=sp.map(l={
                 0: sp.record(address=x_address, pool=sp.nat(0)),
@@ -163,19 +164,25 @@ class Dex(sp.Contract, TokenUtility):
 
     @sp.entry_point
     def admin_claim(self):
-        sp.verify(sp.sender == self.data.admin, "NOT_ADMIN")
-        self.transferToTokenId(
-            _from=sp.self_address,
-            _to=sp.sender,
-            _amount=self.data.admin_fee_pool[0].pool,
-            _token_id=0
-        )
-        self.transferToTokenId(
-            _from = sp.self_address,
-            _to = sp.sender,
-            _amount = self.data.admin_fee_pool[1].pool,
-            _token_id = 1
-        )
+         sp.verify(sp.sender == self.data.admin, "NOT_ADMIN")
+        # CHECK
+        # sp.trace({"0 admin fee" : self.data.admin_fee_pool[0].pool})
+        # sp.trace({"1 admin fee" : self.data.admin_fee_pool[1].pool})
+        sp.if self.data.admin_fee_pool[0].pool > 0:
+            self.transfer(
+            from_=sp.self_address,
+            to=sp.sender,
+            amount=self.data.admin_fee_pool[0].pool/(self.data.eighteen/self.data.token_pool[0].decimals),
+            token_id=0
+            )
+        sp.if self.data.admin_fee_pool[1].pool > 0:
+            self.transfer(
+            from_=sp.self_address,
+            to=sp.sender,
+            amount=self.data.admin_fee_pool[1].pool/(self.data.eighteen/self.data.token_pool[1].decimals),
+            token_id=1
+            )
+        # /(self.data.eighteen/self.data.token_pool[0].decimals)
         # Update Pools
         self.data.token_pool[0].pool = sp.as_nat(self.data.token_pool[0].pool - self.data.admin_fee_pool[0].pool)
         self.data.token_pool[1].pool = sp.as_nat(self.data.token_pool[0].pool - self.data.admin_fee_pool[1].pool)
@@ -209,9 +216,9 @@ class Dex(sp.Contract, TokenUtility):
         )
         
         # Update the storage.
-        self.data.token_pool[0].pool = token1_amount
-        self.data.token_pool[1].pool = token2_amount
-        self.mint_lp(token1_amount + token2_amount)
+        self.data.token_pool[0].pool = token1_amount*(self.data.eighteen/self.data.token_pool[0].decimals)
+        self.data.token_pool[1].pool = token2_amount*(self.data.eighteen/self.data.token_pool[1].decimals)
+        self.mint_lp(token1_amount*(self.data.eighteen/self.data.token_pool[0].decimals) + token2_amount*(self.data.eighteen/self.data.token_pool[1].decimals))
 
     @sp.entry_point
     def update_A(self, new_A):
@@ -244,6 +251,7 @@ class Dex(sp.Contract, TokenUtility):
         self.data.token_pool[j].pool = sp.as_nat(
             self.data.token_pool[j].pool - dy.value)
 
+        dy.value /= (self.data.eighteen/self.data.token_pool[j].decimals)
         # sp.trace(dy.value)
         # return dy
         sp.if dy.value > 0:
@@ -279,6 +287,8 @@ class Dex(sp.Contract, TokenUtility):
         sp.trace({"lp_amount": lp_amount})
         sp.if lp_amount > sp.nat(0):
             self.mint_lp(lp_amount)
+
+        dx /= (self.data.eighteen/self.data.token_pool[i].decimals)
         
         # Take coins from the sender
         self.transferToTokenId(
@@ -299,15 +309,17 @@ class Dex(sp.Contract, TokenUtility):
 
         _x4 = sp.local('_x4', sp.nat(0))
         sp.while _x4.value < sp.len(pool_record):
-            value = self.data.token_pool[_x4.value].pool * _amount / token_supply.value
-            self.data.token_pool[_x4.value].pool = sp.as_nat(self.data.token_pool[_x4.value].pool - value)
-            self.transferToTokenId(
-                _from=sp.self_address,
-                _to=sp.sender,
-                _amount=value,
-                _token_id=_x4.value
+            value = sp.local('val', self.data.token_pool[_x4.value].pool * _amount / token_supply.value)
+            self.data.token_pool[_x4.value].pool = sp.as_nat(self.data.token_pool[_x4.value].pool - value.value)
+            value.value /= (self.data.eighteen/self.data.token_pool[_x4.value].decimals)
+            self.transfer(
+                from_=sp.self_address, 
+                to=sp.sender, 
+                amount=value.value, 
+                token_id=_x4.value
             )
             _x4.value += 1
+
 
         self.burn_lp(_amount)
 

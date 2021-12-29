@@ -2,6 +2,7 @@ import smartpy as sp
 from contracts.utility import TokenUtility
 fa12 = sp.io.import_script_from_url("https://smartpy.io/templates/FA1.2.py")
 
+
 class Token(fa12.FA12):
     """ Test FA1.2 Token """
     pass
@@ -22,12 +23,24 @@ class Dex(sp.Contract, TokenUtility):
             N_COINS=sp.nat(2),
             A=sp.nat(85),
             token_pool=sp.map(l={
-                0: sp.record(address=x_address, pool=sp.nat(0), fa2=False, token_id=0, decimals = 1000000000000000000),
-                1: sp.record(address=y_address, pool=sp.nat(0), fa2=False, token_id=0, decimals = 1000000),
+                0: sp.record(
+                    address=x_address,
+                    pool=sp.nat(0),
+                    fa2=False,
+                    token_id=0,
+                    decimals=1000000000000000000
+                ),
+                1: sp.record(
+                    address=y_address,
+                    pool=sp.nat(0),
+                    fa2=False,
+                    token_id=0,
+                    decimals=1000000
+                ),
             }),
             admin=_admin,
-            eighteen = 1000000000000000000,
-            fee = sp.nat(15),
+            eighteen=1000000000000000000,
+            fee=sp.nat(15),
             admin_fee_pool=sp.map(l={
                 0: sp.record(address=x_address, pool=sp.nat(0)),
                 1: sp.record(address=y_address, pool=sp.nat(0)),
@@ -68,11 +81,12 @@ class Dex(sp.Contract, TokenUtility):
             'burn'
         ).open_some()
         sp.transfer(transfer_value, sp.mutez(0), contract)
-    
+
     def transferToTokenId(self, _from, _to, _amount, _token_id=0):
         token = self.data.token_pool.get(_token_id)
         sp.if token.fa2:
-            self.fa2Transfer(_from, _to, _amount, token.token_id, token.address)
+            self.fa2Transfer(_from, _to, _amount,
+                             token.token_id, token.address)
         sp.else:
             self.fa12Transfer(_from, _to, _amount, token.address)
 
@@ -124,7 +138,7 @@ class Dex(sp.Contract, TokenUtility):
         # sp.trace({"D": D.value})
         c = sp.local('c', D.value)
         Ann = sp.local('Ann1', self.data.A * self.data.N_COINS)
-        
+
         # S_ = sp.local('S_', sp.nat(0))
         # _x1 = sp.local('_x1', sp.nat(0))
         # sp.for _i in sp.range(0, self.data.N_COINS, step=1):

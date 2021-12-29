@@ -2,6 +2,10 @@
 
 A decentralised stablecoin exchange on Tezos
 
+## Docs
+
+[Read the docs](./docs/README.md)
+
 ## What's the need?
 
 The simple answer is that a constant product market maker formula does not work well for stablecoins. Now that is a mouthful but the idea behind is not only simple but ingenious.
@@ -34,10 +38,16 @@ Test LP token address: `KT1Nv2h1bHPLYZsGrCdfdvwKzXsZrFEfJnpJ`
 Decimals is 9 for all the tokens.
 
 ### Some tokens with decimals and standards
-+ kUSD = 10**18 (6.42 M) [FA1.2]
-+ wBUSD = 10**18 (1.85 M) [FA 2]
-+ wDAI = 10**18 (1 M) [FA 2]
-+ uUSD = 10**12 (8.35 M) [FA 2]
-+ USDtz = 10**6 (1.87 M) [FA1.2]
-+ wUSDC = 10**6 (2.5 M) [FA 2]
-+ wUSDT = 10**6 (0.75 M) [FA 2]
+
+- kUSD = 10\*\*18 (6.42 M) [FA1.2]
+- wBUSD = 10\*\*18 (1.85 M) [FA 2]
+- wDAI = 10\*\*18 (1 M) [FA 2]
+- uUSD = 10\*\*12 (8.35 M) [FA 2]
+- USDtz = 10\*\*6 (1.87 M) [FA1.2]
+- wUSDC = 10\*\*6 (2.5 M) [FA 2]
+- wUSDT = 10\*\*6 (0.75 M) [FA 2]
+
+## Refrence
+
+1. Curve White Paper
+2. Uniswap white Paper

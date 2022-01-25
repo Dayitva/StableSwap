@@ -9,7 +9,7 @@ class Token(fa12.FA12):
 
 
 class Dex(sp.Contract, TokenUtility):
-    def __init__(self, x_address, y_address, _lp_token, _admin):
+    def __init__(self, x_address, y_address, _lp_token, x_decimals, y_decimals, _admin):
         """
         x_address: The address of the x token
         y_address: The address of the y token
@@ -28,14 +28,14 @@ class Dex(sp.Contract, TokenUtility):
                     pool=sp.nat(0),
                     fa2=False,
                     token_id=0,
-                    decimals=1000000000000000000
+                    decimals=x_decimals,
                 ),
                 1: sp.record(
                     address=y_address,
                     pool=sp.nat(0),
                     fa2=False,
                     token_id=0,
-                    decimals=1000000
+                    decimals=y_decimals,
                 ),
             }),
             admin=_admin,
@@ -48,9 +48,10 @@ class Dex(sp.Contract, TokenUtility):
             lp_token=_lp_token,
         )
 
+    @sp.private_lambda(with_storage="read-only", with_operations=True, wrap_call=True)
     def mint_lp(self, amount):
         """Mint `amount` LP tokens to `sp.sender` account."""
-        transfet_type = sp.TRecord(
+        transfer_type = sp.TRecord(
             address=sp.TAddress,
             value=sp.TNat,
         )
@@ -59,15 +60,16 @@ class Dex(sp.Contract, TokenUtility):
             value=amount,
         )
         contract = sp.contract(
-            transfet_type,
+            transfer_type,
             self.data.lp_token,
             'mint'
         ).open_some()
         sp.transfer(transfer_value, sp.mutez(0), contract)
 
+    @sp.private_lambda(with_storage="read-only", with_operations=True, wrap_call=True)
     def burn_lp(self, amount):
         """ Burn `amount` LP Tokens. """
-        transfet_type = sp.TRecord(
+        transfer_type = sp.TRecord(
             address=sp.TAddress,
             value=sp.TNat,
         )
@@ -76,12 +78,13 @@ class Dex(sp.Contract, TokenUtility):
             value=amount,
         )
         contract = sp.contract(
-            transfet_type,
+            transfer_type,
             self.data.lp_token,
             'burn'
         ).open_some()
         sp.transfer(transfer_value, sp.mutez(0), contract)
 
+    @sp.private_lambda(with_storage="read-only", with_operations=True, wrap_call=True)
     def transferToTokenId(self, _from, _to, _amount, _token_id=0):
         token = self.data.token_pool.get(_token_id)
         sp.if token.fa2:
@@ -90,6 +93,7 @@ class Dex(sp.Contract, TokenUtility):
         sp.else:
             self.fa12Transfer(_from, _to, _amount, token.address)
 
+    @sp.private_lambda(with_storage="read-only", with_operations=False, wrap_call=False)
     def get_D(self):
         S = sp.local('S', sp.nat(0))
         pool_record = self.data.token_pool.values()
@@ -133,6 +137,7 @@ class Dex(sp.Contract, TokenUtility):
 
         return D.value
 
+    @sp.private_lambda(with_storage="read-only", with_operations=False, wrap_call=False)
     def get_y(self, i, j, x):
         D = sp.local('D1', self.get_D())
         # sp.trace({"D": D.value})
@@ -170,12 +175,12 @@ class Dex(sp.Contract, TokenUtility):
 
     @sp.entry_point
     def update_fee(self, new_fee):
-        sp.verify(sp.sender == self.data.admin, "NOT_ADMIN")
+        sp.verify(sp.sender == self.data.admin, Error.ADMIN_ERROR)
         self.data.fee = new_fee
 
     @sp.entry_point
     def admin_claim(self):
-         sp.verify(sp.sender == self.data.admin, "NOT_ADMIN")
+         sp.verify(sp.sender == self.data.admin, Error.ADMIN_ERROR)
         # CHECK
         # sp.trace({"0 admin fee" : self.data.admin_fee_pool[0].pool})
         # sp.trace({"1 admin fee" : self.data.admin_fee_pool[1].pool})
@@ -196,21 +201,22 @@ class Dex(sp.Contract, TokenUtility):
         # /(self.data.eighteen/self.data.token_pool[0].decimals)
         # Update Pools
         self.data.token_pool[0].pool = sp.as_nat(self.data.token_pool[0].pool - self.data.admin_fee_pool[0].pool)
-        self.data.token_pool[1].pool = sp.as_nat(self.data.token_pool[0].pool - self.data.admin_fee_pool[1].pool)
+        self.data.token_pool[1].pool = sp.as_nat(self.data.token_pool[1].pool - self.data.admin_fee_pool[1].pool)
         # Set admin fee 0
         self.data.admin_fee_pool[0].pool = sp.nat(0)
-        self.data.admin_fee_pool[0].pool = sp.nat(0)
+        self.data.admin_fee_pool[1].pool = sp.nat(0)
 
     @sp.entry_point
     def set_lp_address(self, address: sp.TAddress):
-        sp.verify(sp.sender == self.data.admin, "NOT_ADMIN")
+        sp.verify(sp.sender == self.data.admin, Error.ADMIN_ERROR)
         self.data.lp_token = address
 
     @sp.entry_point
     def initialize_exchange(self, token1_amount, token2_amount):
         """ Initialize the exchange with the token2 and token2 amounts."""
-        sp.verify(token1_amount > sp.nat(0), "INVALID_AMOUNT")
-        sp.verify(token2_amount > sp.nat(0), "INVALID_AMOUNT")
+        sp.verify(sp.sender == self.data.admin, Error.ADMIN_ERROR)
+        sp.verify(token1_amount > sp.nat(0), Error.AMOUNT_ERROR)
+        sp.verify(token2_amount > sp.nat(0), Error.AMOUNT_ERROR)
         
         # Transfer tokens from the user's account to our contract's address.
         self.transferToTokenId(
@@ -233,17 +239,20 @@ class Dex(sp.Contract, TokenUtility):
 
     @sp.entry_point
     def update_A(self, new_A):
-        sp.verify(sp.sender == self.data.admin, "Permission denied")
+        sp.verify(sp.sender == self.data.admin, Error.NOT_ADMIN)
         self.data.A = new_A
 
     @sp.entry_point
-    def exchange(self, i, j, dx):
-        sp.verify(i != j, "Same token")
-        sp.verify(dx > 0, "Invalid Amount")
-        sp.verify(i >= 0, "Invalid Token")
-        sp.verify(j >= 0, "Invalid Token")
-        sp.verify(i < self.data.N_COINS, "Invalid Token")
-        sp.verify(j < self.data.N_COINS, "Invalid Token")
+    def exchange(self, i, j, dx, min_dy):
+        """
+        min_dy: minimum amount of tokens that the user should get.
+        """
+        sp.verify(i != j, Error.TOKEN_ERROR)
+        sp.verify(dx > 0, Error.AMOUNT_ERROR)
+        sp.verify(i >= 0, Error.TOKEN_ERROR)
+        sp.verify(j >= 0, Error.TOKEN_ERROR)
+        sp.verify(i < self.data.N_COINS, Error.TOKEN_ERROR)
+        sp.verify(j < self.data.N_COINS, Error.TOKEN_ERROR)
         
         self.transferToTokenId(
             _from=sp.sender,
@@ -265,6 +274,8 @@ class Dex(sp.Contract, TokenUtility):
         dy.value /= (self.data.eighteen/self.data.token_pool[j].decimals)
         # sp.trace(dy.value)
         # return dy
+        sp.verify(dy.value >= min_dy, Error.POOL_STATE)
+
         sp.if dy.value > 0:
             self.transferToTokenId(
                 _from=sp.self_address,
@@ -274,7 +285,7 @@ class Dex(sp.Contract, TokenUtility):
             )
 
     @sp.entry_point
-    def add_liquidity(self, i, dx):
+    def add_liquidity(self, i, dx, min_tok):
         """
         """
         pool_record = self.data.token_pool.values()
@@ -301,6 +312,8 @@ class Dex(sp.Contract, TokenUtility):
 
         dx /= (self.data.eighteen/self.data.token_pool[i].decimals)
         
+        sp.verify(dx >= min_tok, Error.POOL_STATE)
+
         # Take coins from the sender
         self.transferToTokenId(
             _from=sp.sender,
@@ -309,8 +322,9 @@ class Dex(sp.Contract, TokenUtility):
             _token_id=i
         )
 
+
     @sp.entry_point
-    def remove_liquidity(self, _amount: sp.TNat):
+    def remove_liquidity(self, _amount: sp.TNat, min_tok: sp.TList(sp.TNat)):
         pool_record = self.data.token_pool.values()
         token_supply = sp.local('ts1', sp.nat(0))
         _x3 = sp.local('_x3', sp.nat(0))
@@ -323,6 +337,7 @@ class Dex(sp.Contract, TokenUtility):
             value = sp.local('val', self.data.token_pool[_x4.value].pool * _amount / token_supply.value)
             self.data.token_pool[_x4.value].pool = sp.as_nat(self.data.token_pool[_x4.value].pool - value.value)
             value.value /= (self.data.eighteen/self.data.token_pool[_x4.value].decimals)
+            sp.verify(value.value >= min_tok[_x4.value], Error.POOL_STATE)
             self.transfer(
                 from_=sp.self_address, 
                 to=sp.sender, 
@@ -331,26 +346,4 @@ class Dex(sp.Contract, TokenUtility):
             )
             _x4.value += 1
 
-
         self.burn_lp(_amount)
-
-    @sp.offchain_view(pure=True)
-    def get_totalSupply(self):
-        """Returns the total supply"""
-        pool_record = self.data.token_pool.values()
-        token_supply = sp.local('_ts1', sp.nat(0))
-
-        _x6 = sp.local('_x6', sp.nat(0))
-        sp.while _x6.value < sp.len(pool_record):
-            token_supply.value += self.data.token_pool[_x6.value].pool
-            _x6.value += 1
-
-        sp.result(token_supply.value)
-
-    @sp.offchain_view(pure=True)
-    def get_dy(self, params):
-        """Returns the number of tokens user will get after the swap"""
-        x = self.data.token_pool[params.i].pool + params.dx
-        y = self.get_y(params.i, params.j, x)
-        dy = sp.as_nat(self.data.token_pool[params.j].pool - y)
-        sp.result(dy)

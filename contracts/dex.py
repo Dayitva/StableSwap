@@ -140,7 +140,7 @@ class Dex(sp.Contract, TokenUtility):
         sp.else:
             self.fa12Transfer(_from, _to, _amount, token.address)
 
-    @sp.private_lambda(with_storage="read-write", with_operations=False, wrap_call=False)
+    # @sp.private_lambda(with_storage="read-write", with_operations=False, wrap_call=False)
     def get_D(self):
         S = sp.local('S', sp.nat(0))
         pool_record = self.data.token_pool.values()
@@ -181,8 +181,8 @@ class Dex(sp.Contract, TokenUtility):
             # sp.trace({"D": D.value})
 
         # sp.trace({"D": D.value})
-        # return D.value
-        sp.result(D.value)
+        return D.value
+        # sp.result(D.value)
 
     @sp.private_lambda(with_storage="read-only", with_operations=False, wrap_call=False)
     def get_y(self, params):

@@ -5,11 +5,12 @@ fa12 = dex.fa12
 Dex = dex.Dex
 Token = dex.Token
 
-@sp.add_test(name="Liquibrium")
+@sp.add_test(name="Test DEX")
 def test():
-    admin = sp.address("tz1d6ZpPZj4Xb9tPbLcnSnRN2VCxRdSz1i4o")
+    admin = sp.test_account("Admin")
     alice = sp.test_account("Alice")
     bob = sp.test_account("Robert")
+    oscar = sp.test_account("Oscar")
     token_admin = sp.test_account("Token Admin")
     
     DECIMALS_0 = 10 ** 6
@@ -55,11 +56,19 @@ def test():
         value=sp.nat(100000 * DECIMALS_1)
     ).run(sender=token_admin)
     kusd.mint(
+        address=admin.address,
+        value=sp.nat(100000 * DECIMALS_1)
+    ).run(sender=token_admin)
+    kusd.mint(
         address=bob.address,
         value=sp.nat(100000 * DECIMALS_1)
     ).run(sender=token_admin)
     usdtz.mint(
         address=alice.address,
+        value=sp.nat(100000 * DECIMALS_0)
+    ).run(sender=token_admin)
+    usdtz.mint(
+        address=admin.address,
         value=sp.nat(100000 * DECIMALS_0)
     ).run(sender=token_admin)
     usdtz.mint(
@@ -74,7 +83,9 @@ def test():
         y_address=usdtz.address,
         # y_address=sp.address('KT1CNQL6xRn5JaTUcMmxwSc5YQjwpyHkDR5r'),
         _lp_token=sp.address('KT1-LP-TOKEN'),
-        _admin=admin
+        _admin=admin.address,
+        x_decimals = sp.nat(DECIMALS_0),
+        y_decimals = sp.nat(DECIMALS_1),
     )
     # lp_metadata = {
     #     "decimals": "9",
@@ -96,28 +107,51 @@ def test():
     kusd.approve(sp.record(
         spender=dex.address,
         value=sp.nat(50_000 * DECIMALS_1
-                     ))).run(sender=alice)
+                     ))).run(sender=admin)
     usdtz.approve(sp.record(
         spender=dex.address,
         value=sp.nat(50_000 * DECIMALS_0
-                     ))).run(sender=alice)
+                     ))).run(sender=admin)
+
+
     dex.initialize_exchange(
         token1_amount=sp.nat(50_000 * DECIMALS_1),
         token2_amount=sp.nat(50_000 * DECIMALS_0)
-    ).run(sender=alice)
-    dex.remove_liquidity(25000 * (10**18)).run(sender=alice)
+    ).run(sender=alice, valid=False)
+    
+    dex.initialize_exchange(
+        token1_amount=sp.nat(50_000 * DECIMALS_1),
+        token2_amount=sp.nat(50_000 * DECIMALS_0)
+    ).run(sender=admin)
+    
+    dex.remove_liquidity(_amount = 25000 * (10**18), min_tok = {0: 1, 1: 1}).run(sender=alice, valid=False)
+    dex.remove_liquidity(_amount = 25000 * (10**18), min_tok = {0: 1, 1: 1}).run(sender=oscar, valid=False)
+    
     kusd.approve(sp.record(
         spender=dex.address,
         value=sp.nat(5000 * DECIMALS_1)
     )).run(sender=bob)
-    dex.exchange(i=0, j=1, dx=5000 * DECIMALS_1).run(sender=bob)
+    
+    dex.exchange(i=0, j=1, dx=5000 * DECIMALS_1, min_dy = 1).run(sender=bob)
+    
     kusd.approve(sp.record(
         spender=dex.address,
         value=sp.nat(100 * DECIMALS_1
     ))).run(sender=alice)
-    dex.add_liquidity(i=0, dx=100 * DECIMALS_1).run(sender=alice)
-    dex.remove_liquidity(50 * (10**18)).run(sender=alice)
+    
+    dex.add_liquidity(i=0, dx=100 * DECIMALS_1, min_tok=1).run(sender=alice)
+    # dex.add_liquidity(i=0, dx=100 * DECIMALS_1, min_tok=1).run(sender=alice)
+    # dex.add_liquidity(i=0, dx=100 * DECIMALS_1 ,min_tok=1).run(sender=alice)
+
+    dex.remove_liquidity(_amount=100 * DECIMALS_1,  min_tok={0: 1, 1: 1}).run(sender=alice)
+    dex.remove_liquidity(_amount=100 * DECIMALS_1,  min_tok={0: 1, 1: 1}).run(sender=alice)
+    dex.remove_liquidity(_amount=100 * DECIMALS_1,  min_tok={0: 1, 1: 1}).run(sender=alice)
+    
     dex.admin_claim().run(sender=admin)
+    dex.admin_claim().run(sender=alice, valid=False)
 
+    dex.update_A(sp.nat(1000)).run(sender=alice, valid=False)
+    dex.update_A(sp.nat(100)).run(sender=admin)
 
-
+    dex.update_fee(sp.nat(200)).run(sender=alice, valid=False)
+    dex.update_fee(sp.nat(20)).run(sender=admin)

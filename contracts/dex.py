@@ -94,7 +94,7 @@ class Dex(sp.Contract, TokenUtility):
             lp_token=_lp_token,
         )
 
-    @sp.private_lambda(with_storage="read-only", with_operations=True, wrap_call=True)
+    # @sp.private_lambda(with_storage="read-only", with_operations=True, wrap_call=True)
     def mint_lp(self, amount):
         """Mint `amount` LP tokens to `sp.sender` account."""
         transfer_type = sp.TRecord(
@@ -112,7 +112,7 @@ class Dex(sp.Contract, TokenUtility):
         ).open_some()
         sp.transfer(transfer_value, sp.mutez(0), contract)
 
-    @sp.private_lambda(with_storage="read-only", with_operations=True, wrap_call=True)
+    # @sp.private_lambda(with_storage="read-only", with_operations=True, wrap_call=True)
     def burn_lp(self, amount):
         """ Burn `amount` LP Tokens. """
         transfer_type = sp.TRecord(
@@ -130,7 +130,7 @@ class Dex(sp.Contract, TokenUtility):
         ).open_some()
         sp.transfer(transfer_value, sp.mutez(0), contract)
 
-    @sp.private_lambda(with_storage="read-only", with_operations=True, wrap_call=True)
+    # @sp.private_lambda(with_storage="read-only", with_operations=True, wrap_call=True)
     def transferToTokenId(self, params):
         _from, _to, _amount, _token_id = params._from, params._to, params._amount, params._token_id
         token = self.data.token_pool.get(_token_id)
@@ -142,11 +142,12 @@ class Dex(sp.Contract, TokenUtility):
 
     # @sp.private_lambda(with_storage="read-write", with_operations=False, wrap_call=False)
     def get_D(self):
+        sp.trace("Hello")
         S = sp.local('S', sp.nat(0))
         pool_record = self.data.token_pool.values()
         _x = sp.local('_x', sp.nat(0))
         sp.while _x.value < sp.len(pool_record):
-            S.value += self.data.token_pool[_x.value].pool
+            S.value += self.data.token_pool[_x.value].pool*(self.data.eighteen/self.data.token_pool[_x.value].decimals)
             _x.value += 1
 
         # sp.if S.value == 0:
@@ -157,8 +158,8 @@ class Dex(sp.Contract, TokenUtility):
         Ann = sp.local('Ann', self.data.A * self.data.N_COINS)
         D_P = sp.local('D_P', D.value)
 
-        # sp.trace({"S": S.value})
-        # sp.trace({"Ann": Ann.value})
+        sp.trace({"S": S.value})
+        sp.trace({"Ann": Ann.value})
 
         sp.while abs(D.value - Dprev.value) > 1:
             D_P.value = D.value
@@ -171,20 +172,20 @@ class Dex(sp.Contract, TokenUtility):
             Dprev.value = D.value
             D1 = (Ann.value * S.value + D_P.value * self.data.N_COINS) * D.value
             D2 = ((sp.as_nat(Ann.value - 1) * D.value) +
-                    ((self.data.N_COINS + 1) * D_P.value))
+                  ((self.data.N_COINS + 1) * D_P.value))
             D.value = D1 // D2
 
-            # sp.trace({"D_P": D_P.value})
-            # sp.trace({"Dprev": Dprev.value})
-            # sp.trace({"D1": D1})
-            # sp.trace({"D2": D2})
-            # sp.trace({"D": D.value})
+            sp.trace({"D_P": D_P.value})
+            sp.trace({"Dprev": Dprev.value})
+            sp.trace({"D1": D1})
+            sp.trace({"D2": D2})
+            sp.trace({"D": D.value})
 
         # sp.trace({"D": D.value})
         return D.value
         # sp.result(D.value)
 
-    @sp.private_lambda(with_storage="read-only", with_operations=False, wrap_call=False)
+    # @sp.private_lambda(with_storage="read-only", with_operations=False, wrap_call=False)
     def get_y(self, params):
         i, j, x = params.i, params.j, params.x
         D = sp.local('D1', self.get_D())
@@ -352,6 +353,7 @@ class Dex(sp.Contract, TokenUtility):
         token_supply = sp.local('ts', sp.nat(0))
         _x2 = sp.local('_x2', sp.nat(0))
         sp.while _x2.value < sp.len(pool_record):
+            sp.trace({"_x2": _x2.value})
             token_supply.value += self.data.token_pool[_x2.value].pool
             _x2.value += 1
         # Initial invariant
@@ -359,6 +361,8 @@ class Dex(sp.Contract, TokenUtility):
         sp.if token_supply.value > 0:
             D0.value = self.get_D()
 
+        sp.trace("I came out")
+        
         self.data.token_pool[i].pool = self.data.token_pool[i].pool + dx
         # Invariant after change
         D1 = sp.local('D1', self.get_D())

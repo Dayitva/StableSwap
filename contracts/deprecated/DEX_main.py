@@ -321,6 +321,50 @@ class Dex(sp.Contract):
         )
 
     @sp.entry_point
+    def add_liquidity_old(self, i, dx, min_tok):
+        pool_record = self.data.token_pool.values()
+        token_supply = sp.local('ts', sp.nat(0))
+        
+        _x2 = sp.local('_x2', sp.nat(0))
+        sp.while _x2.value < sp.len(pool_record):
+            # sp.trace({"_x2": _x2.value})
+            token_supply.value += self.data.token_pool[_x2.value].pool
+            _x2.value += 1
+        
+        # Initial invariant
+        D0 = sp.local('D0', sp.nat(0))
+        sp.if token_supply.value > 0:
+            D0.value = self.get_D()
+        
+        self.data.token_pool[i].pool = self.data.token_pool[i].pool + dx
+        
+        # Invariant after change
+        D1 = sp.local('D1', self.get_D())
+        
+        # sp.trace({'D1': D1.value})
+        # sp.trace({'D0': D0.value})
+        # sp.trace({"D1-D0": D1.value-D0.value})
+        
+        lp_amount = token_supply.value * sp.as_nat(D1.value - D0.value) / D0.value 
+        # sp.trace({"lp_amount": lp_amount})
+        sp.if lp_amount > sp.nat(0):
+            self.mint_lp(lp_amount)
+
+        dx /= (self.data.eighteen/self.data.token_pool[i].decimals)
+        
+        sp.verify(lp_amount >= min_tok, Error.POOL_STATE)
+
+        # Take coins from the sender
+        self.transferToTokenId(
+            sp.record(
+                _from=sp.sender,
+                _to=sp.self_address,
+                _amount=dx,
+                _token_id=i
+            )
+        )
+
+    @sp.entry_point
     def remove_liquidity(self, _amount: sp.TNat):
         """
         27508699211: first

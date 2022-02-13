@@ -12,48 +12,6 @@ class Token(fa12.FA12):
     """ Test FA1.2 Token """
     pass
 
-# sp.add_compilation_target("Token", Token(
-#     admin=admin,
-#     config=fa12.FA12_config(support_upgradable_metadata=True),
-#     token_metadata= {
-#         "decimals": "18",
-#         "name": "Kolibri USD",
-#         "symbol": "KUSD",
-#         "icon": 'https://smartpy.io/static/img/logo-only.svg'
-#     },
-#     contract_metadata={
-#         "": "ipfs://QmaiAUj1FFNGYTu8rLBjc3eeN9cSKwaF8EGMBNDmhzPNFd",
-#     }
-# ))
-# sp.add_compilation_target("Token", Token(
-#     admin=admin,
-#     config=fa12.FA12_config(support_upgradable_metadata=True),
-#     token_metadata= {
-#         "decimals": "6",
-#         "name": "USD Tez",
-#         "symbol": "USDtz",
-#         "icon": 'https://smartpy.io/static/img/logo-only.svg'
-#     },
-#     contract_metadata={
-#         "": "ipfs://QmaiAUj1FFNGYTu8rLBjc3eeN9cSKwaF8EGMBNDmhzPNFd",
-#     }
-# ))
-
-
-sp.add_compilation_target("Token", Token(
-    admin=admin,
-    config=fa12.FA12_config(support_upgradable_metadata=True),
-    token_metadata= {
-        "decimals": "18",
-        "name": "KUSD <-> USDtz",
-        "symbol": "LP Token",
-        "icon": 'https://smartpy.io/static/img/logo-only.svg'
-    },
-    contract_metadata={
-        "": "ipfs://QmaiAUj1FFNGYTu8rLBjc3eeN9cSKwaF8EGMBNDmhzPNFd",
-    }
-))
-
 class Dex(sp.Contract, TokenUtility):
     def __init__(self, x_address, y_address, _lp_token, x_decimals, y_decimals, _admin):
         """
@@ -80,7 +38,7 @@ class Dex(sp.Contract, TokenUtility):
                     address=y_address,
                     pool=sp.nat(0),
                     fa2=False,
-                    token_id=0,
+                    token_id=1,
                     decimals=y_decimals,
                 ),
             }),
@@ -142,12 +100,11 @@ class Dex(sp.Contract, TokenUtility):
 
     # @sp.private_lambda(with_storage="read-write", with_operations=False, wrap_call=False)
     def get_D(self):
-        sp.trace("Hello")
         S = sp.local('S', sp.nat(0))
         pool_record = self.data.token_pool.values()
         _x = sp.local('_x', sp.nat(0))
         sp.while _x.value < sp.len(pool_record):
-            S.value += self.data.token_pool[_x.value].pool*(self.data.eighteen/self.data.token_pool[_x.value].decimals)
+            S.value += self.data.token_pool[_x.value].pool
             _x.value += 1
 
         # sp.if S.value == 0:
@@ -158,8 +115,8 @@ class Dex(sp.Contract, TokenUtility):
         Ann = sp.local('Ann', self.data.A * self.data.N_COINS)
         D_P = sp.local('D_P', D.value)
 
-        sp.trace({"S": S.value})
-        sp.trace({"Ann": Ann.value})
+        # sp.trace({"S": S.value})
+        # sp.trace({"Ann": Ann.value})
 
         sp.while abs(D.value - Dprev.value) > 1:
             D_P.value = D.value
@@ -175,11 +132,11 @@ class Dex(sp.Contract, TokenUtility):
                   ((self.data.N_COINS + 1) * D_P.value))
             D.value = D1 // D2
 
-            sp.trace({"D_P": D_P.value})
-            sp.trace({"Dprev": Dprev.value})
-            sp.trace({"D1": D1})
-            sp.trace({"D2": D2})
-            sp.trace({"D": D.value})
+            # sp.trace({"D_P": D_P.value})
+            # sp.trace({"Dprev": Dprev.value})
+            # sp.trace({"D1": D1})
+            # sp.trace({"D2": D2})
+            # sp.trace({"D": D.value})
 
         # sp.trace({"D": D.value})
         return D.value
@@ -219,8 +176,9 @@ class Dex(sp.Contract, TokenUtility):
             y_prev.value = y.value
             y.value = (y.value*y.value + c.value) / \
                 sp.as_nat((2 * y.value + b.value) - D.value)
+        
         # sp.trace({"y": y.value})
-        sp.result(y.value)
+        return y.value
 
     @sp.entry_point
     def update_fee(self, new_fee):
@@ -292,7 +250,9 @@ class Dex(sp.Contract, TokenUtility):
         # Update the storage.
         self.data.token_pool[0].pool = token1_amount*(self.data.eighteen/self.data.token_pool[0].decimals)
         self.data.token_pool[1].pool = token2_amount*(self.data.eighteen/self.data.token_pool[1].decimals)
-        self.mint_lp(token1_amount*(self.data.eighteen/self.data.token_pool[0].decimals) + token2_amount*(self.data.eighteen/self.data.token_pool[1].decimals))
+        # sp.trace({"Pool 1" : self.data.token_pool[0].pool})
+        # sp.trace({"Pool 2" : self.data.token_pool[1].pool})
+        self.mint_lp(self.data.token_pool[0].pool + self.data.token_pool[1].pool)
 
     @sp.entry_point
     def update_A(self, new_A):
@@ -320,7 +280,7 @@ class Dex(sp.Contract, TokenUtility):
             )
         )
         
-        x = self.data.token_pool[i].pool + dx
+        x = self.data.token_pool[i].pool + dx*(self.data.eighteen/self.data.token_pool[i].decimals) #verify
         y = self.get_y(sp.record(i=i, j=j, x=x))
         dy = sp.local('dy', sp.as_nat(self.data.token_pool[j].pool - y))
         fee_collected = sp.local('fee', ((dy.value * self.data.fee) / 10000))
@@ -346,52 +306,61 @@ class Dex(sp.Contract, TokenUtility):
             )
 
     @sp.entry_point
-    def add_liquidity(self, i, dx, min_tok):
-        """
-        """
+    def add_liquidity(self, _amount0, _amount1, min_token):
         pool_record = self.data.token_pool.values()
         token_supply = sp.local('ts', sp.nat(0))
-        _x2 = sp.local('_x2', sp.nat(0))
-        sp.while _x2.value < sp.len(pool_record):
-            sp.trace({"_x2": _x2.value})
-            token_supply.value += self.data.token_pool[_x2.value].pool
-            _x2.value += 1
+        
+        _x5 = sp.local('_x5', sp.nat(0))
+        sp.while _x5.value < sp.len(pool_record):
+            token_supply.value += self.data.token_pool[_x5.value].pool
+            _x5.value += 1
+        
         # Initial invariant
         D0 = sp.local('D0', sp.nat(0))
         sp.if token_supply.value > 0:
             D0.value = self.get_D()
-
-        sp.trace("I came out")
         
-        self.data.token_pool[i].pool = self.data.token_pool[i].pool + dx
+        self.data.token_pool[0].pool = self.data.token_pool[0].pool + _amount0*(self.data.eighteen/self.data.token_pool[0].decimals)
+        self.data.token_pool[1].pool = self.data.token_pool[1].pool + _amount1*(self.data.eighteen/self.data.token_pool[1].decimals)
+        
         # Invariant after change
         D1 = sp.local('D1', self.get_D())
+        
         # sp.trace({'D1': D1.value})
         # sp.trace({'D0': D0.value})
-        sp.trace({"D1-D0": D1.value-D0.value})
+        # sp.trace({"D1-D0": D1.value-D0.value})
+        
         lp_amount = token_supply.value * sp.as_nat(D1.value - D0.value) / D0.value 
-        sp.trace({"lp_amount": lp_amount})
+        # sp.trace({"lp_amount": lp_amount})
         sp.if lp_amount > sp.nat(0):
             self.mint_lp(lp_amount)
 
-        dx /= (self.data.eighteen/self.data.token_pool[i].decimals)
-        
-        sp.verify(dx >= min_tok, Error.POOL_STATE)
+        sp.verify(lp_amount >= min_token, Error.POOL_STATE)
 
         # Take coins from the sender
-        self.transferToTokenId(
-            sp.record(
-                _from=sp.sender,
-                _to=sp.self_address,
-                _amount=dx,
-                _token_id=i
+        sp.if _amount0 > 0:
+            self.transferToTokenId(
+                sp.record(
+                    _from=sp.sender,
+                    _to=sp.self_address,
+                    _amount=_amount0,
+                    _token_id=0
+                )
             )
-        )
 
+        sp.if _amount1 > 0:
+            self.transferToTokenId(
+                sp.record(
+                    _from=sp.sender,
+                    _to=sp.self_address,
+                    _amount=_amount1,
+                    _token_id=1
+                )
+            )
 
     @sp.entry_point
-    def remove_liquidity(self, _amount, min_tok):
-        sp.set_type(min_tok, sp.TMap(sp.TNat, sp.TNat))
+    def remove_liquidity(self, _amount, min_tokens):
+        sp.set_type(min_tokens, sp.TMap(sp.TNat, sp.TNat))
         pool_record = self.data.token_pool.values()
         token_supply = sp.local('ts1', sp.nat(0))
         _x3 = sp.local('_x3', sp.nat(0))
@@ -404,7 +373,7 @@ class Dex(sp.Contract, TokenUtility):
             value = sp.local('val', self.data.token_pool[_x4.value].pool * _amount / token_supply.value)
             self.data.token_pool[_x4.value].pool = sp.as_nat(self.data.token_pool[_x4.value].pool - value.value)
             value.value /= (self.data.eighteen/self.data.token_pool[_x4.value].decimals)
-            sp.verify(value.value >= min_tok[_x4.value], Error.POOL_STATE)
+            sp.verify(value.value >= min_tokens[_x4.value], Error.POOL_STATE)
             self.transferToTokenId(
                 sp.record(
                     _from=sp.self_address, 

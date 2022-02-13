@@ -75,34 +75,39 @@ def test():
         address=bob.address,
         value=sp.nat(100000 * DECIMALS_0)
     ).run(sender=token_admin)
-    # Initialize the exchange.
-    # Approve to spend by stable_swap address
+    lp_metadata = {
+        "decimals": "9",
+        "name": "LP Token",
+        "symbol": "LP-TOKEN",
+        "icon": 'https://smartpy.io/static/img/logo-only.svg'
+    }
+    lp_contract_metadata = {
+        "": "ipfs://QmaiAUj1FFNGYTu8rLBjc3eeN9cSKwaF8EGMBNDmhzPNFd",
+    }
+    lp = Token(
+        token_admin.address,
+        config=fa12.FA12_config(support_upgradable_metadata=True),
+        token_metadata=lp_metadata,
+        contract_metadata=lp_contract_metadata
+    )
+
     dex = Dex(
         x_address=kusd.address,
         # x_address=sp.address('KT1WJUr74D5bkiQM2RE1PALV7R8MUzzmDzQ9'),
         y_address=usdtz.address,
         # y_address=sp.address('KT1CNQL6xRn5JaTUcMmxwSc5YQjwpyHkDR5r'),
-        _lp_token=sp.address('KT1-LP-TOKEN'),
+        _lp_token=lp.address,
         _admin=admin.address,
-        x_decimals = sp.nat(DECIMALS_0),
-        y_decimals = sp.nat(DECIMALS_1),
+        x_decimals = sp.nat(DECIMALS_1),
+        y_decimals = sp.nat(DECIMALS_0),
     )
-    # lp_metadata = {
-    #     "decimals": "9",
-    #     "name": "LP Token",
-    #     "symbol": "LP-TOKEN",
-    #     "icon": 'https://smartpy.io/static/img/logo-only.svg'
-    # }
-    # lp_contract_metadata = {
-    #     "": "ipfs://QmaiAUj1FFNGYTu8rLBjc3eeN9cSKwaF8EGMBNDmhzPNFd",
-    # }
+
+    scenario += lp
     scenario += dex
-    # lp = Token(
-    #     dex.address,
-    #     config=fa12.FA12_config(support_upgradable_metadata=True),
-    #     token_metadata=lp_metadata,
-    #     contract_metadata=lp_contract_metadata
-    # )
+    scenario.simulation(dex)
+
+    lp.setAdministrator(dex.address).run(sender=token_admin.address)
+    
     # dex.set_lp_address(lp.address).run(sender=admin)
     kusd.approve(sp.record(
         spender=dex.address,
@@ -124,8 +129,8 @@ def test():
         token2_amount=sp.nat(50_000 * DECIMALS_0)
     ).run(sender=admin)
     
-    dex.remove_liquidity(_amount = 25000 * (10**18), min_tok = {0: 1, 1: 1}).run(sender=alice, valid=False)
-    dex.remove_liquidity(_amount = 25000 * (10**18), min_tok = {0: 1, 1: 1}).run(sender=oscar, valid=False)
+    dex.remove_liquidity(_amount = 25000 * (10**18), min_tokens = {0: sp.as_nat(1), 1: sp.as_nat(1)}).run(sender=alice, valid=False)
+    dex.remove_liquidity(_amount = 25000 * (10**18), min_tokens = {0: sp.as_nat(1), 1: sp.as_nat(1)}).run(sender=oscar, valid=False)
     
     kusd.approve(sp.record(
         spender=dex.address,
@@ -136,16 +141,29 @@ def test():
     
     kusd.approve(sp.record(
         spender=dex.address,
-        value=sp.nat(100 * DECIMALS_1
+        value=sp.nat(50_000 * DECIMALS_1
+    ))).run(sender=alice)
+    usdtz.approve(sp.record(
+        spender=dex.address,
+        value=sp.nat(50_000 * DECIMALS_0
     ))).run(sender=alice)
     
-    dex.add_liquidity(i=0, dx=100 * DECIMALS_1, min_tok=1).run(sender=alice)
-    # dex.add_liquidity(i=0, dx=100 * DECIMALS_1, min_tok=1).run(sender=alice)
-    # dex.add_liquidity(i=0, dx=100 * DECIMALS_1 ,min_tok=1).run(sender=alice)
+    dex.add_liquidity(_amount0 = 200 * DECIMALS_1, _amount1 = 0 * DECIMALS_0, min_token=1).run(sender=alice)
+    dex.add_liquidity(_amount0 = 10 * DECIMALS_1, _amount1 = 0 * DECIMALS_0, min_token=1).run(sender=alice)
+    dex.add_liquidity(_amount0 = 5000 * DECIMALS_1, _amount1 = 0 * DECIMALS_0, min_token=1).run(sender=alice)
+    dex.add_liquidity(_amount0 = 200 * DECIMALS_1, _amount1 = 200 * DECIMALS_0, min_token=1).run(sender=alice)
+    dex.add_liquidity(_amount0 = 100 * DECIMALS_1, _amount1 = 10 * DECIMALS_0, min_token=1).run(sender=alice)
+    dex.add_liquidity(_amount0 = 5000 * DECIMALS_1, _amount1 = 100 * DECIMALS_0, min_token=1).run(sender=alice)
 
-    dex.remove_liquidity(_amount=100 * DECIMALS_1,  min_tok={0: 1, 1: 1}).run(sender=alice)
-    dex.remove_liquidity(_amount=100 * DECIMALS_1,  min_tok={0: 1, 1: 1}).run(sender=alice)
-    dex.remove_liquidity(_amount=100 * DECIMALS_1,  min_tok={0: 1, 1: 1}).run(sender=alice)
+    dex.remove_liquidity(_amount=200 * DECIMALS_1,  min_tokens={0: 1, 1: 1}).run(sender=alice)
+    dex.remove_liquidity(_amount=10 * DECIMALS_1,  min_tokens={0: 1, 1: 1}).run(sender=alice)
+    dex.remove_liquidity(_amount=5000 * DECIMALS_1,  min_tokens={0: 1, 1: 1}).run(sender=alice)
+    dex.remove_liquidity(_amount=400 * DECIMALS_1,  min_tokens={0: 1, 1: 1}).run(sender=alice)
+    dex.remove_liquidity(_amount=110 * DECIMALS_1,  min_tokens={0: 1, 1: 1}).run(sender=alice)
+    dex.remove_liquidity(_amount=4500 * DECIMALS_1,  min_tokens={0: 1, 1: 1}).run(sender=alice)
+
+    dex.remove_liquidity(_amount=50_000 * DECIMALS_1,  min_tokens={0: 1, 1: 1}).run(sender=admin)
+    dex.remove_liquidity(_amount=50_000 * DECIMALS_1,  min_tokens={0: 1, 1: 1}).run(sender=admin)
     
     dex.admin_claim().run(sender=admin)
     dex.admin_claim().run(sender=alice, valid=False)

@@ -4,13 +4,28 @@ from contracts.errors import Error
 fa12 = sp.io.import_script_from_url("https://smartpy.io/templates/FA1.2.py")
 
 admin = sp.address("tz1WNKahMHz1bkuAfZrsvtmjBhh4GJzw8YcU")
-kusd = sp.address("KT1NkofEZaZqU6vXjv8uL6dNpX1hAQ8cdKmW")
-usdtz = sp.address("KT1U2uqt8HHvqMs3B8xetUsdGpHZTHhCtnh8")
-lp = sp.address("KT1AREgvupo7r4gP7wNUVHKT6a48rRR3msGc")
+kusd = sp.address("KT1WJUr74D5bkiQM2RE1PALV7R8MUzzmDzQ9")
+usdtz = sp.address("KT1CNQL6xRn5JaTUcMmxwSc5YQjwpyHkDR5r")
+lp = sp.address("KT1StTa4Bv1hFMRFnYQq2jgx6tCHkLUd632s")
+dex = sp.address("KT1DJGEjVSKWYoypUvUPV1RJ7Td9YJT5rJYt")
 
 class Token(fa12.FA12):
     """ Test FA1.2 Token """
     pass
+
+sp.add_compilation_target("LP Token", Token(
+    admin,
+    config=fa12.FA12_config(support_upgradable_metadata=True),
+    token_metadata={
+        "decimals": "18",
+        "name": "LP Token",
+        "symbol": "LP-TOKEN",
+        "icon": 'https://smartpy.io/static/img/logo-only.svg'
+    },
+    contract_metadata={
+        "": "ipfs://QmaiAUj1FFNGYTu8rLBjc3eeN9cSKwaF8EGMBNDmhzPNFd",
+    }
+))
 
 class Dex(sp.Contract, TokenUtility):
     def __init__(self, x_address, y_address, _lp_token, x_decimals, y_decimals, _admin):

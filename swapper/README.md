@@ -12,17 +12,15 @@ Below are some of the deployed FA1.2 token contract.
 
 1. KUSD: `KT1WJUr74D5bkiQM2RE1PALV7R8MUzzmDzQ9`
 2. USDTz: `KT1CNQL6xRn5JaTUcMmxwSc5YQjwpyHkDR5r`
-3. LP Token: `KT1Nv2h1bHPLYZsGrCdfdvwKzXsZrFEfJnpJ`
+3. LP Token: `KT1StTa4Bv1hFMRFnYQq2jgx6tCHkLUd632s`
 
 > Admin: `tz1UYZ6SMKD5A4fpviTDd1EBixZe1f5arN76`
 
 Below are some of the deployed StableSwap Contracts.
 
-1. KUSD-USDTz
+1. kUSD-USDtz
 
-- Address: `KT1VZw9rDvkESuBegSiu3SVcnGF19HpXBXTK`
-- X: KUSD
-- Y: USDTz
+- Address: `KT1DJGEjVSKWYoypUvUPV1RJ7Td9YJT5rJYt`
 
 ## Todo
 

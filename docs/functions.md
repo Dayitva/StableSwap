@@ -80,7 +80,7 @@ Definition: `update_A(new_A: sp.TNat)`
 
 Type: `Entry Point`
 
-This entry point allows user to change the value of `A`, the amplication coefficient for a specific pool. `A` represents the skewness of the pool, with `A = 0` meaning that the pool exibhits a constant-product market maker character, and `A > 0` decides the pools constant-sum market maker character.
+This entry point allows admin to change the value of `A`, the amplication coefficient for a specific pool. `A` represents the skewness of the pool, with `A = 0` meaning that the pool exibhits a constant-product market maker character, and `A > 0` decides the pools constant-sum market maker character.
 
 ## Exchange
 

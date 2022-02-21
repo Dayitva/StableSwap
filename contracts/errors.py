@@ -6,3 +6,5 @@ class Error:
     AMOUNT_ERROR = "INVALID AMOUNT"
     TOKEN_ERROR = "TOKEN ERROR"
     NOT_ADMIN = "NOT ADMIN"
+    INITIALIZED_ERROR = "ALREADY INITIALIZED"
+    NO_TEZ = "No tez allowed here"

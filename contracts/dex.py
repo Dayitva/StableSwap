@@ -126,7 +126,6 @@ class Dex(sp.Contract, TokenUtility):
 
         sp.if S == sp.nat(0):
             sp.result(S)
-
         sp.else:
             Dprev = sp.local('Dprev', sp.nat(0))
             D = sp.local('D', S)
@@ -188,23 +187,25 @@ class Dex(sp.Contract, TokenUtility):
         sp.verify(sp.sender == self.data.admin, Error.ADMIN_ERROR)
         sp.verify(sp.amount == sp.tez(0), Error.NO_TEZ)
 
-        self.transferToTokenId(
-            sp.record(
-                _from=sp.self_address,
-                _to=sp.sender,
-                _amount=self.data.token_pool[0].admin_fee/(self.data.eighteen/self.data.token_pool[0].decimals),
-                _token_id=0
+        sp.if self.data.token_pool[0].admin_fee > sp.nat(0):
+            self.transferToTokenId(
+                sp.record(
+                    _from=sp.self_address,
+                    _to=sp.sender,
+                    _amount=self.data.token_pool[0].admin_fee/(self.data.eighteen/self.data.token_pool[0].decimals),
+                    _token_id=0
+                )
             )
-        )
-    
-        self.transferToTokenId(
-            sp.record(
-                _from=sp.self_address,
-                _to=sp.sender,
-                _amount=self.data.token_pool[1].admin_fee/(self.data.eighteen/self.data.token_pool[1].decimals),
-                _token_id=1
+
+        sp.if self.data.token_pool[1].admin_fee > sp.nat(0):
+            self.transferToTokenId(
+                sp.record(
+                    _from=sp.self_address,
+                    _to=sp.sender,
+                    _amount=self.data.token_pool[1].admin_fee/(self.data.eighteen/self.data.token_pool[1].decimals),
+                    _token_id=1
+                )
             )
-        )
 
         # Update Pools
         self.data.token_pool[0].pool = sp.as_nat(self.data.token_pool[0].pool - self.data.token_pool[0].admin_fee)

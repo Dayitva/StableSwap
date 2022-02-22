@@ -138,13 +138,13 @@ class Dex(sp.Contract, TokenUtility):
 
             sp.while abs(D.value - Dprev.value) > 1:
                 D_P.value = D.value
-                D_P.value = D_P.value * D.value // (self.data.N_COINS * self.data.token_pool[0].pool)
-                D_P.value = D_P.value * D.value // (self.data.N_COINS * self.data.token_pool[1].pool)
+                D_P.value = D_P.value * D.value / (self.data.N_COINS * self.data.token_pool[0].pool)
+                D_P.value = D_P.value * D.value / (self.data.N_COINS * self.data.token_pool[1].pool)
                 Dprev.value = D.value
                 D1 = (Ann.value * S + D_P.value * self.data.N_COINS) * D.value
                 D2 = ((sp.as_nat(Ann.value - 1) * D.value) +
                     ((self.data.N_COINS + 1) * D_P.value))
-                D.value = D1 // D2
+                D.value = D1 / D2
 
                 # sp.trace({"D_P": D_P.value})
                 # sp.trace({"Dprev": Dprev.value})

@@ -106,7 +106,8 @@ class Dex(sp.Contract, TokenUtility):
             'burn'
         ).open_some()
         sp.transfer(transfer_value, sp.mutez(0), contract)
-
+    
+    @sp.private_lambda(with_storage="read-write", with_operations=True, wrap_call=True)
     def transferToTokenId(self, params):
         _from = params._from 
         _to = params._to

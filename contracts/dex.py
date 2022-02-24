@@ -42,6 +42,7 @@ class Dex(sp.Contract, TokenUtility):
         self.init(
             N_COINS=sp.nat(2),
             A=sp.nat(85),
+            paused = sp.bool(False),
             token_pool=sp.map(l={
                 0: sp.record(
                     address=x_address,
@@ -60,7 +61,8 @@ class Dex(sp.Contract, TokenUtility):
                     token_id=1,
                 ),
             }),
-            lp_balance = sp.map(l={},tkey = sp.TAddress, tvalue = sp.TNat),
+            lp_balance = sp.map(l={},tkey = sp.TAddress, tvalue = sp.TNat), # Only added for testing purposes
+            lp_supply = sp.nat(0),
             admin=_admin,
             eighteen=1000000000000000000,
             fee=sp.nat(15),
@@ -70,10 +72,23 @@ class Dex(sp.Contract, TokenUtility):
                 "content": sp.utils.bytes_of_string(metadata),
             }),
         )
+    
+    @sp.entry_point
+    def togglePause(self):
+        sp.verify(sp.sender == self.data.admin, Error.ADMIN_ERROR)
+        self.data.paused = ~ self.data.paused
 
     @sp.private_lambda(with_storage="read-only", with_operations=True, wrap_call=True)
     def mint_lp(self, amount):
         """Mint `amount` LP tokens to `sp.sender` account."""
+
+        sp.if self.data.lp_balance.contains(sp.sender):
+            self.data.lp_balance[sp.sender] = self.data.lp_balance[sp.sender] + amount
+        sp.else:
+            self.data.lp_balance[sp.sender] = amount
+
+        self.data.lp_supply = self.data.lp_supply + amount
+
         transfer_type = sp.TRecord(
             address=sp.TAddress,
             value=sp.TNat,
@@ -92,6 +107,14 @@ class Dex(sp.Contract, TokenUtility):
     @sp.private_lambda(with_storage="read-only", with_operations=True, wrap_call=True)
     def burn_lp(self, amount):
         """ Burn `amount` LP Tokens. """
+
+        sp.if self.data.lp_balance.contains(sp.sender):
+            self.data.lp_balance[sp.sender] = sp.as_nat(self.data.lp_balance[sp.sender] - amount)
+        sp.else:
+            self.data.lp_balance[sp.sender] = 0
+
+        self.data.lp_supply = sp.as_nat(self.data.lp_supply - amount)
+
         transfer_type = sp.TRecord(
             address=sp.TAddress,
             value=sp.TNat,
@@ -230,6 +253,7 @@ class Dex(sp.Contract, TokenUtility):
         sp.verify(self.data.token_pool[1].pool <= 0, Error.INITIALIZED_ERROR)
         sp.verify(sp.sender == self.data.admin, Error.ADMIN_ERROR)
         sp.verify(sp.amount == sp.tez(0), Error.NO_TEZ)
+        sp.verify(self.data.paused == sp.bool(False), Error.PAUSED)
 
         # Transfer tokens from the user's account to our contract's address.
         self.transferToTokenId(
@@ -256,6 +280,7 @@ class Dex(sp.Contract, TokenUtility):
         # sp.trace({"Pool 2" : self.data.token_pool[1].pool})
         self.mint_lp(self.data.token_pool[0].pool + self.data.token_pool[1].pool)
 
+
     @sp.entry_point
     def update_A(self, new_A):
         sp.verify(sp.sender == self.data.admin, Error.NOT_ADMIN)
@@ -263,14 +288,18 @@ class Dex(sp.Contract, TokenUtility):
         self.data.A = new_A
 
     @sp.entry_point
-    def exchange(self, i, dx, min_dy):
+    def exchange(self, i, dx, min_dy, time_valid_upto):
         """
+        i: token id
+        dx: amount of token i to exchange
         min_dy: minimum amount of tokens that the user should get.
+        time_valid_upto: time in seconds that the exchange is valid for the user.
         """
         sp.verify(dx > 0, Error.AMOUNT_ERROR)
         sp.verify(i >= 0, Error.TOKEN_ERROR)
         sp.verify(i < self.data.N_COINS, Error.TOKEN_ERROR)
         sp.verify(sp.amount == sp.tez(0), Error.NO_TEZ)
+        sp.verify(self.data.paused == sp.bool(False), Error.PAUSED)
 
         j = sp.as_nat(1-i)
         
@@ -296,6 +325,7 @@ class Dex(sp.Contract, TokenUtility):
         # sp.trace(dy.value)
         # return dy
         sp.verify(dy.value >= min_dy, Error.POOL_STATE)
+        sp.verify(sp.now <= time_valid_upto, Error.TIME_STATE)
 
         self.transferToTokenId(
             sp.record(
@@ -309,6 +339,7 @@ class Dex(sp.Contract, TokenUtility):
     @sp.entry_point
     def add_liquidity(self, _amount0, _amount1, min_token):
         sp.verify(sp.amount == sp.tez(0), Error.NO_TEZ)
+        sp.verify(self.data.paused == sp.bool(False), Error.PAUSED)
 
         # Initial invariant
         token_supply_initial = sp.local('ts0', self.data.token_pool[0].pool + self.data.token_pool[1].pool)
@@ -327,11 +358,6 @@ class Dex(sp.Contract, TokenUtility):
         
         lp_amount = token_supply_initial.value * sp.as_nat(D1.value - D0.value) / D0.value 
         sp.verify(lp_amount >= min_token, Error.POOL_STATE)
-
-        sp.if self.data.lp_balance.contains(sp.sender):
-            self.data.lp_balance[sp.sender] = self.data.lp_balance[sp.sender] + lp_amount
-        sp.else:
-            self.data.lp_balance[sp.sender] = lp_amount
 
         sp.if lp_amount > sp.nat(0):
             self.mint_lp(lp_amount)
@@ -358,11 +384,12 @@ class Dex(sp.Contract, TokenUtility):
     @sp.entry_point
     def remove_liquidity(self, _amount, min_tokens):
         sp.verify(sp.amount == sp.tez(0), Error.NO_TEZ)
+        sp.verify(self.data.paused == sp.bool(False), Error.PAUSED)
         sp.set_type(min_tokens, sp.TMap(sp.TNat, sp.TNat))
 
         token_supply = sp.local('ts1', self.data.token_pool[0].pool + self.data.token_pool[1].pool)
 
-        value = sp.local('val1', self.data.token_pool[0].pool * _amount / token_supply.value)
+        value = sp.local('val1', sp.as_nat(self.data.token_pool[0].pool - self.data.token_pool[0].admin_fee) * _amount / self.data.lp_supply)
         self.data.token_pool[0].pool = sp.as_nat(self.data.token_pool[0].pool - value.value)
         value.value /= (self.data.eighteen/self.data.token_pool[0].decimals)
         
@@ -376,7 +403,7 @@ class Dex(sp.Contract, TokenUtility):
             )
         )
 
-        value.value = self.data.token_pool[1].pool * _amount / token_supply.value
+        value.value = sp.as_nat(self.data.token_pool[1].pool - self.data.token_pool[1].admin_fee) * _amount / self.data.lp_supply
         self.data.token_pool[1].pool = sp.as_nat(self.data.token_pool[1].pool - value.value)
         value.value /= (self.data.eighteen/self.data.token_pool[1].decimals)
         
@@ -389,11 +416,6 @@ class Dex(sp.Contract, TokenUtility):
                 _token_id=1
             )
         )
-
-        sp.if self.data.lp_balance.contains(sp.sender):
-            self.data.lp_balance[sp.sender] = sp.as_nat(self.data.lp_balance[sp.sender] - _amount)
-        sp.else:
-            self.data.lp_balance[sp.sender] = 0
 
         self.burn_lp(_amount)
 

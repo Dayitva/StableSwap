@@ -194,59 +194,66 @@ def test():
     scenario.verify(dex.data.lp_balance[alice.address] == 0 * DECIMALS_E)
 
     scenario.h2("Test 11: Exchange operation by Bob. Should fail as he is asking for more min tokens than allowed.")
-    dex.exchange(i=0, dx=5000 * DECIMALS_0, min_dy = 5001 * DECIMALS_E).run(sender=bob, valid=False)
+    dex.exchange(i=0, dx=5000 * DECIMALS_0, min_dy = 5001 * DECIMALS_E, time_valid_upto=sp.timestamp_from_utc(2022, 2, 21, 23, 59, 59)).run(sender=bob, valid=False, now=sp.timestamp_from_utc(2022, 2, 20, 23, 59, 59))
 
     scenario.h2("Test 12: Exchange operation by Bob. Should fail as he is exchanging more tokens than he is approved for.")
-    dex.exchange(i=0, dx=100001 * DECIMALS_0, min_dy = 5001 * DECIMALS_E).run(sender=bob, valid=False)
+    dex.exchange(i=0, dx=100001 * DECIMALS_0, min_dy = 5001 * DECIMALS_E, time_valid_upto=sp.timestamp_from_utc(2022, 2, 21, 23, 59, 59)).run(sender=bob, valid=False, now=sp.timestamp_from_utc(2022, 2, 20, 23, 59, 59))
 
-    scenario.h2("Test 13: Exchange operation by Bob. Should succeed with correct return values.")
-    dex.exchange(i=0, dx=5000 * DECIMALS_0, min_dy = 4986 * DECIMALS_1).run(sender=bob)
+    scenario.h2("Test 13: Exchange operation by Bob. Should fail as the transaction takes more than he wanted it valid for.")
+    dex.exchange(i=0, dx=100001 * DECIMALS_0, min_dy = 5001 * DECIMALS_E, time_valid_upto=sp.timestamp_from_utc(2022, 2, 21, 23, 59, 59)).run(sender=bob, valid=False, now=sp.timestamp_from_utc(2022, 2, 22, 23, 59, 59))
+
+    scenario.h2("Test 14: Exchange operation by Bob. Should succeed with correct return values.")
+    dex.exchange(i=0, dx=5000 * DECIMALS_0, min_dy = 4986 * DECIMALS_1, time_valid_upto=sp.timestamp_from_utc(2022, 2, 21, 23, 59, 59)).run(sender=bob, now=sp.timestamp_from_utc(2022, 2, 20, 23, 59, 59))
     scenario.verify(dex.data.token_pool[0].pool == 55000 * DECIMALS_E)
     scenario.verify(dex.data.token_pool[1].pool >= 45213 * DECIMALS_0)
 
-    scenario.h2("Test 14: Exchange operation by Bob. Should succeed with correct return values.")
-    dex.exchange(i=0, dx=1000 * DECIMALS_0, min_dy = 995 * DECIMALS_1).run(sender=bob)
+    scenario.h2("Test 15: Exchange operation by Bob. Should succeed with correct return values.")
+    dex.exchange(i=0, dx=1000 * DECIMALS_0, min_dy = 995 * DECIMALS_1, time_valid_upto=sp.timestamp_from_utc(2022, 2, 21, 23, 59, 59)).run(sender=bob, now=sp.timestamp_from_utc(2022, 2, 20, 23, 59, 59))
     scenario.verify(dex.data.token_pool[0].pool == 56000 * DECIMALS_E)
     scenario.verify(dex.data.token_pool[1].pool >= 44017 * DECIMALS_0)
 
-    scenario.h2("Test 15: Exchange operation by Bob. Should succeed with correct return values.")
-    dex.exchange(i=1, dx=1000 * DECIMALS_1, min_dy = 1001 * DECIMALS_0).run(sender=bob)
+    scenario.h2("Test 16: Exchange operation by Bob. Should succeed with correct return values.")
+    dex.exchange(i=1, dx=1000 * DECIMALS_1, min_dy = 1001 * DECIMALS_0, time_valid_upto=sp.timestamp_from_utc(2022, 2, 21, 23, 59, 59)).run(sender=bob, now=sp.timestamp_from_utc(2022, 2, 20, 23, 59, 59))
     scenario.verify(dex.data.token_pool[0].pool >= 54998 * DECIMALS_E)
     scenario.verify(dex.data.token_pool[1].pool >= 45017 * DECIMALS_0)
 
-    scenario.h2("Test 16: Claiming admin fees by Oscar. Should fail as he is not admin.")
+    scenario.h2("Test 17: Claiming admin fees by Oscar. Should fail as he is not admin.")
     dex.admin_claim().run(sender=oscar, valid=False)
 
-    scenario.h2("Test 17: Claiming admin fees by Admin. Should succeed.")
+    scenario.h2("Test 18: Claiming admin fees by Admin. Should succeed.")
     dex.admin_claim().run(sender=admin)
     scenario.verify(dex.data.token_pool[0].pool >= 54998 * DECIMALS_E)
     scenario.verify(dex.data.token_pool[1].pool >= 45012 * DECIMALS_E)
 
-    scenario.h2("Test 18: Removing all liquidity by Admin. Should fail as admin is removing more liquidity than allowed for.")
+    scenario.h2("Test 19: Removing all liquidity by Admin. Should fail as admin is removing more liquidity than allowed for.")
     dex.remove_liquidity(_amount = 100001 * DECIMALS_E, min_tokens={0: 50000*DECIMALS_0, 1: 50000*DECIMALS_1}).run(sender=admin, valid=False)
 
-    scenario.h2("Test 19: Removing all liquidity by Admin. Should succeed.")
+    scenario.h2("Test 20: Removing all liquidity by Admin. Should succeed.")
     dex.remove_liquidity(_amount = 100000 * DECIMALS_E, min_tokens={0: 40000*DECIMALS_0, 1: 40000*DECIMALS_1}).run(sender=admin)
     scenario.verify(dex.data.token_pool[0].pool <= 10 * DECIMALS_E)
     scenario.verify(dex.data.token_pool[1].pool <= 10 * DECIMALS_E)
     scenario.verify(dex.data.lp_balance[admin.address] == 0 * DECIMALS_E)
 
-    scenario.h2("Test 20: Updating A by Oscar. Should fail as he is not admin.")
+    scenario.h2("Test 21: Updating A by Oscar. Should fail as he is not admin.")
     dex.update_A(sp.nat(100)).run(sender=oscar, valid=False)
    
-    scenario.h2("Test 21: Updating A by Admin. Should succeed.")
+    scenario.h2("Test 22: Updating A by Admin. Should succeed.")
     dex.update_A(sp.nat(100)).run(sender=admin)
     scenario.verify(dex.data.A == 100)
 
-    scenario.h2("Test 22: Updating fee by Oscar. Should fail as he is not admin.")
+    scenario.h2("Test 23: Updating fee by Oscar. Should fail as he is not admin.")
     dex.update_fee(sp.nat(200)).run(sender=oscar, valid=False)
     
-    scenario.h2("Test 23: Updating fee by Admin. Should succeed.")
+    scenario.h2("Test 24: Updating fee by Admin. Should succeed.")
     dex.update_fee(sp.nat(20)).run(sender=admin)
     scenario.verify(dex.data.fee == 20)
 
-    scenario.h2("Test 24: Update the lp token address by Oscar. Should fail as he is not admin.")
+    scenario.h2("Test 25: Update the lp token address by Oscar. Should fail as he is not admin.")
     dex.set_lp_address(lp.address).run(sender=oscar, valid=False)
 
-    scenario.h2("Test 25: Update the lp token address. Should succeed.")
+    scenario.h2("Test 26: Update the lp token address. Should succeed.")
     dex.set_lp_address(lp.address).run(sender=admin)
+
+    scenario.h2("Test 27: Adding liquidity by Alice. Should fail as the the contract is paused by the admin.")
+    dex.togglePause().run(sender=admin)
+    dex.add_liquidity(_amount0 = 10 * DECIMALS_0, _amount1 = 20 * DECIMALS_1, min_token=1).run(sender=alice, valid=False)

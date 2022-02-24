@@ -2,5 +2,6 @@
     "name": "Liquibrium DEX",
     "description": "A decentralised stablecoin exchange to trade stable assets at low slippage",
     "version": "0.0.1",
-    "homepage": "https://liquibrium.netlify.app/"
+    "homepage": "https://liquibrium.netlify.app/",
+    "interfaces": [ "TZIP-012", "TZIP-007" ]
   }

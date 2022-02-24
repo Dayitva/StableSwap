@@ -4,7 +4,8 @@ A = 85                          # Higher A, more towards x+y=k | Lower A, more t
 N_COINS = 2                     # Number of tokens in pool
 FEE = 15                        # Fee for exchanges
 ADMIN_FEE_POOL = [0, 0]         # Counter to track Admin fee 
-TOKEN_POOL = [50000, 50000]         # Liquidity Pools
+TOKEN_POOL = [1000, 10]     # Liquidity Pools
+LP_SUPPLY = sum(TOKEN_POOL)
     
 def get_D():
     S = 0
@@ -60,6 +61,8 @@ def get_y(i, j, x, _xp):
     return y
 
 def xchg(i, dx):
+    global ADMIN_LP_SUPPLY
+    global LP_SUPPLY
     j = 1 - i
     xp = TOKEN_POOL
     x = TOKEN_POOL[i] + dx
@@ -68,11 +71,16 @@ def xchg(i, dx):
     fee_collected = (dy * FEE) / 10000
     dy = dy - fee_collected
     ADMIN_FEE_POOL[j] += (fee_collected / 2)
+
+    ADMIN_LP_SUPPLY += (fee_collected / 2)/(TOKEN_POOL[0] + TOKEN_POOL[1] + (fee_collected / 2))
+    LP_SUPPLY += (fee_collected / 2)/(TOKEN_POOL[0] + TOKEN_POOL[1] + (fee_collected / 2))
+
     TOKEN_POOL[i] += dx
     TOKEN_POOL[j] = TOKEN_POOL[j] - dy
     return dy
 
 def add_liquidity(_amount0, _amount1):
+    global LP_SUPPLY
     token_supply_initial = TOKEN_POOL[0] + TOKEN_POOL[1]
     D0 = get_D()
     
@@ -85,18 +93,28 @@ def add_liquidity(_amount0, _amount1):
     # print("D1:", D1)
     
     lp_amount = token_supply_initial * (D1 - D0) / D0 
+    LP_SUPPLY += lp_amount
 
     return lp_amount
 
 def remove_liquidity(_amount):
+    global LP_SUPPLY
+    # global ADMIN_LP_SUPPLY
+    # global ADMIN_FEE_POOL
     token_supply = TOKEN_POOL[0] + TOKEN_POOL[1]
 
-    value0 = TOKEN_POOL[0] * _amount / token_supply
+    print(LP_SUPPLY)
+    value0 = (TOKEN_POOL[0] - ADMIN_FEE_POOL[0]) * _amount / LP_SUPPLY
     TOKEN_POOL[0] = TOKEN_POOL[0] - value0
 
-    value1 = TOKEN_POOL[1] * _amount / token_supply
+    value1 = (TOKEN_POOL[1] - ADMIN_FEE_POOL[1]) * _amount / LP_SUPPLY
     TOKEN_POOL[1] = TOKEN_POOL[1] - value1
 
+    LP_SUPPLY = LP_SUPPLY - _amount
+    # if admin:
+    #     ADMIN_LP_SUPPLY = ADMIN_LP_SUPPLY - _amount
+    #     ADMIN_FEE_POOL[0] = 0
+    #     ADMIN_FEE_POOL[1] = 0
     return value0, value1
 
 ### TESTS BEGIN HERE ###
@@ -116,10 +134,10 @@ def remove_liquidity(_amount):
 #     print(ADMIN_FEE_POOL)
 
 print(TOKEN_POOL)
-print("For", 200, "of token 0 and", 200, "of token 1, you get", add_liquidity(200, 200), " LP tokens.")
+print("For", 0, "of token 0 and", 1000, "of token 1, you get", add_liquidity(0, 1000), " LP tokens.")
 
 print(TOKEN_POOL)
-print("For", 400, "of LP tokens you get", remove_liquidity(400), "tokens.")
+print("For", 1230, "of LP tokens you get", remove_liquidity(1230), "tokens.")
 
 print(TOKEN_POOL)
 print("For", 5000, "of token 0 you get", xchg(0, 5000), "of token 1.") 
@@ -131,7 +149,7 @@ print(TOKEN_POOL)
 print("For", 1000, "of token 1 you get", xchg(1, 1000), "of token 0.") 
 
 print(TOKEN_POOL)
-print("For", 100001, "of LP tokens you get", remove_liquidity(100000), "tokens.")
+print("For", 100000, "of LP tokens you get", remove_liquidity(100000), "tokens.")
 
 print(TOKEN_POOL)
 print(ADMIN_FEE_POOL)

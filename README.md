@@ -1,6 +1,6 @@
 # Liquibrium
 
-A decentralised stablecoin exchange on Tezos
+A decentralised stablecoin exchange on Tezos allowing users to trade similar assets at low slippage.
 
 ## Docs
 
@@ -26,28 +26,17 @@ An added benefit of this is that liquidity providers also can now provide liquid
 
 Impermanent loss happens when you provide liquidity to a liquidity pool, and the price of your deposited assets changes compared to when you deposited them. The bigger this change is, the more you are exposed to impermanent loss. But since the assets are pegged to a certain value or move together in the case of wrapped tokens, users don't have to worry about it.
 
-## Exchange Pairs Avaliable
-
-### kUSD <-> USDtz
-
-You can get these tokens from the faucet provided. Make sure you are on the Granada testnet and add these addresses in your wallet for the best experience.
-Test kUSD address: `KT1WJUr74D5bkiQM2RE1PALV7R8MUzzmDzQ9`
-Test USDtz address: `KT1CNQL6xRn5JaTUcMmxwSc5YQjwpyHkDR5r`
-Test LP token address: `KT1Nv2h1bHPLYZsGrCdfdvwKzXsZrFEfJnpJ`
-
-Decimals is 9 for all the tokens.
-
 ### Some tokens with decimals and standards
 
-- kUSD = 10\*\*18 (6.42 M) [FA1.2]
-- wBUSD = 10\*\*18 (1.85 M) [FA 2]
-- wDAI = 10\*\*18 (1 M) [FA 2]
-- uUSD = 10\*\*12 (8.35 M) [FA 2]
-- USDtz = 10\*\*6 (1.87 M) [FA1.2]
-- wUSDC = 10\*\*6 (2.5 M) [FA 2]
-- wUSDT = 10\*\*6 (0.75 M) [FA 2]
+- kUSD = 10\*\*18 [FA1.2]
+- wBUSD = 10\*\*18 [FA 2]
+- wDAI = 10\*\*18[FA 2]
+- uUSD = 10\*\*12[FA 2]
+- USDtz = 10\*\*6[FA1.2]
+- wUSDC = 10\*\*6[FA 2]
+- wUSDT = 10\*\*6[FA 2]
 
-## Refrence
+## Reference
 
-1. Curve White Paper
-2. Uniswap white Paper
+1. Curve Whitepaper
+2. Uniswap Whitepaper

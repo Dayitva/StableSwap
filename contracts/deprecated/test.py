@@ -1,13 +1,13 @@
-A = 4500
+A = 85
 N_COINS = 2
 PRECISION = 10 ** 18
 A_MULTIPLIER = 10000
 MIN_A = (N_COINS**N_COINS) * A_MULTIPLIER / 100
 MAX_A = (N_COINS**N_COINS) * A_MULTIPLIER * 10000
 
-token1_pool = 80000
-token2_pool = 100000
-amount_to_be_swapped = 1
+token1_pool = 50000
+token2_pool = 50000
+amount_to_be_swapped = 5000
     
 def get_D():
     S = 0
@@ -63,6 +63,6 @@ def get_y(i, j, x):
         
     return y
 
-#print("For", amount_to_be_swapped, "kUSD, you get", get_y(1, 1, amount_to_be_swapped), "USDtz")
+print("For", amount_to_be_swapped, "kUSD, you get", get_y(1, 0, amount_to_be_swapped), "USDtz")
 # print("For", amount_to_be_swapped, "you get", get_y(0, 1, 100))
-print(get_D())
+# print(get_D())

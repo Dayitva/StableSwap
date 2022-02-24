@@ -60,6 +60,7 @@ class Dex(sp.Contract, TokenUtility):
                     token_id=1,
                 ),
             }),
+            lp_balance = sp.map(l={},tkey = sp.TAddress, tvalue = sp.TNat),
             admin=_admin,
             eighteen=1000000000000000000,
             fee=sp.nat(15),
@@ -326,6 +327,11 @@ class Dex(sp.Contract, TokenUtility):
         lp_amount = token_supply_initial.value * sp.as_nat(D1.value - D0.value) / D0.value 
         sp.verify(lp_amount >= min_token, Error.POOL_STATE)
 
+        sp.if self.data.lp_balance.contains(sp.sender):
+            self.data.lp_balance[sp.sender] = self.data.lp_balance[sp.sender] + lp_amount
+        sp.else:
+            self.data.lp_balance[sp.sender] = lp_amount
+
         sp.if lp_amount > sp.nat(0):
             self.mint_lp(lp_amount)
 
@@ -382,6 +388,11 @@ class Dex(sp.Contract, TokenUtility):
                 _token_id=1
             )
         )
+
+        sp.if self.data.lp_balance.contains(sp.sender):
+            self.data.lp_balance[sp.sender] = sp.as_nat(self.data.lp_balance[sp.sender] - _amount)
+        sp.else:
+            self.data.lp_balance[sp.sender] = 0
 
         self.burn_lp(_amount)
 

@@ -4,7 +4,7 @@ A = 85                          # Higher A, more towards x+y=k | Lower A, more t
 N_COINS = 2                     # Number of tokens in pool
 FEE = 15                        # Fee for exchanges
 ADMIN_FEE_POOL = [0, 0]         # Counter to track Admin fee 
-TOKEN_POOL = [1000, 10]     # Liquidity Pools
+TOKEN_POOL = [1000, 10]         # Liquidity Pools
 LP_SUPPLY = sum(TOKEN_POOL)
     
 def get_D():
@@ -70,10 +70,10 @@ def xchg(i, dx):
     dy = TOKEN_POOL[j] - y
     fee_collected = (dy * FEE) / 10000
     dy = dy - fee_collected
-    ADMIN_FEE_POOL[j] += (fee_collected / 2)
+    # ADMIN_FEE_POOL[j] += (fee_collected / 2)
 
-    ADMIN_LP_SUPPLY += (fee_collected / 2)/(TOKEN_POOL[0] + TOKEN_POOL[1] + (fee_collected / 2))
-    LP_SUPPLY += (fee_collected / 2)/(TOKEN_POOL[0] + TOKEN_POOL[1] + (fee_collected / 2))
+    # ADMIN_LP_SUPPLY += (fee_collected / 2)/(TOKEN_POOL[0] + TOKEN_POOL[1] + (fee_collected / 2))
+    # LP_SUPPLY += (fee_collected / 2)/(TOKEN_POOL[0] + TOKEN_POOL[1] + (fee_collected / 2))
 
     TOKEN_POOL[i] += dx
     TOKEN_POOL[j] = TOKEN_POOL[j] - dy
@@ -133,17 +133,17 @@ def remove_liquidity(_amount):
 #     print(TOKEN_POOL)
 #     print(ADMIN_FEE_POOL)
 
-print(TOKEN_POOL)
-print("For", 0, "of token 0 and", 1000, "of token 1, you get", add_liquidity(0, 1000), " LP tokens.")
+# print(TOKEN_POOL)
+# print("For", 0, "of token 0 and", 1000, "of token 1, you get", add_liquidity(0, 1000), " LP tokens.")
 
-print(TOKEN_POOL)
-print("For", 1230, "of LP tokens you get", remove_liquidity(1230), "tokens.")
+# print(TOKEN_POOL)
+# print("For", 1230, "of LP tokens you get", remove_liquidity(1230), "tokens.")
 
-print(TOKEN_POOL)
-print("For", 5000, "of token 0 you get", xchg(0, 5000), "of token 1.") 
+# print(TOKEN_POOL)
+# print("For", 1000, "of token 0 you get", xchg(0, 1000), "of token 1.") 
 
-print(TOKEN_POOL)
-print("For", 1000, "of token 0 you get", xchg(0, 1000), "of token 1.") 
+# print(TOKEN_POOL)
+# print("For", 1000, "of token 0 you get", xchg(0, 1000), "of token 1.") 
 
 print(TOKEN_POOL)
 print("For", 1000, "of token 1 you get", xchg(1, 1000), "of token 0.") 

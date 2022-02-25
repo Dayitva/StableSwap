@@ -1,80 +1,99 @@
 import React, { useContext } from "react";
 import Button from "./forms/Button";
-// import {connectToWallet} from '../utils/wallet';
-import { BeaconWallet } from "@taquito/beacon-wallet";
-import { TezosToolkit } from "@taquito/taquito";
-import CONFIG from "../config";
-import { TezosContext } from "../contexts/TezosContext";
 import { ErrorContext } from "../contexts/ErrorContext";
 import Jdenticon from "react-jdenticon";
 import { NavLink } from "react-router-dom";
+import { ArrowRightIcon, MenuIcon, XIcon } from "@heroicons/react/outline";
+
+import { useEffect, useState } from "react";
+import {
+  connectWallet,
+  disconnectWallet,
+  getActiveAccount,
+} from "../utils/wallet";
+import useWallet from "../hooks/useWallet";
 
 const routes = [
   { id: 1, name: "Home", path: "/" },
   { id: 2, name: "Exchange", path: "/exchange" },
   { id: 3, name: "Liquidity", path: "/liquidity" },
-  {id: 4, name: "Faucet", path: "/faucet"},
+  { id: 4, name: "Faucet", path: "/faucet" },
 ];
 
 function Navbar() {
-  const { showMessage } = useContext(ErrorContext);
-  const { tezos, setTezos, address, setAddress } = useContext(TezosContext);
+  const { wallet, setWallet } = useWallet();
+  const [mobileNav, setMobileNav] = useState(false);
 
-  async function connectToWallet() {
-    console.log(tezos);
-    if (!tezos) {
-      const tezos = new TezosToolkit(CONFIG.rpcUrl);
-      const options = {
-        name: "StableSwap",
-        preferredNetwork: CONFIG.preferredNetwork,
-      };
-      const wallet = new BeaconWallet(options);
-      await wallet.requestPermissions({
-        network: { type: CONFIG.preferredNetwork },
-      });
-      tezos.setWalletProvider(wallet);
-      const pkh = await tezos.wallet.pkh();
-      setTezos(tezos);
-      setAddress(pkh);
-    } else {
-      showMessage("💳️ Wallet is already connected.");
-      console.log("Already there.");
-    }
-  }
+  const handleConnectWallet = async () => {
+    const { wallet } = await connectWallet();
+    setWallet(wallet);
+  };
+  const handleDisconnectWallet = async () => {
+    const { wallet } = await disconnectWallet();
+    setWallet(wallet);
+  };
+
+  useEffect(() => {
+    const func = async () => {
+      const account = await getActiveAccount();
+      if (account) {
+        setWallet(account.address);
+      }
+    };
+    func();
+  }, []);
 
   return (
     <div className="fixed left-0 right-0 top-0 h-16 shadow-md border-b-2 border-gray-900 z-40 bg-dark">
-      <nav className="flex items-center container mx-auto h-full justify-between">
-        <h1 className="font-semibold uppercase text-lg text-gray-200">
-          🔄 Liquibrium
-        </h1>
-        <div>
-          <ul className="flex items-center space-x-10 text-sm">
+      <nav className="relative flex items-stretch container mx-auto h-full justify-between px-4">
+        <div className="flex items-center justify-center">
+          <h1 className="font-semibold uppercase text-lg text-gray-200">
+            Liquibrium
+          </h1>
+        </div>
+        <div
+          className={`absolute md:static md:block top-full left-0 right-0 bg-black ${
+            !mobileNav ? "hidden" : "block"
+          }`}
+        >
+          <ul className="block md:flex md:h-full text-sm">
             {routes.map((route) => {
               return (
-                <li key={route.id}>
-                  <NavLink
-                    to={route.path}
-                    className="text-gray-400 hover:text-gray-100"
-                  >
-                    {route.name}
-                  </NavLink>
-                </li>
+                <NavLink
+                  key={route.id}
+                  to={route.path}
+                  className="h-full flex md:items-center justify-between md:justify-center hover:bg-gray-900 text-gray-400 hover:text-gray-100 px-6 transition-all duration-200 py-5"
+                >
+                  <li key={route.id}>{route.name}</li>
+                  <ArrowRightIcon className="w-5 h-5 md:hidden" />
+                </NavLink>
               );
             })}
           </ul>
         </div>
         <div className="flex items-center space-x-2">
-          {address ? <Jdenticon size="42" value={address} /> : ""}
+          {wallet ? <Jdenticon size="42" value={wallet} /> : ""}
           <Button
             text={
-              tezos
-                ? `${address.slice(0, 5)}...${address.slice(32, 36)}`
+              wallet
+                ? `${wallet.slice(0, 5)}...${wallet.slice(32, 36)}`
                 : "CONNECT"
             }
             bg="bg-gradient-to-r from-purple-500 to-blue-500"
-            onClick={connectToWallet}
+            onClick={!wallet ? handleConnectWallet : handleDisconnectWallet}
           />
+          <button
+            onClick={() => {
+              setMobileNav(!mobileNav);
+            }}
+            className="md:hidden"
+          >
+            {mobileNav ? (
+              <XIcon className="w-5 h-5" />
+            ) : (
+              <MenuIcon className="w-5 h-5" />
+            )}
+          </button>
         </div>
       </nav>
     </div>

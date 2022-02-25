@@ -1,9 +1,4 @@
 import React from "react";
-import DemoImage from "../assets/demo.png";
-import SwapImage from "../assets/swap.png";
-import TeamMemberDayitva from "../assets/dayitva.jpg";
-import TeamMemberVivek from "../assets/vivek.png";
-import TeamMemberDev from "../assets/dev.jpeg";
 import Button from "../components/forms/Button";
 import FeatureCard from "../components/FeatureCard";
 import TeamCard from "../components/TeamCard";
@@ -39,7 +34,7 @@ function Home() {
             </div>
           </div>
           <div className="order-1 md:order-2">
-            <img src={DemoImage} alt="Liquibrium" />
+            <img src={"/assets/demo.png"} alt="Liquibrium" />
           </div>
         </div>
       </div>
@@ -73,7 +68,11 @@ function Home() {
         <h2 className="text-2xl font-semibold text-center">
           "Not every DEX is made for stable assets, Liquibrium is."
         </h2>
-        <img className="mx-auto mt-10 h-20" src={SwapImage} alt="Swap" />
+        <img
+          className="mx-auto mt-10 h-20"
+          src={"/assets/swap.png"}
+          alt="Swap"
+        />
       </div>
 
       <div className=" py-40 my-4 ">
@@ -83,17 +82,17 @@ function Home() {
       space-y-10 md:space-y-0 flex-col lg:flex-row lg:space-x-4"
         >
           <TeamCard
-            imgSrc={TeamMemberDayitva}
+            imgSrc={"/assets/dayitva.jpg"}
             imgAlt="Dayitva Goel"
             twitterUsername="Dayitva_Goel"
           />
           <TeamCard
-            imgSrc={TeamMemberVivek}
+            imgSrc={"/assets/vivek.png"}
             imgAlt="Vivek Kumar"
             twitterUsername="vivekascoder"
           />
           <TeamCard
-            imgSrc={TeamMemberDev}
+            imgSrc={"/assets/dev.jpeg"}
             imgAlt="Dev Churiwala"
             twitterUsername="ChuriwalaDev"
           />

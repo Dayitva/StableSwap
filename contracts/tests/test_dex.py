@@ -7,17 +7,22 @@ Token = dex.Token
 
 @sp.add_test(name="Test_DEX")
 def test():
-    admin = sp.test_account("Admin")
-    alice = sp.test_account("Alice")
-    bob = sp.test_account("Robert")
-    oscar = sp.test_account("Oscar")
-    token_admin = sp.test_account("Token Admin")
+    admin = sp.address("tz1-Admin")
+    alice = sp.address("tz1-Alice")
+    bob = sp.address("tz1-Robert")
+    oscar = sp.address("tz1-Oscar")
+    token_admin = sp.address("tz1-TokenAdmin")
     
     DECIMALS_0 = 10 ** 8
     DECIMALS_1 = 10 ** 6
     DECIMALS_E = 10 ** 18
 
     scenario = sp.test_scenario()
+
+    scenario.table_of_contents()
+    scenario.h1("Test DEX")
+
+    scenario.h2("Test Accounts")
     
     scenario.table_of_contents()
 
@@ -41,14 +46,14 @@ def test():
     }
     
     usdtz = Token(
-        token_admin.address,
+        token_admin,
         config=fa12.FA12_config(support_upgradable_metadata=True),
         token_metadata=token1_metadata,
         contract_metadata=contract1_metadata
     )
 
     kusd = Token(
-        token_admin.address,
+        token_admin,
         config=fa12.FA12_config(support_upgradable_metadata=True),
         token_metadata=token2_metadata,
         contract_metadata=contract2_metadata
@@ -60,28 +65,28 @@ def test():
     scenario.h2("Minting tokens to users")
 
     kusd.mint(
-        address=alice.address,
-        value=sp.nat(100000 * DECIMALS_0)
+        address=alice,
+        value=sp.nat(100000 * DECIMALS_1)
     ).run(sender=token_admin)
     kusd.mint(
-        address=admin.address,
-        value=sp.nat(100000 * DECIMALS_0)
+        address=admin,
+        value=sp.nat(100000 * DECIMALS_1)
     ).run(sender=token_admin)
     kusd.mint(
-        address=bob.address,
+        address=bob,
+        value=sp.nat(100000 * DECIMALS_1)
+    ).run(sender=token_admin)
+    usdtz.mint(
+        address=alice,
         value=sp.nat(100000 * DECIMALS_0)
     ).run(sender=token_admin)
     usdtz.mint(
-        address=alice.address,
-        value=sp.nat(100000 * DECIMALS_1)
+        address=admin,
+        value=sp.nat(100000 * DECIMALS_0)
     ).run(sender=token_admin)
     usdtz.mint(
-        address=admin.address,
-        value=sp.nat(100000 * DECIMALS_1)
-    ).run(sender=token_admin)
-    usdtz.mint(
-        address=bob.address,
-        value=sp.nat(100000 * DECIMALS_1)
+        address=bob,
+        value=sp.nat(100000 * DECIMALS_0)
     ).run(sender=token_admin)
     lp_metadata = {
         "decimals": "9",
@@ -93,7 +98,7 @@ def test():
         "": "ipfs://QmaiAUj1FFNGYTu8rLBjc3eeN9cSKwaF8EGMBNDmhzPNFd",
     }
     lp = Token(
-        token_admin.address,
+        token_admin,
         config=fa12.FA12_config(support_upgradable_metadata=True),
         token_metadata=lp_metadata,
         contract_metadata=lp_contract_metadata
@@ -105,15 +110,17 @@ def test():
         y_address=usdtz.address,
         # y_address=sp.address('KT1CNQL6xRn5JaTUcMmxwSc5YQjwpyHkDR5r'),
         _lp_token=lp.address,
-        _admin=admin.address,
-        x_decimals = sp.nat(DECIMALS_0),
-        y_decimals = sp.nat(DECIMALS_1),
+        _admin=admin,
+        x_decimals = sp.nat(DECIMALS_1),
+        y_decimals = sp.nat(DECIMALS_0),
     )
 
     scenario += lp
     scenario += dex
 
-    lp.setAdministrator(dex.address).run(sender=token_admin.address)
+    scenario.h2("Making dex, the admin of LP token")
+    lp.setAdministrator(dex.address).run(sender=token_admin)
+    
     # dex.set_lp_address(lp.address).run(sender=admin)
     
     scenario.h2("Approving tokens")
@@ -126,6 +133,23 @@ def test():
         spender=dex.address,
         value=sp.nat(50_000 * DECIMALS_1
                      ))).run(sender=admin)
+
+    scenario.h2("[INVALID] Initialize exchange.")
+    dex.initialize_exchange(
+        token1_amount=sp.nat(50_000 * DECIMALS_1),
+        token2_amount=sp.nat(50_000 * DECIMALS_0)
+    ).run(sender=alice, valid=False)
+
+    scenario.h2("Initialize exchange.")
+    dex.initialize_exchange(
+        token1_amount=sp.nat(50_000 * DECIMALS_1),
+        token2_amount=sp.nat(50_000 * DECIMALS_0)
+    ).run(sender=admin)
+    
+    scenario.h2("[INVALID] Remove liquidity.")
+    dex.remove_liquidity(_amount = 25000 * (10**18), min_tokens = {0: sp.as_nat(1), 1: sp.as_nat(1)}).run(sender=alice, valid=False)
+    scenario.h2("[INVALID] Remove liquidity.")
+    dex.remove_liquidity(_amount = 25000 * (10**18), min_tokens = {0: sp.as_nat(1), 1: sp.as_nat(1)}).run(sender=oscar, valid=False)
     
     usdtz.approve(sp.record(
         spender=dex.address,
@@ -135,7 +159,10 @@ def test():
         spender=dex.address,
         value=sp.nat(50_000 * DECIMALS_0)
     )).run(sender=bob)
-
+    
+    scenario.h2("Exchange tokens")
+    dex.exchange(i=0, j=1, dx=5000 * DECIMALS_1, min_dy = 1).run(sender=bob)
+    
     kusd.approve(sp.record(
         spender=dex.address,
         value=sp.nat(50_000 * DECIMALS_0
@@ -154,20 +181,28 @@ def test():
         token2_amount=sp.nat(50_000 * DECIMALS_1)
     ).run(sender=oscar, valid=False)
     
-    scenario.h2("Test 2: Initialising by Admin. Should succeed.")
-    dex.initialize_exchange(
-        token1_amount=sp.nat(50_000 * DECIMALS_0),
-        token2_amount=sp.nat(50_000 * DECIMALS_1)
-    ).run(sender=admin)
+    scenario.h2("Alice :: Adding liquidity. 200")
+    dex.add_liquidity(_amount0 = 200 * DECIMALS_1, _amount1 = 0 * DECIMALS_0, min_token=1).run(sender=alice)
+    scenario.h2("Alice :: Adding liquidity. 10")
+    dex.add_liquidity(_amount0 = 10 * DECIMALS_1, _amount1 = 0 * DECIMALS_0, min_token=1).run(sender=alice)
+    scenario.h2("Alice :: Adding liquidity. 5000")
+    dex.add_liquidity(_amount0 = 5000 * DECIMALS_1, _amount1 = 0 * DECIMALS_0, min_token=1).run(sender=alice)
+    scenario.h2("Alice :: Adding liquidity. 200")
+    dex.add_liquidity(_amount0 = 200 * DECIMALS_1, _amount1 = 200 * DECIMALS_0, min_token=1).run(sender=alice)
+    scenario.h2("Alice :: Adding liquidity. 100")
+    dex.add_liquidity(_amount0 = 100 * DECIMALS_1, _amount1 = 10 * DECIMALS_0, min_token=1).run(sender=alice)
+    scenario.h2("Alice :: Adding liquidity. 5000")
+    dex.add_liquidity(_amount0 = 5000 * DECIMALS_1, _amount1 = 100 * DECIMALS_0, min_token=1).run(sender=alice)
 
-    scenario.h2("Test 3: Initialising by Admin again. Should fail.")
-    dex.initialize_exchange(
-        token1_amount=sp.nat(50_000 * DECIMALS_0),
-        token2_amount=sp.nat(50_000 * DECIMALS_1)
-    ).run(sender=admin, valid=False)
+    dex.remove_liquidity(_amount=200 * DECIMALS_1,  min_tokens={0: 1, 1: 1}).run(sender=alice)
+    dex.remove_liquidity(_amount=10 * DECIMALS_1,  min_tokens={0: 1, 1: 1}).run(sender=alice)
+    dex.remove_liquidity(_amount=5000 * DECIMALS_1,  min_tokens={0: 1, 1: 1}).run(sender=alice)
+    dex.remove_liquidity(_amount=400 * DECIMALS_1,  min_tokens={0: 1, 1: 1}).run(sender=alice)
+    dex.remove_liquidity(_amount=110 * DECIMALS_1,  min_tokens={0: 1, 1: 1}).run(sender=alice)
+    dex.remove_liquidity(_amount=4500 * DECIMALS_1,  min_tokens={0: 1, 1: 1}).run(sender=alice)
 
-    scenario.h2("Test 4: Removing liquidity by Alice. Should fail as she has not added any liquidity.")
-    dex.remove_liquidity(_amount = 100 * DECIMALS_E, min_tokens = {0: 1, 1: 1}).run(sender=alice, valid=False)
+    dex.remove_liquidity(_amount=50_000 * DECIMALS_1,  min_tokens={0: 1, 1: 1}).run(sender=admin)
+    dex.remove_liquidity(_amount=50_000 * DECIMALS_1,  min_tokens={0: 1, 1: 1}).run(sender=admin)
     
     scenario.h2("Test 5: Adding liquidity by Alice. Should fail as she is asking for more min tokens than possible.")
     dex.add_liquidity(_amount0 = 200 * DECIMALS_0, _amount1 = 0 * DECIMALS_1, min_token=200).run(sender=alice, valid=False)

@@ -1,14 +1,13 @@
 import React from "react";
 
-
-function Button({text, bg, padding, onClick}) {
+function Button({ text, bg, padding, onClick, fontWeight }) {
   return (
     <div>
       <button
         className={`
-          ${padding || 'px-6 py-2'} text-sm font-semibold 
-          rounded-sm text-white transition ${bg}`}
-        onClick= {onClick}
+          ${padding || "px-6 py-2"} text-xs font-${fontWeight || "regular"}} 
+          rounded-md text-white transition ${bg}`}
+        onClick={onClick}
       >
         <span>{text}</span>
       </button>

@@ -7,7 +7,6 @@ import TokenSelector from "./components/TokenSelector";
 import Exchange from "./views/Exchange";
 import Liquidity from "./views/Liquidity";
 import Home from "./views/Home";
-
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 import { TokenListContext } from "./contexts/TokenListContext";
 import Loading from "./components/Loading";

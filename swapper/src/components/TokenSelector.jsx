@@ -26,7 +26,7 @@ function TokenSelector() {
             // Render a component here.
             <div
               key={token.id}
-              className="flex items-center px-6 py-4 hover:bg-gray-800 hover:cursor-pointer"
+              className="flex items-center px-6 py-4 hover:bg-gray-800 cursor-pointer"
               onClick={() => {
                 setToken(token);
               }}
@@ -36,7 +36,7 @@ function TokenSelector() {
                 alt={token.name}
                 className="w-9 h-9 rounded-full"
               />
-              <div className="flex-1 ml-4">
+              <div className="flex-1 ml-4 cursor-pointer">
                 <h1 className="text-lg font-medium">{token.symbol}</h1>
                 <p className="text-sm text-gray-400">{token.name}</p>
               </div>

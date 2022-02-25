@@ -363,23 +363,25 @@ class Dex(sp.Contract, TokenUtility):
             self.mint_lp(lp_amount)
 
         # Take coins from the sender
-        self.transferToTokenId(
-            sp.record(
-                _from=sp.sender,
-                _to=sp.self_address,
-                _amount=_amount0,
-                _token_id=0
+        sp.if _amount0 > 0:
+            self.transferToTokenId(
+                sp.record(
+                    _from=sp.sender,
+                    _to=sp.self_address,
+                    _amount=_amount0,
+                    _token_id=0
+                )
             )
-        )
 
-        self.transferToTokenId(
-            sp.record(
-                _from=sp.sender,
-                _to=sp.self_address,
-                _amount=_amount1,
-                _token_id=1
+        sp.if _amount1 > 0:
+            self.transferToTokenId(
+                sp.record(
+                    _from=sp.sender,
+                    _to=sp.self_address,
+                    _amount=_amount1,
+                    _token_id=1
+                )
             )
-        )
 
     @sp.entry_point
     def remove_liquidity(self, _amount, min_tokens):

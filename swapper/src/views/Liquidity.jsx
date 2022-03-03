@@ -1,18 +1,15 @@
-import React, { useContext, useEffect, useState, useCallback } from "react";
-import AddLiquidity from "../components/AddLiquidity";
-import Balances from "../components/Balances";
-import RemoveLiquidity from "../components/RemoveLiquidity";
+import React, { useEffect, useCallback } from "react";
 import CONFIG from "../config";
 import axios from "axios";
 import PoolStats from "../components/PoolStats";
 import useWallet from "../hooks/useWallet";
-// import LiquidityTab from "../components/liquidity";
+import LiquidityTab from "../components/liquidity";
 
 function Liquidity() {
   const { wallet } = useWallet();
-  const [kusdAmount, setKusdAmount] = useState(0);
-  const [usdtzAmount, setUsdtzAmount] = useState(0);
-  const [lpamount, setLpAmount] = useState(0);
+  // const [kusdAmount, setKusdAmount] = useState(0);
+  // const [usdtzAmount, setUsdtzAmount] = useState(0);
+  // const [lpamount, setLpAmount] = useState(0);
 
   /**
    *
@@ -37,16 +34,16 @@ function Liquidity() {
   const updateBalances = useCallback(async () => {
     if (wallet) {
       const lp = await getBalance(wallet, CONFIG.lpBigmapId);
-      setLpAmount(lp);
+      // setLpAmount(lp);
 
       const usdtz = await getBalance(wallet, CONFIG.usdtzBigmapId);
-      setUsdtzAmount(usdtz);
+      // setUsdtzAmount(usdtz);
 
       const kusd = await getBalance(wallet, CONFIG.kusdBigmapId);
-      setKusdAmount(kusd);
+      // setKusdAmount(kusd);
       console.log({ usdtz, kusd, lp });
     }
-  }, [`wallet`]);
+  }, [wallet]);
 
   useEffect(() => {
     updateBalances();
@@ -54,16 +51,15 @@ function Liquidity() {
 
   return (
     <div>
-      <div className="py-16">
+      <div className=" mx-auto max-w-xl pt-20">
         {/* The balance Component */}
-        <div className="mt-20 mx-auto max-w-2xl relative">
-          {/* Wrapper for swap component... */}
+        {/* <div className="mt-20 mx-auto max-w-2xl relative">
           <Balances
             kusdAmount={kusdAmount}
             lpAmount={lpamount}
             usdTzAmount={usdtzAmount}
           />
-        </div>
+        </div> */}
 
         <div className="mt-8 mx-auto max-w-2xl relative">
           {/* Wrapper for swap component... */}
@@ -73,7 +69,7 @@ function Liquidity() {
         <div className="mt-20 mx-auto max-w-2xl relative">
           {/* Wrapper for swap component... */}
           {/* <div className="absolute -inset-0.5 bg-gray-800 blur"></div> */}
-          {/* <LiquidityTab /> */}
+          <LiquidityTab />
         </div>
       </div>
     </div>

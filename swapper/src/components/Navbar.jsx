@@ -1,6 +1,6 @@
-import React, { useContext } from "react";
+import React from "react";
 import Button from "./forms/Button";
-import { ErrorContext } from "../contexts/ErrorContext";
+// import { ErrorContext } from "../contexts/ErrorContext";
 import Jdenticon from "react-jdenticon";
 import { NavLink } from "react-router-dom";
 import { ArrowRightIcon, MenuIcon, XIcon } from "@heroicons/react/outline";
@@ -41,15 +41,16 @@ function Navbar() {
       }
     };
     func();
-  }, []);
+  }, [setWallet]);
 
   return (
-    <div className="fixed left-0 right-0 top-0 h-16 shadow-md border-b-2 border-gray-900 z-40 bg-dark">
+    <div className="fixed left-0 right-0 top-0 h-24 shadow-md border-b-2 border-gray-900 z-40 bg-dark">
       <nav className="relative flex items-stretch container mx-auto h-full justify-between px-4">
         <div className="flex items-center justify-center">
-          <h1 className="font-semibold uppercase text-lg text-gray-200">
+          {/* <h1 className="font-semibold uppercase text-lg text-gray-200">
             Liquibrium
-          </h1>
+          </h1> */}
+          <img src="/assets/logo.png" alt="Logo" className="h-44" />
         </div>
         <div
           className={`absolute md:static md:block top-full left-0 right-0 bg-black ${

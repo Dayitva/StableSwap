@@ -18,12 +18,13 @@
     "react-jdenticon": "^0.0.9",
     "react-router-dom": "^5.3.0",
     "react-scripts": "4.0.3",
+    "react-tooltip": "^4.2.21",
     "web-vitals": "^1.0.1"
   },
   "scripts": {
-    "start": "craco start",
-    "build": "craco build",
-    "test": "craco test",
+    "start": "DISABLE_ESLINT_PLUGIN=true craco start",
+    "build": "DISABLE_ESLINT_PLUGIN=true craco build",
+    "test": "DISABLE_ESLINT_PLUGIN=true craco test",
     "eject": "react-scripts eject",
     "curve": "node ./src/scripts/curve_estimate.js",
     "cpmm": "python ./src/scripts/cpmm_estimate.py"

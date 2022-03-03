@@ -1,17 +1,20 @@
 import SlippageBadge from "./SlippageBadge";
 
-import { useState, useContext, useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { TokenListContext } from "../../contexts/TokenListContext";
 import { useSwapCalculation } from "../../hooks/useSwapCalculation";
 import config from "../../config";
 import SlippageInputBadge from "./SlippageInputBadge";
 
-export default function SlippageCalculator() {
-  const slippages = [0.25, 0.5, 1.0];
-  const [currentSlippage, setCurrentSlippage] = useState(slippages[0]);
+export default function SlippageCalculator({
+  slippages,
+  currentSlippage,
+  setCurrentSlippage,
+  minReturn,
+  setMinReturn,
+}) {
   const { toValue } = useSwapCalculation();
   const { toToken } = useContext(TokenListContext);
-  const [minReturn, setMinReturn] = useState(0);
 
   useEffect(() => {
     setMinReturn(() => {
@@ -22,7 +25,7 @@ export default function SlippageCalculator() {
           (config.fee * toValue) / 100
       );
     });
-  }, [toValue, currentSlippage]);
+  }, [toValue, currentSlippage, setMinReturn]);
 
   return (
     <div className="mt-3">
@@ -62,19 +65,19 @@ export default function SlippageCalculator() {
         <div className="flex justify-between items-center">
           <p>Fee: </p>
           <p>
-            {((config.fee * toValue) / 100).toFixed(2)} {toToken.symbol}
+            {((config.fee * toValue) / 100).toFixed(6)} {toToken.symbol}
           </p>
         </div>
         <div className="flex justify-between items-center">
           <p>Slippage: </p>
           <p>
-            {((currentSlippage * toValue) / 100).toFixed(2)} {toToken.symbol}
+            {((currentSlippage * toValue) / 100).toFixed(6)} {toToken.symbol}
           </p>
         </div>
         <div className="flex justify-between items-center">
           <p>Minimum returns: </p>
           <p>
-            {minReturn.toFixed(2)} {toToken.symbol}
+            {minReturn.toFixed(6)} {toToken.symbol}
           </p>
         </div>
       </div>

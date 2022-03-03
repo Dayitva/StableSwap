@@ -1,3 +1,5 @@
+import config from "../config";
+
 /**
  *
  * @param {Array<Number>} tokenPool
@@ -8,31 +10,37 @@
 function getD(tokenPool, A, N_COINS) {
   // tokenPool = [token1_amount, token2_amount];
   let S = tokenPool[0] + tokenPool[1];
+  if (S === 0) {
+    return 0;
+  }
   let Dprev = 0;
 
   let D = S;
   let Ann = A * N_COINS;
-  let D_P = D;
 
   while (Math.abs(D - Dprev) > 1) {
+    let D_P = D;
+    // console.log({ D, Dprev });
     D_P = D;
-    let x = 0;
-    while (x < N_COINS) {
-      D_P = (D_P * D) / (N_COINS * tokenPool[x]);
-      x += 1;
-    }
+
+    D_P = (D_P * D) / (N_COINS * tokenPool[0]);
+    D_P = (D_P * D) / (N_COINS * tokenPool[1]);
+
     Dprev = D;
     let D1 = (Ann * S + D_P * N_COINS) * D;
     let D2 = (Ann - 1) * D + (N_COINS + 1) * D_P;
     D = D1 / D2;
   }
+  console.log("dy is all good");
   return D;
 }
 
 function getY(tokenPool, A, x, N_COINS) {
   // x is the amount that we want to exchange.
   // 1 and j are the index of tokens while exchanging from i -> j
+  console.log("Before getD");
   let D = getD(tokenPool, A, N_COINS);
+  console.log("After getD");
   let c = D;
   let Ann = A * N_COINS;
 
@@ -51,24 +59,34 @@ function getY(tokenPool, A, x, N_COINS) {
   return y;
 }
 
+// const decimals = { 0: 18, 1: 6 };
+
 function getDy(tokenPool, i, j, dx, A, N_COINS) {
   // From i to j `dx` amount of tokens.
-  let x = tokenPool[i] + dx * 10 ** 9;
+  console.log("getDy", tokenPool, i, j, dx, A, N_COINS);
+  let x = tokenPool[i] + dx;
+  console.log(x);
   let y = getY(tokenPool, A, x, N_COINS);
   let dy = tokenPool[j] - y;
-  return (dy / 10 ** 9).toFixed(4);
+  console.log(dy);
+  return dy - (config.fee / 100) * dy;
 }
 
-function estimateTokensByLp(tokenPool, _amount) {
-  let token_supply = tokenPool[0] + tokenPool[1];
+function estimateTokensByLp(tokenPool, adminFee, _amount, lpSupply) {
+  // let token_supply = tokenPool[0] + tokenPool[1];
 
-  let _x4 = 0;
+  // let _x4 = 0;
   let tokenOut = {};
-  while (_x4 < tokenPool.length) {
-    let value = (tokenPool[_x4] * _amount * 10 ** 9) / token_supply;
-    tokenOut[_x4] = value / 10 ** 9;
-    _x4 += 1;
-  }
+
+  // For first token.
+  let val = ((tokenPool[0] - adminFee[0]) * _amount) / lpSupply;
+  // val /= 10 ** 18 / config.tokens[0].decimals;
+  tokenOut[0] = val;
+
+  val = ((tokenPool[1] - adminFee[1]) * _amount) / lpSupply;
+  // val /= 10 ** 18 / config.tokens[1].decimals;
+  tokenOut[1] = val;
+
   return tokenOut;
 }
 

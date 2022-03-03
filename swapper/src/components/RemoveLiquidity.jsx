@@ -9,6 +9,7 @@ import axios from "axios";
 import { estimateTokensByLp } from "../utils/estimates";
 import config from "../config";
 import { TezosToolkit } from "@taquito/taquito";
+import { removeLiquidity } from "../utils/wallet";
 
 function RemoveLiquidity() {
   const [lpAmount, setLpAmount] = useState(0);
@@ -21,13 +22,23 @@ function RemoveLiquidity() {
   }
   async function updateOutTokens(newValue) {
     const { data } = await axios.get(
-      `https://api.granadanet.tzkt.io/v1/contracts/${CONFIG.StableSwapAddress}/storage`
+      `https://api.hangzhounet.tzkt.io/v1/contracts/${CONFIG.StableSwapAddress}/storage`
     );
     let tokenPool = [
-      parseInt(data.token_pool[0].pool),
-      parseInt(data.token_pool[1].pool),
+      parseInt(parseInt(data.token_pool[0].pool) / 10 ** 18),
+      parseInt(parseInt(data.token_pool[1].pool) / 10 ** 18),
     ];
-    let tokenAmount = estimateTokensByLp(tokenPool, newValue);
+    let adminFee = [
+      parseInt(parseInt(data.token_pool[0].admin_fee) / 10 ** 18),
+      parseInt(parseInt(data.token_pool[1].admin_fee) / 10 ** 18),
+    ];
+    let tokenAmount = estimateTokensByLp(
+      tokenPool,
+      adminFee,
+      parseInt(newValue),
+      parseInt(parseInt(data.lp_supply) / 10 ** 18)
+    );
+    console.log(tokenAmount);
     setOutTokens(tokenAmount);
   }
   const debounceSave = useCallback(
@@ -36,31 +47,38 @@ function RemoveLiquidity() {
     []
   );
 
-  async function removeLiquidity() {
-    const tezos = new TezosToolkit(config.rpcUrl);
-    const stableSwapContract = await tezos.wallet.at(CONFIG.StableSwapAddress);
-    const amount = parseInt(lpAmount * 10 ** 9);
-    const op = await stableSwapContract.methods.remove_liquidity(amount).send();
-    showMessage(`✅ ${op.opHash}`);
-    const result = op.confirmation();
-    console.log(result);
+  async function handleRemoveLiquidity() {
+    console.log(parseInt(outTokens[0]), parseInt(outTokens[1]));
+    console.log(outTokens);
+    const data = await removeLiquidity(
+      lpAmount,
+      parseInt(outTokens[0] * 10 ** config.tokens[0].decimals),
+      parseInt(outTokens[1] * 10 ** config.tokens[1].decimals)
+    );
   }
 
   return (
-    <div className="bg-gray-900 border-2 border-gray-700 p-4 rounded-md relative">
-      <div className="flex items-center justify-between">
+    <div className="rounded-md relative">
+      {/* <div className="flex items-center justify-between">
         <h1>Remove Liquidity</h1>
-      </div>
+      </div> */}
       <div className="space-y-4 mt-2">
         <PlainInputBox
           label={"Amount of LP tokens"}
           value={lpAmount}
           setValue={handleChangeLpEvent}
+          type={"number"}
         />
         <div>
-          <p className="text-gray-300 text-sm">Estimated Tokens:</p>
-          <p className="text-gray-300 text-xs ml-2">KUSD: {outTokens[0]}</p>
-          <p className="text-gray-300 text-xs ml-2">USDtz: {outTokens[1]}</p>
+          <h2 className="text-xl">Estimated Tokens:</h2>
+          <p className="text-gray-100 flex items-center justify-between">
+            <span>Amount of kUSD:</span>{" "}
+            <span className="font-medium"> {outTokens[0]} kUSD</span>
+          </p>
+          <p className="text-gray-100 flex items-center justify-between">
+            <span>Amount of wUSDC:</span>{" "}
+            <span className="font-medium">{outTokens[1]} wUSDC</span>
+          </p>
         </div>
       </div>
 
@@ -69,9 +87,9 @@ function RemoveLiquidity() {
           <div className="absolute inset-0 bg-blue-500 blur"></div>
           <Button
             text="Remove Liquidity"
-            bg="w-full bg-blue-500"
+            bg="w-full text-lg bg-gradient-to-r from-purple-500 to-blue-500"
             padding="py-4 relative"
-            onClick={removeLiquidity}
+            onClick={handleRemoveLiquidity}
           />
         </div>
       </div>

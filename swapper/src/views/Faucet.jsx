@@ -1,48 +1,36 @@
-import axios from "axios";
-import { useContext, useState } from "react";
-import { LoadingContext } from "../contexts/LoadingContext";
-import { ErrorContext } from "../contexts/ErrorContext";
+// import axios from "axios";
+// import { useContext, useState } from "react";
+// import { LoadingContext } from "../contexts/LoadingContext";
+// import { ErrorContext } from "../contexts/ErrorContext";
+// import PlainInputBox from "../components/PlainInputBox";
+import Button from "../components/forms/Button";
+import { getTokens } from "../utils/wallet";
 
 function Faucet() {
-  const {setShowLoading} = useContext(LoadingContext);
-  const { showMessage } = useContext(ErrorContext);
+  const handleGetTokens = async () => {
+    await getTokens();
+  };
 
-  const [address, setAddress] = useState("");
-  const giveMeSome = async (tokenName) => {
-    setShowLoading(true);
-    if (!address) {
-      showMessage("Not a valid address.")
-      return
-    }
-    try {
-      const {data} = await axios.post('https://faucet.divcorn.com/mint', {
-        address: address,
-        tokenName: tokenName
-      })
-      console.log(data) 
-      showMessage(data.opHash);
-      setShowLoading(false); 
-    } catch (error) {
-      console.log(error)
-      setShowLoading(false);
-    }
-  }
   return (
-    <div className="pt-20 container mx-auto px-4">
-      <h1 className="text-white font-semibold text-xl">
-        Liquibrium's Faucet
-      </h1>
-      <div className="mt-4"> 
-        <p className="mb-2">Enter your address:</p>
-        <input type="text" className="bg-gray-800 text-white w-full" value={address} onChange={(e) => {setAddress(e.target.value)}}/>
-        <button 
-          className="text-xs uppercase font-semibold px-6 py-2 bg-green-500 mt-2"
-          onClick={() => giveMeSome("usdtz")}
-        >Get USDtz</button>
-        <button 
-          className="text-xs uppercase font-semibold px-6 py-2 bg-blue-500 mt-2 ml-3"
-          onClick={() => giveMeSome("kusd")}
-        >Get KUSD</button>
+    <div className="px-4">
+      <div className="pt-16 mt-20">
+        {/* Main Content Goes Here... */}
+        <div className="mx-auto max-w-xl relative">
+          <div className="bg-gray-900 border-2 border-gray-700 hover:border-gray-600 transition p-4 rounded-md relative">
+            <h1 className="text-xl font-medium mb-2">Get Test Tokens</h1>
+            <p className="text-gray-300">
+              You can get our test kUSD & wUSDC tokens to try our platform, just
+              click on the button below and you'll get 1000 kUSD and 1000 wUSDC
+              token, ofc they don't have any real value associated with them.
+            </p>
+            <Button
+              text="Get Tokens"
+              bg="w-full text-lg bg-gradient-to-r from-purple-500 to-blue-500"
+              padding="py-4 relative mt-5"
+              onClick={handleGetTokens}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

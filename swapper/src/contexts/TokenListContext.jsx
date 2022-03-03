@@ -1,6 +1,8 @@
 /* Global State Variable to show/hide TokenList */
-import React, { createContext, useState } from "react";
-import { tokenList } from "../utils/tokenList";
+import React, { createContext, useEffect, useState } from "react";
+// import { tokenList } from "../utils/tokenList";
+import config from "../config";
+const tokenList = config.tokens;
 
 // `false` here is default value which mean the List will be hidden.
 const TokenListContext = createContext(false);
@@ -10,6 +12,16 @@ function TokenListProvider(props) {
   const [fromToken, setFromToken] = useState(tokenList[0]);
   const [toToken, setToToken] = useState(tokenList[1]);
   const [which, setWhich] = useState("from");
+
+  useEffect(() => {
+    if (toToken === fromToken) {
+      if (toToken.id === 1) {
+        setToToken(tokenList[1]);
+      } else {
+        setToToken(tokenList[0]);
+      }
+    }
+  }, [fromToken, toToken]);
 
   const changeWhich = (newValue) => {
     if (newValue === "from") {

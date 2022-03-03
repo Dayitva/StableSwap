@@ -3,10 +3,8 @@ import { ErrorContext } from "../contexts/ErrorContext";
 import { TokenListContext } from "../contexts/TokenListContext";
 import InputBox from "../components/swap/InputBox";
 import Button from "../components/forms/Button";
-import CONFIG from "../config";
 import { LoadingContext } from "../contexts/LoadingContext";
-import { TezosToolkit } from "@taquito/taquito";
-import config from "../config";
+import { addLiquidity } from "../utils/wallet";
 
 function AddLiquidity() {
   const { changeWhich, fromToken } = useContext(TokenListContext);
@@ -17,31 +15,11 @@ function AddLiquidity() {
   async function provideLiquidity() {
     setShowLoading(true);
     try {
-      const tezos = new TezosToolkit(config.rpcUrl);
-      const liquidityTokenContract = await tezos.wallet.at(fromToken.address);
-      const stableSwapContract = await tezos.wallet.at(
-        CONFIG.StableSwapAddress
+      const data = await addLiquidity(
+        fromToken,
+        parseInt(fromValue * 10 ** fromToken.decimals)
       );
-
-      const amount = parseInt(fromValue * 10 ** fromToken.decimals);
-
-      const batch = await tezos.wallet
-        .batch()
-        .withContractCall(
-          liquidityTokenContract.methods.approve(
-            CONFIG.StableSwapAddress,
-            amount
-          )
-        )
-        .withContractCall(
-          stableSwapContract.methods.add_liquidity(amount, fromToken.tokenId)
-        );
-
-      const batchOp = await batch.send();
-      setShowLoading(false);
-      console.log("Operation Hash: ", batchOp.opHash);
-      showMessage(`✅ ${batchOp.opHash}`);
-      await batchOp.confirmation();
+      showMessage(`✅ ${data.hash}`);
     } catch (error) {
       showMessage(`🔃 ${error.message}`);
       setShowLoading(false);
@@ -65,7 +43,7 @@ function AddLiquidity() {
           {/* <div className="absolute inset-0 bg-blue-500 blur"></div> */}
           <Button
             text="Add Liquidity"
-            bg="w-full bg-blue-500"
+            bg="w-full text-lg bg-gradient-to-r from-purple-500 to-blue-500"
             padding="py-4 relative"
             onClick={provideLiquidity}
           />

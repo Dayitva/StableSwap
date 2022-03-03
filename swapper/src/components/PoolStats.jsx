@@ -9,7 +9,7 @@ function PoolStats() {
 
   async function fetchTokenPool() {
     const { data } = await axios.get(
-      `https://api.granadanet.tzkt.io/v1/contracts/${CONFIG.StableSwapAddress}/storage`
+      `https://api.hangzhounet.tzkt.io/v1/contracts/${CONFIG.StableSwapAddress}/storage`
     );
     setTokenPool(data);
     // console.log(data)
@@ -35,22 +35,22 @@ function PoolStats() {
           <span>
             {Number(
               parseFloat(
-                parseInt(tokenPool?.token_pool[0].pool) / 10 ** 9
+                parseInt(tokenPool?.token_pool[0].pool) / 10 ** 18
               ).toFixed(2)
             ).toLocaleString()}
           </span>
         </div>
         <div className={balanceClass}>
           <img
-            src="https://img.templewallet.com/insecure/fit/64/64/ce/0/plain/https://quipuswap.com/tokens/usdtz.png"
-            alt="KUSD"
+            src="https://cloudflare-ipfs.com/ipfs/QmQfHU9mYLRDU4yh2ihm3zrvVFxDrLPiXNYtMovUQE2S2t"
+            alt="wUSDC"
             className="w-4 h-4"
           />
 
           <span className="">
             {Number(
               parseFloat(
-                parseInt(tokenPool?.token_pool[1].pool) / 10 ** 9
+                parseInt(tokenPool?.token_pool[1].pool) / 10 ** 18
               ).toFixed(2)
             ).toLocaleString()}
           </span>

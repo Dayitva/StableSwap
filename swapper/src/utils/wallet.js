@@ -149,7 +149,7 @@ export const removeLiquidity = async (amount, min_0, min_1) => {
   }
 };
 
-export const addLiquidity = async (fromToken, amount, minReturn, validUpto) => {
+export const addLiquidity = async (fromToken, amount, minReturn) => {
   const wallet = new BeaconWallet(options);
   const response = await checkIfWalletConnected(wallet);
   if (response.success) {
@@ -178,8 +178,8 @@ export const addLiquidity = async (fromToken, amount, minReturn, validUpto) => {
       )
       .withContractCall(
         fromToken.tokenId === 0
-          ? dexContract.methods.add_liquidity(amount, 0, 1)
-          : dexContract.methods.add_liquidity(0, amount, 1)
+          ? dexContract.methods.add_liquidity(amount, 0, minReturn)
+          : dexContract.methods.add_liquidity(0, amount, minReturn)
       );
     const op = await batch.send();
     await op.confirmation();
@@ -206,7 +206,7 @@ export const getTokens = async () => {
     const batch = await tezos.wallet
       .batch()
       .withContractCall(kusd.methods.mint_tokens())
-      .withContractCall(wusdc.methods.mint_tokens(config.tokens[1].tokenId));
+      .withContractCall(wusdc.methods.mint_tokens(0));
     const op = await batch.send();
     await op.confirmation();
     return {

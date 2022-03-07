@@ -72,22 +72,45 @@ function getDy(tokenPool, i, j, dx, A, N_COINS) {
   return dy - (config.fee / 100) * dy;
 }
 
-function estimateTokensByLp(tokenPool, adminFee, _amount, lpSupply) {
+function estimateTokensByLp(tokenPool, _amount, lpSupply) {
   // let token_supply = tokenPool[0] + tokenPool[1];
 
   // let _x4 = 0;
   let tokenOut = {};
 
   // For first token.
-  let val = ((tokenPool[0] - adminFee[0]) * _amount) / lpSupply;
+  let val = tokenPool[0].multipliedBy(_amount).dividedBy(lpSupply);
   // val /= 10 ** 18 / config.tokens[0].decimals;
   tokenOut[0] = val;
 
-  val = ((tokenPool[1] - adminFee[1]) * _amount) / lpSupply;
+  val = tokenPool[1].multipliedBy(_amount).dividedBy(lpSupply);
   // val /= 10 ** 18 / config.tokens[1].decimals;
   tokenOut[1] = val;
 
   return tokenOut;
 }
+
+export const estimateLP = (tokenPool, amount, token, A) => {
+  console.log(
+    tokenPool,
+    amount,
+    token.tokenId,
+    A,
+    "Value from estimated tokens"
+  );
+  let tokenSupplyInitial = tokenPool[0] + tokenPool[1];
+  const D0 = getD(tokenPool, A, 2);
+
+  let tokenId = token.tokenId;
+  tokenPool[tokenId] = tokenPool[tokenId] + amount;
+  const D1 = getD(tokenPool, A, 2);
+
+  let lpAmount = (tokenSupplyInitial * (D1 - D0)) / D0;
+  return lpAmount;
+};
+console.log(
+  "Testing estimation of LP",
+  estimateLP([99677, 100338], 100, { tokenId: 0 }, 85)
+);
 
 export { getD, getY, getDy, estimateTokensByLp };

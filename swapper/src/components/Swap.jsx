@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import InputBox from "./swap/InputBox";
 import Button from "./forms/Button";
 import { TokenListContext } from "../contexts/TokenListContext";
@@ -14,25 +14,37 @@ import axios from "axios";
 import SlippageCalculator from "./slippage/SlippageCalculator";
 import { useSwapCalculation } from "../hooks/useSwapCalculation";
 import { exchange } from "../utils/wallet";
+import SlippageBar from "./slippage/SlippageBar";
+import TimeSlippageBar from "./slippage/TimeSlippageBar";
+import config from "../config";
 
 function Swap() {
   const { changeWhich, setFromToken, setToToken, fromToken, toToken } =
     useContext(TokenListContext);
-  // const { showMessage } = useContext(ErrorContext);
   const { setShowLoading } = useContext(LoadingContext);
 
   const slippages = [0.25, 0.5, 1.0];
   const [currentSlippage, setCurrentSlippage] = useState(slippages[0]);
   const [minReturn, setMinReturn] = useState(0);
+  const durations = [1, 5, 10, 20];
+  const [duration, setDuration] = useState(durations[0]);
 
-  // const [fromValue, setFromValue] = useState(0);
-  // const [toValue, setToValue] = useState(0);
   const { fromValue, toValue, setFromValue, setToValue } = useSwapCalculation();
   const giveIJ = () => {
     let i = fromToken.tokenId;
     let j = toToken.tokenId;
     return { i, j };
   };
+  useEffect(() => {
+    setMinReturn(() => {
+      return (
+        toValue &&
+        toValue -
+          (currentSlippage * toValue) / 100 -
+          (config.fee * toValue) / 100
+      );
+    });
+  }, [currentSlippage, fromValue, toValue]);
 
   const debounceSave = useCallback(
     // eslint-disable-line react-hooks/exhaustive-deps
@@ -97,43 +109,22 @@ function Swap() {
     setFromToken(toToken);
     setToToken(oldFromToken);
   };
-  // function calculateOutTokens() {
-  //   // if (!tezos) {
-  //   //   return 0;
-  //   // }
-  //   const decimals = getDecimals(tezos, fromToken.address);
-  //   console.log(decimals);
-  // }
 
   async function exchangeTokens() {
-    // try {
     setShowLoading(true);
-    const validUpto = new Date(Date.now() + 60000).toISOString();
+    const validUpto = new Date(Date.now() + duration * 60 * 1000).toISOString();
     const data = await exchange(
       fromToken,
       parseInt(fromValue * 10 ** fromToken.decimals),
       parseInt(minReturn * 10 ** toToken.decimals),
       validUpto
     );
-    // } catch (err) {
-    //   setShowLoading(false);
-    //   showMessage(err.message);
-    //   console.log(err);
-    // }
   }
 
   return (
     <div className="bg-gray-900 border-2 border-gray-700 hover:border-gray-600 transition p-4 rounded-md relative">
       <div className="flex items-center justify-between border-b border-gray-700 pb-2 mb-3">
         <h1 className="text-lg">Swap</h1>
-        {/* <div className="space-x-2">
-          <button onClick={handleInterChange}>
-            <RefreshIcon className="w-5 h-5" />
-          </button>
-          <button>
-            <CalculatorIcon className="w-5 h-5" />
-          </button>
-        </div> */}
       </div>
       <div className="space-y-4 mt-2">
         <InputBox
@@ -153,13 +144,45 @@ function Swap() {
           token={toToken}
         />
       </div>
-      <SlippageCalculator
-        slippages={slippages}
-        currentSlippage={currentSlippage}
-        setCurrentSlippage={setCurrentSlippage}
-        minReturn={minReturn}
-        setMinReturn={setMinReturn}
-      />
+      <div>
+        <SlippageBar
+          slippages={slippages}
+          currentSlippage={currentSlippage}
+          setCurrentSlippage={setCurrentSlippage}
+        />
+      </div>
+      <div>
+        <TimeSlippageBar
+          durations={durations}
+          currentDuration={duration}
+          setCurrentDuration={setDuration}
+          time={true}
+        />
+      </div>
+      <div className="px-2">
+        {/* Div to show calculations. */}
+        <div>
+          <h2 className="font-semibold text-lg mt-3 uppercase">Calculations</h2>
+        </div>
+        <div className="flex justify-between items-center">
+          <p>Fee: </p>
+          <p>
+            {((config.fee * toValue) / 100).toFixed(6)} {toToken.symbol}
+          </p>
+        </div>
+        <div className="flex justify-between items-center">
+          <p>Price impact: </p>
+          <p>
+            {((currentSlippage * toValue) / 100).toFixed(6)} {toToken.symbol}
+          </p>
+        </div>
+        <div className="flex justify-between items-center">
+          <p>Minimum returns: </p>
+          <p>
+            {minReturn.toFixed(6)} {toToken.symbol}
+          </p>
+        </div>
+      </div>
       <div className="mt-8">
         <div className="relative">
           {/* <div className="absolute inset-0 bg-blue-500 blur"></div> */}

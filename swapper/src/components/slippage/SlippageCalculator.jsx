@@ -54,6 +54,8 @@ export default function SlippageCalculator({
               );
               console.log(currentSlippage);
             }}
+            value={currentSlippage}
+            active={!slippages.includes(currentSlippage)}
           />
         </div>
       </div>

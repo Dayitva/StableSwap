@@ -9,9 +9,9 @@ export default function TimeSlippageBar({
 }) {
   return (
     <div className="mt-3">
-      <div className="flex items-center justify-between mt-4">
+      <div className="flex flex-col sm:flex-row items-start space-y-1 sm:space-y-0 sm:items-center sm:justify-between mt-4">
         <div>
-          <h1 className="text-md ml-2">Transaction Deadline</h1>
+          <h1 className="text-md font-semibold">Transaction Deadline</h1>
         </div>
         <div className="flex items-center justify-end space-x-2">
           {/* For selecting slippage tolerance. */}

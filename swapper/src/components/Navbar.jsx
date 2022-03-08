@@ -1,6 +1,5 @@
 import React from "react";
 import Button from "./forms/Button";
-// import { ErrorContext } from "../contexts/ErrorContext";
 import Jdenticon from "react-jdenticon";
 import { NavLink } from "react-router-dom";
 import { ArrowRightIcon, MenuIcon, XIcon } from "@heroicons/react/outline";
@@ -44,13 +43,10 @@ function Navbar() {
   }, [setWallet]);
 
   return (
-    <div className="fixed left-0 right-0 top-0 h-24 shadow-md border-b-2 border-gray-900 z-40 bg-dark">
+    <div className="fixed left-0 right-0 top-0 sm:h-24 h-16 shadow-md border-b-2 border-gray-900 z-40 bg-dark">
       <nav className="relative flex items-stretch container mx-auto h-full justify-between px-4">
         <div className="flex items-center justify-center">
-          {/* <h1 className="font-semibold uppercase text-lg text-gray-200">
-            Liquibrium
-          </h1> */}
-          <img src="/assets/logo.png" alt="Logo" className="h-44" />
+          <img src="/assets/logo.png" alt="Logo" className="h-24 sm:h-44" />
         </div>
         <div
           className={`absolute md:static md:block top-full left-0 right-0 bg-black ${
@@ -72,7 +68,7 @@ function Navbar() {
             })}
           </ul>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-4">
           {wallet ? <Jdenticon size="42" value={wallet} /> : ""}
           <Button
             text={
@@ -80,14 +76,14 @@ function Navbar() {
                 ? `${wallet.slice(0, 5)}...${wallet.slice(32, 36)}`
                 : "CONNECT"
             }
-            bg="bg-gradient-to-r from-purple-500 to-blue-500"
+            bg="bg-gradient-to-r from-purple-500 to-blue-500 font-semibold"
             onClick={!wallet ? handleConnectWallet : handleDisconnectWallet}
           />
           <button
             onClick={() => {
               setMobileNav(!mobileNav);
             }}
-            className="md:hidden"
+            className="md:hidden bg-gray-800 p-2 rounded-sm"
           >
             {mobileNav ? (
               <XIcon className="w-5 h-5" />

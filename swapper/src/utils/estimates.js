@@ -69,7 +69,7 @@ function getDy(tokenPool, i, j, dx, A, N_COINS) {
   let y = getY(tokenPool, A, x, N_COINS);
   let dy = tokenPool[j] - y;
   console.log(dy);
-  return dy - (config.fee / 100) * dy;
+  return (dy - (config.fee / 100) * dy).toFixed(5);
 }
 
 function estimateTokensByLp(tokenPool, _amount, lpSupply) {

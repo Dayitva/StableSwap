@@ -122,9 +122,9 @@ function Swap() {
   }
 
   return (
-    <div className="bg-gray-900 border-2 border-gray-700 hover:border-gray-600 transition p-4 rounded-md relative">
+    <div className="bg-gray-900 border-2 border-gray-700 hover:border-gray-600 transition p-2 sm:p-4 rounded-md relative mb-20">
       <div className="flex items-center justify-between border-b border-gray-700 pb-2 mb-3">
-        <h1 className="text-lg">Swap</h1>
+        <h1 className="text-sm font-semibold sm:text-lg">Swap</h1>
       </div>
       <div className="space-y-4 mt-2">
         <InputBox
@@ -159,37 +159,38 @@ function Swap() {
           time={true}
         />
       </div>
-      <div className="px-2">
+      <div className="sm:px-2 mt-4">
         {/* Div to show calculations. */}
         <div>
-          <h2 className="font-semibold text-lg mt-3 uppercase">Calculations</h2>
+          <h2 className="font-semibold text-sm sm:text-lg mt-3 uppercase">
+            Calculations
+          </h2>
         </div>
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center text-xs sm:text-base">
           <p>Fee: </p>
           <p>
             {((config.fee * toValue) / 100).toFixed(6)} {toToken.symbol}
           </p>
         </div>
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center text-xs sm:text-base">
           <p>Price impact: </p>
           <p>
             {((currentSlippage * toValue) / 100).toFixed(6)} {toToken.symbol}
           </p>
         </div>
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center text-xs sm:text-base">
           <p>Minimum returns: </p>
           <p>
             {minReturn.toFixed(6)} {toToken.symbol}
           </p>
         </div>
       </div>
-      <div className="mt-8">
+      <div className="sm:mt-8 mt-3">
         <div className="relative">
-          {/* <div className="absolute inset-0 bg-blue-500 blur"></div> */}
           <Button
             text="Swap Tokens"
-            bg="w-full text-lg bg-gradient-to-r from-purple-500 to-blue-500"
-            padding="py-4 relative"
+            bg="w-full sm:text-lg text-xs font-semibold bg-gradient-to-r from-purple-500 to-blue-500"
+            padding="sm:py-4 py-3 relative"
             onClick={exchangeTokens}
           />
         </div>

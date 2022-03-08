@@ -18,7 +18,7 @@ function App() {
   return (
     <div className="min-h-screen bg-dark relative text-white">
       <BrowserRouter>
-        <Navbar />
+        {/* <Navbar /> */}
         {/* Loading component */}
         <Loading />
         {/* Token Selctor for the formToken and ToToken */}

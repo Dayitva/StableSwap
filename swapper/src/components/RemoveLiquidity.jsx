@@ -98,12 +98,14 @@ function RemoveLiquidity() {
               setCurrentSlippage={setSlippage}
             />
           </div>
-          <h2 className="text-xl">Estimated Tokens:</h2>
-          <p className="text-gray-100 flex items-center justify-between">
+          <h2 className="text-md sm:text-xl font-semibold">
+            Estimated Tokens:
+          </h2>
+          <p className="text-gray-100 flex items-center justify-between text-xs sm:text-base">
             <span>Amount of kUSD:</span>{" "}
             <span className="font-medium"> {outTokens[0] / 10 ** 18} kUSD</span>
           </p>
-          <p className="text-gray-100 flex items-center justify-between">
+          <p className="text-gray-100 flex items-center justify-between text-xs sm:text-base">
             <span>Amount of wUSDC:</span>{" "}
             <span className="font-medium">{outTokens[1] / 10 ** 18} wUSDC</span>
           </p>
@@ -115,8 +117,8 @@ function RemoveLiquidity() {
           <div className="absolute inset-0 bg-blue-500 blur"></div>
           <Button
             text="Remove Liquidity"
-            bg="w-full text-lg bg-gradient-to-r from-purple-500 to-blue-500"
-            padding="py-4 relative"
+            bg="w-full sm:text-lg text-xs font-semibold bg-gradient-to-r from-purple-500 to-blue-500"
+            padding="sm:py-4 py-3 relative"
             onClick={handleRemoveLiquidity}
           />
         </div>

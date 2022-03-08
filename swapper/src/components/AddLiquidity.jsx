@@ -87,8 +87,8 @@ function AddLiquidity() {
             setCurrentSlippage={setSlippage}
           />
         </div>
-        <h2 className="text-xl">Estimated Tokens:</h2>
-        <p className="text-gray-100 flex items-center justify-between">
+        <h2 className="text-md sm:text-xl mt-3">Estimated Tokens:</h2>
+        <p className="text-gray-100 flex items-center justify-between text-xs sm:text-base">
           <span>Minimum LP recieve:</span>{" "}
           <span className="font-medium"> {min || 0} LLP</span>
         </p>
@@ -98,8 +98,8 @@ function AddLiquidity() {
           {/* <div className="absolute inset-0 bg-blue-500 blur"></div> */}
           <Button
             text="Add Liquidity"
-            bg="w-full text-lg bg-gradient-to-r from-purple-500 to-blue-500"
-            padding="py-4 relative"
+            bg="w-full sm:text-lg text-xs font-semibold bg-gradient-to-r from-purple-500 to-blue-500"
+            padding="sm:py-4 py-3 relative"
             onClick={provideLiquidity}
           />
         </div>

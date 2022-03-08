@@ -4,6 +4,7 @@
 // import { ErrorContext } from "../contexts/ErrorContext";
 // import PlainInputBox from "../components/PlainInputBox";
 import Button from "../components/forms/Button";
+import Navbar from "../components/Navbar";
 import { getTokens } from "../utils/wallet";
 
 function Faucet() {
@@ -13,6 +14,7 @@ function Faucet() {
 
   return (
     <div className="px-4">
+      <Navbar />
       <div className="pt-16 mt-20">
         {/* Main Content Goes Here... */}
         <div className="mx-auto max-w-xl relative">

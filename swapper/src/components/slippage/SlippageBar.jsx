@@ -8,9 +8,9 @@ export default function SlippageBar({
 }) {
   return (
     <div className="mt-3">
-      <div className="flex items-center justify-between mt-4">
+      <div className="flex flex-col sm:flex-row items-start space-y-1 sm:space-y-0 sm:items-center sm:justify-between mt-4">
         <div>
-          <h1 className="text-md ml-2">Slippage</h1>
+          <h1 className="font-semibold text-md">Slippage</h1>
         </div>
         <div className="flex items-center justify-end space-x-2">
           {/* For selecting slippage tolerance. */}
@@ -26,7 +26,6 @@ export default function SlippageBar({
           ))}
           <SlippageInputBadge
             slippage={currentSlippage}
-            // onClick={(e) => setCurrentSlippage(e.target.value)}
             onChange={(e) => {
               setCurrentSlippage((old) =>
                 e.target.value < 30 ? e.target.value : old

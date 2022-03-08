@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import CONFIG from "../config";
 import axios from "axios";
 
-const balanceClass = `bg-gray-800 mt-2 py-2 px-6 rounded-full flex items-center space-x-2`;
+const balanceClass = `bg-gray-800 mt-2 py-2 px-6 rounded-full flex items-center space-x-2 sm:text-base text-xs font-semibold`;
 
 function PoolStats() {
   const [tokenPool, setTokenPool] = useState(null);
@@ -12,7 +12,6 @@ function PoolStats() {
       `https://api.hangzhounet.tzkt.io/v1/contracts/${CONFIG.StableSwapAddress}/storage`
     );
     setTokenPool(data);
-    // console.log(data)
   }
 
   useEffect(() => {
@@ -23,8 +22,10 @@ function PoolStats() {
   }, []);
 
   return (
-    <div className="bg-gray-900 p-4 rounded-md text-gray-100 border-2 border-gray-700">
-      <p className="font-lg border-b border-gray-700 pb-3 mb-2">Pool Stats</p>
+    <div className="bg-gray-900 sm:p-4 p-2 rounded-md text-gray-100 border-2 border-gray-700">
+      <p className="text-sm font-semibold sm:text-base border-b border-gray-700 sm:pb-3 pb-1 sm:mb-2">
+        Pool Stats
+      </p>
       <div className="flex items-center justify-around relative">
         <div className={balanceClass}>
           <img

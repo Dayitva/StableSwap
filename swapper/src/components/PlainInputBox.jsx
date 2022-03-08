@@ -12,7 +12,7 @@ function PlainInputBox({ label, value, setValue, type }) {
         onChange={(e) => {
           setValue(e.target.value);
         }}
-        className="w-full bg-transparent text-2xl font-semibold px-3 py-6 text-right focus:outline-none"
+        className="w-full bg-transparent text-xl sm:text-2xl font-semibold px-3 py-3 sm:py-6 text-right focus:outline-none"
       />
     </div>
   );

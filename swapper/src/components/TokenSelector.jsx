@@ -17,11 +17,11 @@ function TokenSelector() {
   }, [which, fromToken.id]);
   return (
     <div
-      className="w-[30rem] bg-gray-900 rounded-md shadow-2xl border-2 border-gray-600"
+      className="w-[30rem] bg-gray-900 rounded-md shadow-2xl border-2 border-gray-600 mx-2"
       style={{ width: "30rem" }}
     >
       <div className="p-3 flex items-center justify-between border-b border-gray-700">
-        <h2 className="text-xl">Select a token</h2>
+        <h2 className="sm:text-xl text-md font-semibold">Select a token</h2>
         <button
           onClick={() => {
             setShow(!show);
@@ -33,7 +33,6 @@ function TokenSelector() {
       <div className="">
         {tokenList.map((token) => {
           return (
-            // Render a component here.
             <div
               key={token.id}
               className="flex items-center px-6 py-4 hover:bg-gray-800 cursor-pointer transition"
@@ -48,10 +47,14 @@ function TokenSelector() {
               />
               <div className="flex-1 ml-4 cursor-pointer flex justify-between items-center">
                 <div>
-                  <h1 className="text-lg font-medium">{token.symbol}</h1>
-                  <p className="text-sm text-gray-400">{token.name}</p>
+                  <h1 className="text-base sm:text-lg font-medium">
+                    {token.symbol}
+                  </h1>
+                  <p className="text-xs sm:text-sm text-gray-400">
+                    {token.name}
+                  </p>
                 </div>
-                <span className="bg-purple-600 px-5 py-1.5 rounded-full text-xs font-semibold tracking-wide">
+                <span className="bg-purple-600 px-4 sm:px-5 py-1 sm:py-1.5 rounded-full text-xxs sm:text-xs font-semibold tracking-wide">
                   FA2
                 </span>
               </div>

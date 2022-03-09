@@ -4,7 +4,7 @@ import ReactTooltip from "react-tooltip";
 
 function Home() {
   const redirectToApp = async () => {
-    window.location.href = "https://testnet.liquibrium.finance/exchange";
+    // window.location.href = "https://testnet.liquibrium.finance/exchange";
   };
 
   const showDocs = async () => {

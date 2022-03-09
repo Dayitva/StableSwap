@@ -1,5 +1,4 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { ErrorContext } from "../contexts/ErrorContext";
 import { TokenListContext } from "../contexts/TokenListContext";
 import InputBox from "../components/swap/InputBox";
 import Button from "../components/forms/Button";
@@ -18,7 +17,6 @@ function AddLiquidity() {
 
   const { changeWhich, fromToken } = useContext(TokenListContext);
   const [fromValue, setFromValue] = useState(0);
-  const { showMessage } = useContext(ErrorContext);
   const { setShowLoading } = useContext(LoadingContext);
   const [outLP, setOutLP] = useState(0);
   const [min, setMin] = useState(0);
@@ -111,7 +109,6 @@ function AddLiquidity() {
       </div>
       <div className="mt-4">
         <div className="relative">
-          {/* <div className="absolute inset-0 bg-blue-500 blur"></div> */}
           <Button
             text="Add Liquidity"
             bg="w-full sm:text-lg text-xs font-semibold bg-gradient-to-r from-purple-500 to-blue-500"

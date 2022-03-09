@@ -24,7 +24,7 @@ function App() {
         <Loading />
         <ToastContainer position="bottom-right" theme="dark" />
         {show ? (
-          <div className="absolute inset-0 bg-black z-50 bg-opacity-90 flex items-start pt-36 justify-center">
+          <div className="fixed inset-0 bg-black z-50 bg-opacity-90 flex items-start pt-36 justify-center">
             <TokenSelector />
           </div>
         ) : (

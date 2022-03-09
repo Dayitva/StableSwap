@@ -3,14 +3,13 @@ import Button from "../components/forms/Button";
 import ReactTooltip from "react-tooltip";
 
 function Home() {
-
   const redirectToApp = async () => {
     window.location.href = "https://testnet.liquibrium.finance/exchange";
   };
 
   const showDocs = async () => {
     alert("Coming Soon");
-  }
+  };
 
   return (
     <div className="pb-20">
@@ -19,16 +18,16 @@ function Home() {
         {/* Main hero section div. */}
         <div
           className="flex items-center 
-        justify-between py-10 flex-col md:flex-row mx-auto max-w-4xl pt-10 px-4"
+        justify-between py-10 flex-col md:flex-row mx-auto max-w-4xl pt-28 px-4"
         >
           <div className="flex-1 order-2 md:order-1 mt-20 md:mt-0">
             <h1 className="text-5xl sm:text-6xl font-semibold mb-2">
               Liquibrium
             </h1>
             <p className="text-md sm:text-xl sm:leading-8 max-w-lg">
-              Liquibrium is a decentralized exchange for the Tezos ecosystem which
-              focuses on stable assets and provides the most optimum exchange
-              value.
+              Liquibrium is a decentralized exchange for the Tezos ecosystem
+              which focuses on stable assets and provides the most optimum
+              exchange value.
             </p>
             <div className="flex items-center space-x-4 mt-7">
               <Button

@@ -102,12 +102,6 @@ function Swap() {
     setToValue(toValue || 0);
   }
 
-  const handleInterChange = () => {
-    const oldFromToken = fromToken;
-    setFromToken(toToken);
-    setToToken(oldFromToken);
-  };
-
   async function exchangeTokens() {
     if (!fromValue || !toValue) {
       toast("Invalid Values.");
@@ -178,7 +172,6 @@ function Swap() {
         />
       </div>
       <div className="sm:px-2 mt-4">
-        {/* Div to show calculations. */}
         <div>
           <h2 className="font-semibold text-sm sm:text-lg mt-3 uppercase">
             Calculations

@@ -4,7 +4,6 @@ import Button from "../components/forms/Button";
 import Navbar from "../components/Navbar";
 import { getTokens } from "../utils/wallet";
 import { LoadingContext } from "../contexts/LoadingContext";
-import { set } from "lodash";
 
 function Faucet() {
   const { setShowLoading } = useContext(LoadingContext);

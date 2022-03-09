@@ -148,14 +148,14 @@ def remove_liquidity(_amount):
 print(TOKEN_POOL)
 print("For", 1000, "of token 1 you get", xchg(1, 1000), "of token 0.") 
 
-print(TOKEN_POOL)
-print("For", 100000, "of LP tokens you get", remove_liquidity(100000), "tokens.")
+# print(TOKEN_POOL)
+# print("For", 100000, "of LP tokens you get", remove_liquidity(100000), "tokens.")
 
-print(TOKEN_POOL)
-print(ADMIN_FEE_POOL)
+# print(TOKEN_POOL)
+# print(ADMIN_FEE_POOL)
 
-for i, j in zip(TOKEN_POOL, ADMIN_FEE_POOL):
-    print(i - j)
+# for i, j in zip(TOKEN_POOL, ADMIN_FEE_POOL):
+#     print(i - j)
     
 # print("For", 5_000, "of token 1 you get", add_liquidity(1000, 0), " LP tokens.")
   

@@ -96,7 +96,7 @@ function Home() {
                   />
                 </g>
               </svg>
-              <p className="text-sm font-semibold mt-2">Tezo Foundation</p>
+              <p className="text-sm font-semibold mt-2">Tezos Foundation</p>
             </a>
           </div>
         </div>

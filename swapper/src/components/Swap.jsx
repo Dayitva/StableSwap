@@ -163,23 +163,29 @@ function Swap() {
         {/* Div to show calculations. */}
         <div>
           <h2 className="font-semibold text-sm sm:text-lg mt-3 uppercase">
-            Calculations
+            Exchange details
           </h2>
         </div>
         <div className="flex justify-between items-center text-xs sm:text-base">
           <p>Fee: </p>
           <p>
-            {((config.fee * toValue) / 100).toFixed(6)} {toToken.symbol}
+            {config.fee}%
+          </p>
+        </div>
+        <div className="flex justify-between items-center text-xs sm:text-base">
+          <p>Exchange Rate: </p>
+          <p>
+            {(toValue/fromValue).toFixed(4)}
           </p>
         </div>
         <div className="flex justify-between items-center text-xs sm:text-base">
           <p>Price impact: </p>
           <p>
-            {((currentSlippage * toValue) / 100).toFixed(6)} {toToken.symbol}
+            {((fromValue - toValue)/ fromValue * 100).toFixed(4)}%
           </p>
         </div>
         <div className="flex justify-between items-center text-xs sm:text-base">
-          <p>Minimum returns: </p>
+          <p>Minimum received: </p>
           <p>
             {minReturn.toFixed(6)} {toToken.symbol}
           </p>

@@ -2,16 +2,14 @@ import React, { useCallback, useContext, useEffect, useState } from "react";
 import InputBox from "./swap/InputBox";
 import Button from "./forms/Button";
 import { TokenListContext } from "../contexts/TokenListContext";
-// import { RefreshIcon, CalculatorIcon } from "@heroicons/react/outline";
 import CONFIG from "../config";
-// import { ErrorContext } from "../contexts/ErrorContext";
 import { LoadingContext } from "../contexts/LoadingContext";
 
 import { debounce } from "lodash";
 import { getDy } from "../utils/estimates";
+import { toast } from "react-toastify";
 
 import axios from "axios";
-import SlippageCalculator from "./slippage/SlippageCalculator";
 import { useSwapCalculation } from "../hooks/useSwapCalculation";
 import { exchange } from "../utils/wallet";
 import SlippageBar from "./slippage/SlippageBar";
@@ -111,14 +109,34 @@ function Swap() {
   };
 
   async function exchangeTokens() {
+    if (!fromValue || !toValue) {
+      toast("Invalid Values.");
+      return;
+    }
     setShowLoading(true);
     const validUpto = new Date(Date.now() + duration * 60 * 1000).toISOString();
-    const data = await exchange(
-      fromToken,
-      parseInt(fromValue * 10 ** fromToken.decimals),
-      parseInt(minReturn * 10 ** toToken.decimals),
-      validUpto
-    );
+    try {
+      const data = await exchange(
+        fromToken,
+        parseInt(fromValue * 10 ** fromToken.decimals),
+        parseInt(minReturn * 10 ** toToken.decimals),
+        validUpto
+      );
+      setShowLoading(false);
+      if (data.success) {
+        toast(
+          `Successfully Swapped: ${data.hash.slice(0, 5)}...${data.hash.slice(
+            data.hash.length - 4,
+            data.hash.length
+          )}`
+        );
+      } else {
+        toast(data.error);
+      }
+    } catch (e) {
+      setShowLoading(false);
+      toast("Error: " + e.message);
+    }
   }
 
   return (

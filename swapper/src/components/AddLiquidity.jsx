@@ -10,6 +10,7 @@ import { debounce } from "lodash";
 import { estimateLP } from "../utils/estimates";
 import axios from "axios";
 import CONFIG from "../config";
+import { toast } from "react-toastify";
 
 function AddLiquidity() {
   const slippages = [0.25, 0.5, 1.0];
@@ -30,18 +31,32 @@ function AddLiquidity() {
   }, [slippage, outLP]);
 
   async function provideLiquidity() {
-    setShowLoading(true);
+    if (!fromValue) {
+      toast("Invalid Values.");
+      return;
+    }
     try {
+      setShowLoading(true);
       const data = await addLiquidity(
         fromToken,
         parseInt(fromValue * 10 ** fromToken.decimals),
         parseInt(min * 10 ** fromToken.decimals)
       );
-      showMessage(`✅ ${data.hash}`);
+      setShowLoading(false);
+      if (data.success) {
+        toast(
+          `Successfully Added Liquidity: ${data.hash.slice(
+            0,
+            5
+          )}...${data.hash.slice(data.hash.length - 4, data.hash.length)}`
+        );
+      } else {
+        toast(data.error);
+      }
     } catch (error) {
       console.log(error);
-      showMessage(`🔃 ${error.message}`);
       setShowLoading(false);
+      toast(`Error: ${error.message}`);
     }
   }
 

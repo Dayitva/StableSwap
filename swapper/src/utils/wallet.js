@@ -114,6 +114,7 @@ export const exchange = async (fromToken, amount, minReturn, validUpto) => {
   } else {
     return {
       success: false,
+      error: "Can't connect the wallet.",
     };
   }
 };
@@ -171,32 +172,22 @@ export const addLiquidity = async (fromToken, amount, minReturn) => {
     const batch = await tezos.wallet
       .batch()
       .withContractCall(
-        // fromToken.isFA2
-        //   ? fromTokenContract.methods.update_operators([
-        //       {
-        //         add_operator: {
-        //           owner: pkh,
-        //           operator: config.StableSwapAddress,
-        //           token_id: 0,
-        //         },
-        //       },
-        //     ])
-        //   : fromTokenContract.methods.approve(config.StableSwapAddress, amount)
-        fromTokenContract.methods.update_operators([
-          {
-            add_operator: {
-              owner: pkh,
-              operator: config.StableSwapAddress,
-              token_id: 0,
-            },
-          },
-        ])
+        fromToken.isFA2
+          ? fromTokenContract.methods.update_operators([
+              {
+                add_operator: {
+                  owner: pkh,
+                  operator: config.StableSwapAddress,
+                  token_id: 0,
+                },
+              },
+            ])
+          : fromTokenContract.methods.approve(config.StableSwapAddress, amount)
       )
       .withContractCall(
-        // fromToken.tokenId === 0
-        //   ? dexContract.methods.add_liquidity(amount, 0, minReturn)
-        //   : dexContract.methods.add_liquidity(0, amount, minReturn)
-        dexContract.methods.add_liquidity(amount, 0, minReturn)
+        fromToken.tokenId === 0
+          ? dexContract.methods.add_liquidity(amount, 0, minReturn)
+          : dexContract.methods.add_liquidity(0, amount, minReturn)
       );
     const op = await batch.send();
     await op.confirmation();
@@ -207,6 +198,7 @@ export const addLiquidity = async (fromToken, amount, minReturn) => {
   } else {
     return {
       success: false,
+      error: "Can't connect to wallet.",
     };
   }
 };

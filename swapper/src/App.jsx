@@ -11,6 +11,8 @@ import { BrowserRouter, Route, Switch } from "react-router-dom";
 import { TokenListContext } from "./contexts/TokenListContext";
 import Loading from "./components/Loading";
 import Faucet from "./views/Faucet";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   const { show } = useContext(TokenListContext);
@@ -18,10 +20,9 @@ function App() {
   return (
     <div className="min-h-screen bg-dark relative text-white">
       <BrowserRouter>
-        {/* <Navbar /> */}
-        {/* Loading component */}
+        <Navbar />
         <Loading />
-        {/* Token Selctor for the formToken and ToToken */}
+        <ToastContainer position="bottom-right" theme="dark" />
         {show ? (
           <div className="absolute inset-0 bg-black z-50 bg-opacity-90 flex items-start pt-36 justify-center">
             <TokenSelector />
@@ -32,9 +33,9 @@ function App() {
         <Error />
         <Switch>
           <Route path="/" component={Home} exact />
-          {/* <Route path="/exchange" component={Exchange} exact />
+          <Route path="/exchange" component={Exchange} exact />
           <Route path="/liquidity" component={Liquidity} exact />
-          <Route path="/faucet" component={Faucet} exact /> */}
+          <Route path="/faucet" component={Faucet} exact />
         </Switch>
       </BrowserRouter>
     </div>

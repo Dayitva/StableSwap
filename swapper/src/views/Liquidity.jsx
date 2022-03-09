@@ -8,12 +8,7 @@ import Navbar from "../components/Navbar";
 
 function Liquidity() {
   const { wallet } = useWallet();
-  /**
-   *
-   * @param {User Address} userAddress
-   * @param {Bigmap Id of FA1.2 token} bigmapId
-   * @returns balance of the user.
-   */
+
   async function getBalance(userAddress, bigmapId) {
     const { data } = await axios.get(
       `https://api.granadanet.tzkt.io/v1/bigmaps/${bigmapId}/keys`

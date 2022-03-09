@@ -10,6 +10,8 @@ import { estimateLP } from "../utils/estimates";
 import axios from "axios";
 import CONFIG from "../config";
 import { toast } from "react-toastify";
+import { getUserAddress } from "../utils/wallet";
+import { fetchMaxBalanceFA12, fetchMaxBalanceFA2 } from "../utils/balance";
 
 function AddLiquidity() {
   const slippages = [0.25, 0.5, 1.0];
@@ -79,19 +81,56 @@ function AddLiquidity() {
     console.log(`Estimated LP pool tokens`, e);
     setOutLP(e);
   };
+  const handleMaxClick = async (type) => {
+    let token;
+    if (type === "from") {
+      token = fromToken;
+    } else if (type === "to") {
+      token = toToken;
+    }
+
+    const isFA2 = token.isFA2;
+    const userAddress = await getUserAddress();
+    let maxBalance = 0;
+    if (isFA2) {
+      maxBalance = await fetchMaxBalanceFA2(
+        userAddress,
+        token.balanceBigmap,
+        0
+      );
+    } else {
+      maxBalance = await fetchMaxBalanceFA12(userAddress, token.balanceBigmap);
+    }
+    console.log(maxBalance);
+    if (type === "from") {
+      setFromValue(maxBalance / 10 ** fromToken.decimals);
+    } else if (type === "to") {
+      setToValue(maxBalance / 10 ** toToken.decimals);
+    }
+  };
 
   return (
     <div>
       <div className="space-y-4 mt-2">
-        <InputBox
-          onTokenSwitchClick={() => {
-            changeWhich("from");
-          }}
-          value={fromValue}
-          setValue={handleValueChange}
-          token={fromToken}
-          type={"number"}
-        />
+        <div>
+          <InputBox
+            onTokenSwitchClick={() => {
+              changeWhich("from");
+            }}
+            value={fromValue}
+            setValue={handleValueChange}
+            token={fromToken}
+            type={"number"}
+          />
+          <div className="flex justify-end pt-1 pr-1">
+            <button
+              className="text-xs hover:underline"
+              onClick={() => handleMaxClick("from")}
+            >
+              MAX
+            </button>
+          </div>
+        </div>
       </div>
       <div>
         <div className="mb-3">

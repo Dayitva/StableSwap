@@ -203,6 +203,24 @@ export const addLiquidity = async (fromToken, amount, minReturn) => {
   }
 };
 
+export const getUserAddress = async () => {
+  const wallet = new BeaconWallet(options);
+  const response = await checkIfWalletConnected(wallet);
+  if (response.success) {
+    const tezos = new TezosToolkit(rpcURL);
+    tezos.setWalletProvider(wallet);
+    const pkh = await tezos.wallet.pkh();
+    return {
+      success: true,
+      pkh: pkh,
+    };
+  } else {
+    return {
+      success: false,
+    };
+  }
+};
+
 export const getTokens = async () => {
   const wallet = new BeaconWallet(options);
   const response = await checkIfWalletConnected(wallet);

@@ -3,6 +3,15 @@ import Button from "../components/forms/Button";
 import ReactTooltip from "react-tooltip";
 
 function Home() {
+
+  const redirectToApp = async () => {
+    window.location.href = "https://testnet.liquibrium.finance/exchange";
+  };
+
+  const showDocs = async () => {
+    alert("Coming Soon");
+  }
+
   return (
     <div className="pb-20">
       <ReactTooltip />
@@ -10,14 +19,14 @@ function Home() {
         {/* Main hero section div. */}
         <div
           className="flex items-center 
-        justify-between py-10 flex-col md:flex-row mx-auto max-w-4xl pt-28 px-4"
+        justify-between py-10 flex-col md:flex-row mx-auto max-w-4xl pt-10 px-4"
         >
           <div className="flex-1 order-2 md:order-1 mt-20 md:mt-0">
             <h1 className="text-5xl sm:text-6xl font-semibold mb-2">
               Liquibrium
             </h1>
             <p className="text-md sm:text-xl sm:leading-8 max-w-lg">
-              Liquibrium is a decentralized exchange for tezos ecosystem which
+              Liquibrium is a decentralized exchange for the Tezos ecosystem which
               focuses on stable assets and provides the most optimum exchange
               value.
             </p>
@@ -25,10 +34,12 @@ function Home() {
               <Button
                 text="Enter App"
                 bg="bg-gradient-to-r from-purple-500 to-blue-500 py-3 font-semibold uppercase"
+                onClick={redirectToApp}
               />
               <Button
                 text="Read Docs"
                 bg="bg-gray-700 py-3 font-semibold uppercase hover:bg-gray-800"
+                onClick={showDocs}
               />
             </div>
           </div>
@@ -99,7 +110,7 @@ function Home() {
           <ul className="flex space-x-4">
             <li>
               <a
-                href="#!"
+                href="https://twitter.com/liquibrium"
                 className="hover:text-purple-500 hover:underline text-sm"
               >
                 Twitter
@@ -107,10 +118,10 @@ function Home() {
             </li>
             <li>
               <a
-                href="#!"
+                href="https://discord.gg/nNnsp4fxqx"
                 className="hover:text-purple-500 hover:underline text-sm"
               >
-                Github
+                Discord
               </a>
             </li>
           </ul>

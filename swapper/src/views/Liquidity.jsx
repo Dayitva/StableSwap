@@ -4,6 +4,7 @@ import axios from "axios";
 import PoolStats from "../components/PoolStats";
 import useWallet from "../hooks/useWallet";
 import LiquidityTab from "../components/liquidity";
+import Navbar from "../components/Navbar";
 
 function Liquidity() {
   const { wallet } = useWallet();
@@ -44,6 +45,7 @@ function Liquidity() {
 
   return (
     <div>
+      <Navbar />
       <div className=" mx-auto max-w-xl pt-20 px-4">
         <div className="mt-8 mx-auto max-w-2xl relative">
           {/* Wrapper for swap component... */}

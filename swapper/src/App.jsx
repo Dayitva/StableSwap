@@ -18,7 +18,7 @@ function App() {
   return (
     <div className="min-h-screen bg-dark relative text-white">
       <BrowserRouter>
-        <Navbar />
+        {/* <Navbar /> */}
         {/* Loading component */}
         <Loading />
         {/* Token Selctor for the formToken and ToToken */}
@@ -32,9 +32,9 @@ function App() {
         <Error />
         <Switch>
           <Route path="/" component={Home} exact />
-          <Route path="/exchange" component={Exchange} exact />
+          {/* <Route path="/exchange" component={Exchange} exact />
           <Route path="/liquidity" component={Liquidity} exact />
-          <Route path="/faucet" component={Faucet} exact />
+          <Route path="/faucet" component={Faucet} exact /> */}
         </Switch>
       </BrowserRouter>
     </div>

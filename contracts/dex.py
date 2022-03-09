@@ -62,7 +62,6 @@ class Dex(sp.Contract, TokenUtility):
         self.init(
             N_COINS=sp.nat(2),
             A=sp.nat(85),
-            # paused = sp.bool(False),
             token_pool=sp.map(l={
                 0: sp.record(
                     address=x_address,
@@ -92,11 +91,6 @@ class Dex(sp.Contract, TokenUtility):
                 "content": sp.utils.bytes_of_string(metadata),
             }),
         )
-
-    # @sp.entry_point
-    # def togglePause(self):
-    #     sp.verify(sp.sender == self.data.admin, Error.ADMIN_ERROR)
-    #     self.data.paused = ~ self.data.paused
 
     @sp.private_lambda(with_storage="read-only", with_operations=True, wrap_call=True)
     def mint_lp(self, amount):
@@ -283,7 +277,6 @@ class Dex(sp.Contract, TokenUtility):
         sp.verify(self.data.token_pool[1].pool <= 0, Error.INITIALIZED_ERROR)
         sp.verify(sp.sender == self.data.admin, Error.ADMIN_ERROR)
         sp.verify(sp.amount == sp.tez(0), Error.NO_TEZ)
-        # sp.verify(self.data.paused == sp.bool(False), Error.PAUSED)
 
         # Transfer tokens from the user's account to our contract's address.
         self.transferToTokenId(
@@ -331,7 +324,6 @@ class Dex(sp.Contract, TokenUtility):
         sp.verify(i >= 0, Error.TOKEN_ERROR)
         sp.verify(i < self.data.N_COINS, Error.TOKEN_ERROR)
         sp.verify(sp.amount == sp.tez(0), Error.NO_TEZ)
-        # sp.verify(self.data.paused == sp.bool(False), Error.PAUSED)
 
         j = sp.as_nat(1-i)
 
@@ -372,7 +364,6 @@ class Dex(sp.Contract, TokenUtility):
     @sp.entry_point
     def add_liquidity(self, _amount0, _amount1, min_token):
         sp.verify(sp.amount == sp.tez(0), Error.NO_TEZ)
-        # sp.verify(self.data.paused == sp.bool(False), Error.PAUSED)
 
         # Initial invariant
         token_supply_initial = sp.local(
@@ -424,7 +415,6 @@ class Dex(sp.Contract, TokenUtility):
     @sp.entry_point
     def remove_liquidity(self, _amount, min_tokens):
         sp.verify(sp.amount == sp.tez(0), Error.NO_TEZ)
-        # sp.verify(self.data.paused == sp.bool(False), Error.PAUSED)
         sp.set_type(min_tokens, sp.TMap(sp.TNat, sp.TNat))
 
         token_supply = sp.local(

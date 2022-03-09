@@ -1,5 +1,4 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { ErrorContext } from "../contexts/ErrorContext";
 import { TokenListContext } from "../contexts/TokenListContext";
 import InputBox from "../components/swap/InputBox";
 import Button from "../components/forms/Button";
@@ -10,6 +9,9 @@ import { debounce } from "lodash";
 import { estimateLP } from "../utils/estimates";
 import axios from "axios";
 import CONFIG from "../config";
+import { toast } from "react-toastify";
+import { getUserAddress } from "../utils/wallet";
+import { fetchMaxBalanceFA12, fetchMaxBalanceFA2 } from "../utils/balance";
 
 function AddLiquidity() {
   const slippages = [0.25, 0.5, 1.0];
@@ -17,7 +19,6 @@ function AddLiquidity() {
 
   const { changeWhich, fromToken } = useContext(TokenListContext);
   const [fromValue, setFromValue] = useState(0);
-  const { showMessage } = useContext(ErrorContext);
   const { setShowLoading } = useContext(LoadingContext);
   const [outLP, setOutLP] = useState(0);
   const [min, setMin] = useState(0);
@@ -30,17 +31,32 @@ function AddLiquidity() {
   }, [slippage, outLP]);
 
   async function provideLiquidity() {
-    setShowLoading(true);
+    if (!fromValue) {
+      toast("Invalid Values.");
+      return;
+    }
     try {
+      setShowLoading(true);
       const data = await addLiquidity(
         fromToken,
         parseInt(fromValue * 10 ** fromToken.decimals),
         parseInt(min * 10 ** fromToken.decimals)
       );
-      showMessage(`✅ ${data.hash}`);
-    } catch (error) {
-      showMessage(`🔃 ${error.message}`);
       setShowLoading(false);
+      if (data.success) {
+        toast(
+          `Successfully Added Liquidity: ${data.hash.slice(
+            0,
+            5
+          )}...${data.hash.slice(data.hash.length - 4, data.hash.length)}`
+        );
+      } else {
+        toast(data.error);
+      }
+    } catch (error) {
+      console.log(error);
+      setShowLoading(false);
+      toast(`Error: ${error.message}`);
     }
   }
 
@@ -65,19 +81,56 @@ function AddLiquidity() {
     console.log(`Estimated LP pool tokens`, e);
     setOutLP(e);
   };
+  const handleMaxClick = async (type) => {
+    let token;
+    if (type === "from") {
+      token = fromToken;
+    } else if (type === "to") {
+      token = toToken;
+    }
+
+    const isFA2 = token.isFA2;
+    const userAddress = await getUserAddress();
+    let maxBalance = 0;
+    if (isFA2) {
+      maxBalance = await fetchMaxBalanceFA2(
+        userAddress,
+        token.balanceBigmap,
+        0
+      );
+    } else {
+      maxBalance = await fetchMaxBalanceFA12(userAddress, token.balanceBigmap);
+    }
+    console.log(maxBalance);
+    if (type === "from") {
+      setFromValue(maxBalance / 10 ** fromToken.decimals);
+    } else if (type === "to") {
+      setToValue(maxBalance / 10 ** toToken.decimals);
+    }
+  };
 
   return (
     <div>
       <div className="space-y-4 mt-2">
-        <InputBox
-          onTokenSwitchClick={() => {
-            changeWhich("from");
-          }}
-          value={fromValue}
-          setValue={handleValueChange}
-          token={fromToken}
-          type={"number"}
-        />
+        <div>
+          <InputBox
+            onTokenSwitchClick={() => {
+              changeWhich("from");
+            }}
+            value={fromValue}
+            setValue={handleValueChange}
+            token={fromToken}
+            type={"number"}
+          />
+          <div className="flex justify-end pt-1 pr-1">
+            <button
+              className="text-xs hover:underline"
+              onClick={() => handleMaxClick("from")}
+            >
+              MAX
+            </button>
+          </div>
+        </div>
       </div>
       <div>
         <div className="mb-3">
@@ -95,7 +148,6 @@ function AddLiquidity() {
       </div>
       <div className="mt-4">
         <div className="relative">
-          {/* <div className="absolute inset-0 bg-blue-500 blur"></div> */}
           <Button
             text="Add Liquidity"
             bg="w-full sm:text-lg text-xs font-semibold bg-gradient-to-r from-purple-500 to-blue-500"

@@ -2,19 +2,20 @@ import React, { useContext, useEffect } from "react";
 import { XIcon } from "@heroicons/react/solid";
 import { TokenListContext } from "../contexts/TokenListContext";
 import config from "../config";
-let tokenList = config.tokens;
 
 function TokenSelector() {
-  const { setShow, show, setToken, which, fromToken } =
+  const { setShow, show, setToken, which, fromToken, list, setList } =
     useContext(TokenListContext);
+
   useEffect(() => {
     console.log(`Token ${which}`);
-    tokenList = config.tokens;
+    setList(config.tokens);
 
-    if (which === "from") {
-      tokenList = tokenList.filter((token) => token.id !== fromToken.id);
+    if (which === "to") {
+      setList((list) => list.filter((token) => token.id !== fromToken.id));
     }
-  }, [which, fromToken.id]);
+  }, [which]);
+
   return (
     <div
       className="w-[30rem] bg-gray-900 rounded-md shadow-2xl border-2 border-gray-600 mx-2"
@@ -31,7 +32,7 @@ function TokenSelector() {
         </button>
       </div>
       <div className="">
-        {tokenList.map((token) => {
+        {list.map((token) => {
           return (
             <div
               key={token.id}
@@ -55,7 +56,7 @@ function TokenSelector() {
                   </p>
                 </div>
                 <span className="bg-purple-600 px-4 sm:px-5 py-1 sm:py-1.5 rounded-full text-xxs sm:text-xs font-semibold tracking-wide">
-                  FA2
+                  {token.isFA2 ? "FA2" : "FA1.2"}
                 </span>
               </div>
             </div>

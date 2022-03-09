@@ -1,15 +1,26 @@
-// import axios from "axios";
-// import { useContext, useState } from "react";
-// import { LoadingContext } from "../contexts/LoadingContext";
-// import { ErrorContext } from "../contexts/ErrorContext";
-// import PlainInputBox from "../components/PlainInputBox";
+import { useContext } from "react";
+import { toast } from "react-toastify";
 import Button from "../components/forms/Button";
 import Navbar from "../components/Navbar";
 import { getTokens } from "../utils/wallet";
+import { LoadingContext } from "../contexts/LoadingContext";
 
 function Faucet() {
+  const { setShowLoading } = useContext(LoadingContext);
   const handleGetTokens = async () => {
-    await getTokens();
+    try {
+      setShowLoading(true);
+      const data = await getTokens();
+      setShowLoading(false);
+      if (data.success) {
+        toast(`Successfully airdropped. :)`);
+      } else {
+        toast(`Error: ${data.error}`);
+      }
+    } catch (error) {
+      setShowLoading(false);
+      toast(`Error: ${error.message}`);
+    }
   };
 
   return (
@@ -23,7 +34,8 @@ function Faucet() {
             <p className="text-gray-300">
               You can get our test kUSD & wUSDC tokens to try our platform. Just
               click on the button below and you'll get 1000 kUSD and 1000 wUSDC
-              tokens. They ofc they don't have any real value associated with them.
+              tokens. They ofc they don't have any real value associated with
+              them.
             </p>
             <Button
               text="Get Tokens"

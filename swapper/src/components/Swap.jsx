@@ -2,21 +2,20 @@ import React, { useCallback, useContext, useEffect, useState } from "react";
 import InputBox from "./swap/InputBox";
 import Button from "./forms/Button";
 import { TokenListContext } from "../contexts/TokenListContext";
-// import { RefreshIcon, CalculatorIcon } from "@heroicons/react/outline";
 import CONFIG from "../config";
-// import { ErrorContext } from "../contexts/ErrorContext";
 import { LoadingContext } from "../contexts/LoadingContext";
 
 import { debounce } from "lodash";
 import { getDy } from "../utils/estimates";
+import { toast } from "react-toastify";
 
 import axios from "axios";
-import SlippageCalculator from "./slippage/SlippageCalculator";
 import { useSwapCalculation } from "../hooks/useSwapCalculation";
-import { exchange } from "../utils/wallet";
+import { exchange, getUserAddress } from "../utils/wallet";
 import SlippageBar from "./slippage/SlippageBar";
 import TimeSlippageBar from "./slippage/TimeSlippageBar";
 import config from "../config";
+import { fetchMaxBalanceFA12, fetchMaxBalanceFA2 } from "../utils/balance";
 
 function Swap() {
   const { changeWhich, setFromToken, setToToken, fromToken, toToken } =
@@ -35,6 +34,8 @@ function Swap() {
     let j = toToken.tokenId;
     return { i, j };
   };
+  //await fetchMaxBalanceFA12("tz1VRTputDyDYy4GjthJqdabKDVxkD3xCYGc", 165890);
+
   useEffect(() => {
     setMinReturn(() => {
       return (
@@ -104,22 +105,63 @@ function Swap() {
     setToValue(toValue || 0);
   }
 
-  const handleInterChange = () => {
-    const oldFromToken = fromToken;
-    setFromToken(toToken);
-    setToToken(oldFromToken);
-  };
-
   async function exchangeTokens() {
+    if (!fromValue || !toValue) {
+      toast("Invalid Values.");
+      return;
+    }
     setShowLoading(true);
     const validUpto = new Date(Date.now() + duration * 60 * 1000).toISOString();
-    const data = await exchange(
-      fromToken,
-      parseInt(fromValue * 10 ** fromToken.decimals),
-      parseInt(minReturn * 10 ** toToken.decimals),
-      validUpto
-    );
+    try {
+      const data = await exchange(
+        fromToken,
+        parseInt(fromValue * 10 ** fromToken.decimals),
+        parseInt(minReturn * 10 ** toToken.decimals),
+        validUpto
+      );
+      setShowLoading(false);
+      if (data.success) {
+        toast(
+          `Successfully Swapped: ${data.hash.slice(0, 5)}...${data.hash.slice(
+            data.hash.length - 4,
+            data.hash.length
+          )}`
+        );
+      } else {
+        toast(data.error);
+      }
+    } catch (e) {
+      setShowLoading(false);
+      toast("Error: " + e.message);
+    }
   }
+  const handleMaxClick = async (type) => {
+    let token;
+    if (type === "from") {
+      token = fromToken;
+    } else if (type === "to") {
+      token = toToken;
+    }
+
+    const isFA2 = token.isFA2;
+    const userAddress = await getUserAddress();
+    let maxBalance = 0;
+    if (isFA2) {
+      maxBalance = await fetchMaxBalanceFA2(
+        userAddress,
+        token.balanceBigmap,
+        0
+      );
+    } else {
+      maxBalance = await fetchMaxBalanceFA12(userAddress, token.balanceBigmap);
+    }
+    console.log(maxBalance);
+    if (type === "from") {
+      setFromValue(maxBalance / 10 ** fromToken.decimals);
+    } else if (type === "to") {
+      setToValue(maxBalance / 10 ** toToken.decimals);
+    }
+  };
 
   return (
     <div className="bg-gray-900 border-2 border-gray-700 hover:border-gray-600 transition p-2 sm:p-4 rounded-md relative mb-20">
@@ -127,22 +169,42 @@ function Swap() {
         <h1 className="text-sm font-semibold sm:text-lg">Swap</h1>
       </div>
       <div className="space-y-4 mt-2">
-        <InputBox
-          onTokenSwitchClick={() => {
-            changeWhich("from");
-          }}
-          value={fromValue}
-          setValue={handleFromChangeEvent}
-          token={fromToken}
-        />
-        <InputBox
-          onTokenSwitchClick={() => {
-            changeWhich("to");
-          }}
-          value={toValue}
-          setValue={handleToChangeEvent}
-          token={toToken}
-        />
+        <div>
+          <InputBox
+            onTokenSwitchClick={() => {
+              changeWhich("from");
+            }}
+            value={fromValue}
+            setValue={handleFromChangeEvent}
+            token={fromToken}
+          />
+          <div className="flex justify-end pt-1 pr-1">
+            <button
+              className="text-xs hover:underline"
+              onClick={() => handleMaxClick("from")}
+            >
+              MAX
+            </button>
+          </div>
+        </div>
+        <div>
+          <InputBox
+            onTokenSwitchClick={() => {
+              changeWhich("to");
+            }}
+            value={toValue}
+            setValue={handleToChangeEvent}
+            token={toToken}
+          />
+          <div className="flex justify-end pt-1 pr-1">
+            <button
+              className="text-xs hover:underline"
+              onClick={() => handleMaxClick("to")}
+            >
+              MAX
+            </button>
+          </div>
+        </div>
       </div>
       <div>
         <SlippageBar
@@ -160,7 +222,6 @@ function Swap() {
         />
       </div>
       <div className="sm:px-2 mt-4">
-        {/* Div to show calculations. */}
         <div>
           <h2 className="font-semibold text-sm sm:text-lg mt-3 uppercase">
             Exchange details

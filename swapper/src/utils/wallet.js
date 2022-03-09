@@ -114,6 +114,7 @@ export const exchange = async (fromToken, amount, minReturn, validUpto) => {
   } else {
     return {
       success: false,
+      error: "Can't connect the wallet.",
     };
   }
 };
@@ -156,7 +157,14 @@ export const addLiquidity = async (fromToken, amount, minReturn) => {
     const tezos = new TezosToolkit(rpcURL);
     tezos.setWalletProvider(wallet);
     const pkh = await tezos.wallet.pkh();
-    console.log(fromToken, pkh, fromToken.address, config.StableSwapAddress);
+    console.log(
+      fromToken,
+      pkh,
+      fromToken.address,
+      config.StableSwapAddress,
+      amount,
+      minReturn
+    );
 
     const fromTokenContract = await tezos.wallet.at(fromToken.address);
     const dexContract = await tezos.wallet.at(config.StableSwapAddress);
@@ -170,7 +178,7 @@ export const addLiquidity = async (fromToken, amount, minReturn) => {
                 add_operator: {
                   owner: pkh,
                   operator: config.StableSwapAddress,
-                  token_id: fromToken.id,
+                  token_id: 0,
                 },
               },
             ])
@@ -186,6 +194,25 @@ export const addLiquidity = async (fromToken, amount, minReturn) => {
     return {
       success: true,
       hash: op.opHash,
+    };
+  } else {
+    return {
+      success: false,
+      error: "Can't connect to wallet.",
+    };
+  }
+};
+
+export const getUserAddress = async () => {
+  const wallet = new BeaconWallet(options);
+  const response = await checkIfWalletConnected(wallet);
+  if (response.success) {
+    const tezos = new TezosToolkit(rpcURL);
+    tezos.setWalletProvider(wallet);
+    const pkh = await tezos.wallet.pkh();
+    return {
+      success: true,
+      pkh: pkh,
     };
   } else {
     return {

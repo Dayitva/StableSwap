@@ -24,6 +24,7 @@ const config = {
       tokenId: 0,
       decimals: 18,
       isFA2: false,
+      balanceBigmap: 165890,
     },
     {
       id: 2,
@@ -35,8 +36,15 @@ const config = {
       tokenId: 1,
       decimals: 6,
       isFA2: true,
+      balanceBigmap: 165968,
     },
   ],
+  lpToken: {
+    symbol: "LLP",
+    address: "KT1BsG4t7FLTGEURr7Qz9KecrAJtTzdHrrm1",
+    isFA2: false,
+    balanceBigmap: 168488,
+  },
 };
 
 export default config;

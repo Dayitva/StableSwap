@@ -11,12 +11,16 @@ import config from "../config";
 import { removeLiquidity } from "../utils/wallet";
 import BigNumber from "bignumber.js";
 import SlippageBar from "./slippage/SlippageBar";
+import { toast } from "react-toastify";
+import { LoadingContext } from "../contexts/LoadingContext";
+import { getUserAddress } from "../utils/wallet";
+import { fetchMaxBalanceFA12, fetchMaxBalanceFA2 } from "../utils/balance";
 
 function RemoveLiquidity() {
   const slippages = [0.25, 0.5, 1.0];
   const [lpAmount, setLpAmount] = useState(0);
   const [slippage, setSlippage] = useState(slippages[0]);
-  const { showMessage } = useContext(ErrorContext);
+  const { setShowLoading } = useContext(LoadingContext);
   const [outTokens, setOutTokens] = useState({
     0: 0,
     1: 0,
@@ -69,27 +73,76 @@ function RemoveLiquidity() {
   );
 
   async function handleRemoveLiquidity() {
-    console.log(
-      parseInt(lpAmount * 10 ** 18),
-      parseInt(outTokens[0]) / 10 ** (18 - config.tokens[0].decimals),
-      parseInt(outTokens[1]) / 10 ** (18 - config.tokens[1].decimals)
-    );
-    const data = await removeLiquidity(
-      parseInt(lpAmount * 10 ** 18),
-      parseInt(parseInt(outTokens[0]) / 10 ** (18 - config.tokens[0].decimals)),
-      parseInt(parseInt(outTokens[1]) / 10 ** (18 - config.tokens[1].decimals))
-    );
+    if (!lpAmount) {
+      toast("Invalid Values.");
+      return;
+    }
+    try {
+      setShowLoading(true);
+      const data = await removeLiquidity(
+        parseInt(lpAmount * 10 ** 18),
+        parseInt(
+          parseInt(outTokens[0]) / 10 ** (18 - config.tokens[0].decimals)
+        ),
+        parseInt(
+          parseInt(outTokens[1]) / 10 ** (18 - config.tokens[1].decimals)
+        )
+      );
+      setShowLoading(false);
+
+      if (data.success) {
+        toast(
+          `Successfully Removed Liquidity: ${data.hash.slice(
+            0,
+            5
+          )}...${data.hash.slice(data.hash.length - 4, data.hash.length)}`
+        );
+      } else {
+        toast(data.error);
+      }
+    } catch (e) {
+      setShowLoading(false);
+      toast(`Error: ${e.message}`);
+    }
   }
+  const handleMaxClick = async () => {
+    let token = config.lpToken;
+
+    const isFA2 = token.isFA2;
+    const userAddress = await getUserAddress();
+    let maxBalance = 0;
+    if (isFA2) {
+      maxBalance = await fetchMaxBalanceFA2(
+        userAddress,
+        token.balanceBigmap,
+        0
+      );
+    } else {
+      maxBalance = await fetchMaxBalanceFA12(userAddress, token.balanceBigmap);
+    }
+    console.log(maxBalance);
+    setLpAmount(maxBalance / 10 ** 18);
+  };
 
   return (
     <div className="rounded-md relative">
       <div className="space-y-4 mt-2">
-        <PlainInputBox
-          label={"Amount of LP tokens"}
-          value={lpAmount}
-          setValue={handleChangeLpEvent}
-          type={"number"}
-        />
+        <div>
+          <PlainInputBox
+            label={"Amount of LP tokens"}
+            value={lpAmount}
+            setValue={handleChangeLpEvent}
+            type={"number"}
+          />
+          <div className="flex justify-end pt-1 pr-1">
+            <button
+              className="text-xs hover:underline"
+              onClick={() => handleMaxClick()}
+            >
+              MAX
+            </button>
+          </div>
+        </div>
         <div>
           <div className="mb-3">
             <SlippageBar

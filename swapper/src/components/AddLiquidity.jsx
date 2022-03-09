@@ -39,6 +39,7 @@ function AddLiquidity() {
       );
       showMessage(`✅ ${data.hash}`);
     } catch (error) {
+      console.log(error);
       showMessage(`🔃 ${error.message}`);
       setShowLoading(false);
     }

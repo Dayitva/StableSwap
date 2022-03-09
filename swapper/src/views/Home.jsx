@@ -55,7 +55,7 @@ function Home() {
               href="https://www.antler.co/"
               target={"_blank"}
             >
-              <svg width="72px" height="72px" viewBox="0 0 54 54" role="img">
+              <svg width="80px" height="80px" viewBox="0 0 54 54" role="img">
                 <title>Antler</title>
                 <path
                   fill="#fff"
@@ -85,7 +85,7 @@ function Home() {
                   />
                 </g>
               </svg>
-              <p className="text-sm font-semibold mt-2">Tezo Foundation</p>
+              <p className="text-sm font-semibold mt-2">Tezos Foundation</p>
             </a>
           </div>
         </div>

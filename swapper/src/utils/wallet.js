@@ -156,7 +156,14 @@ export const addLiquidity = async (fromToken, amount, minReturn) => {
     const tezos = new TezosToolkit(rpcURL);
     tezos.setWalletProvider(wallet);
     const pkh = await tezos.wallet.pkh();
-    console.log(fromToken, pkh, fromToken.address, config.StableSwapAddress);
+    console.log(
+      fromToken,
+      pkh,
+      fromToken.address,
+      config.StableSwapAddress,
+      amount,
+      minReturn
+    );
 
     const fromTokenContract = await tezos.wallet.at(fromToken.address);
     const dexContract = await tezos.wallet.at(config.StableSwapAddress);
@@ -164,22 +171,32 @@ export const addLiquidity = async (fromToken, amount, minReturn) => {
     const batch = await tezos.wallet
       .batch()
       .withContractCall(
-        fromToken.isFA2
-          ? fromTokenContract.methods.update_operators([
-              {
-                add_operator: {
-                  owner: pkh,
-                  operator: config.StableSwapAddress,
-                  token_id: fromToken.id,
-                },
-              },
-            ])
-          : fromTokenContract.methods.approve(config.StableSwapAddress, amount)
+        // fromToken.isFA2
+        //   ? fromTokenContract.methods.update_operators([
+        //       {
+        //         add_operator: {
+        //           owner: pkh,
+        //           operator: config.StableSwapAddress,
+        //           token_id: 0,
+        //         },
+        //       },
+        //     ])
+        //   : fromTokenContract.methods.approve(config.StableSwapAddress, amount)
+        fromTokenContract.methods.update_operators([
+          {
+            add_operator: {
+              owner: pkh,
+              operator: config.StableSwapAddress,
+              token_id: 0,
+            },
+          },
+        ])
       )
       .withContractCall(
-        fromToken.tokenId === 0
-          ? dexContract.methods.add_liquidity(amount, 0, minReturn)
-          : dexContract.methods.add_liquidity(0, amount, minReturn)
+        // fromToken.tokenId === 0
+        //   ? dexContract.methods.add_liquidity(amount, 0, minReturn)
+        //   : dexContract.methods.add_liquidity(0, amount, minReturn)
+        dexContract.methods.add_liquidity(amount, 0, minReturn)
       );
     const op = await batch.send();
     await op.confirmation();

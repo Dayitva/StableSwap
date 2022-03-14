@@ -80,7 +80,7 @@ function Home() {
               href="https://tezos.foundation/"
               target={"_blank"}
             >
-              <svg
+              {/* <svg
                 className="w-20 h-20"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 1169.87 1593"
@@ -94,7 +94,12 @@ function Home() {
                     // style={{ fill: "#ED4747" }}
                   />
                 </g>
-              </svg>
+              </svg> */}
+              <img
+                src="/assets/TezosLogo_Stacked_White.png"
+                alt="Tezos"
+                className="h-20"
+              />
               <p className="text-sm font-semibold mt-2">Tezos Foundation</p>
             </a>
           </div>

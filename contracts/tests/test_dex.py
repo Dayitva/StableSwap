@@ -151,12 +151,12 @@ def test():
     #     token2_amount=sp.nat(50_000 * DECIMALS_0)
     # ).run(sender=admin)
 
-    scenario.h2("[INVALID] Remove liquidity.")
-    dex.remove_liquidity(_amount=25000 * (10**18), min_tokens={
-                         0: sp.as_nat(1), 1: sp.as_nat(1)}).run(sender=alice, valid=False)
-    scenario.h2("[INVALID] Remove liquidity.")
-    dex.remove_liquidity(_amount=25000 * (10**18), min_tokens={
-                         0: sp.as_nat(1), 1: sp.as_nat(1)}).run(sender=oscar, valid=False)
+    # scenario.h2("[INVALID] Remove liquidity.")
+    # dex.remove_liquidity(_amount=25000 * (10**18), min_tokens={
+    #                      0: sp.as_nat(1), 1: sp.as_nat(1)}).run(sender=alice, valid=False)
+    # scenario.h2("[INVALID] Remove liquidity.")
+    # dex.remove_liquidity(_amount=25000 * (10**18), min_tokens={
+    #                      0: sp.as_nat(1), 1: sp.as_nat(1)}).run(sender=oscar, valid=False)
 
     usdtz.approve(sp.record(
         spender=dex.address,
@@ -356,8 +356,8 @@ def test():
     scenario.h2("Test 29: Update the lp token address. Should succeed.")
     dex.set_lp_address(lp.address).run(sender=admin)
 
-    scenario.h2(
-        "Test 30: Adding liquidity by Alice. Should fail as the the contract is paused by the admin.")
+    # scenario.h2(
+    #     "Test 30: Adding liquidity by Alice. Should fail as the the contract is paused by the admin.")
     # dex.togglePause().run(sender=admin)
-    dex.add_liquidity(_amount0=10 * DECIMALS_0, _amount1=20 *
-                      DECIMALS_1, min_token=1).run(sender=alice, valid=False)
+    # dex.add_liquidity(_amount0=10 * DECIMALS_0, _amount1=20 *
+    #                   DECIMALS_1, min_token=1).run(sender=alice, valid=False)

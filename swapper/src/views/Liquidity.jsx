@@ -5,6 +5,7 @@ import PoolStats from "../components/PoolStats";
 import useWallet from "../hooks/useWallet";
 import LiquidityTab from "../components/liquidity";
 import Navbar from "../components/Navbar";
+import Balance from "../components/Balance";
 
 function Liquidity() {
   const { wallet } = useWallet();
@@ -45,6 +46,9 @@ function Liquidity() {
         <div className="mt-8 mx-auto max-w-2xl relative">
           {/* Wrapper for swap component... */}
           <PoolStats />
+        </div>
+        <div className="mx-auto max-w-xl relative mt-4">
+          <Balance />
         </div>
         {/* Main Content Goes Here... */}
         <div className="sm:mt-20 mt-6 mx-auto max-w-2xl relative mb-20">

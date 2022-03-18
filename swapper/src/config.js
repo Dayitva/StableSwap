@@ -44,6 +44,7 @@ const config = {
     address: "KT1BsG4t7FLTGEURr7Qz9KecrAJtTzdHrrm1",
     isFA2: false,
     balanceBigmap: 168488,
+    decimals: 18,
   },
 };
 

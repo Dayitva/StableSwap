@@ -45,3 +45,35 @@ Below are some of the deployed StableSwap Contracts.
   (address1, address2): pool_address,
   (address1, address2): pool_address,
 } -->
+
+## Transaction
+
+```json
+[
+  {
+    "destination": "KT1LJesKshgXJRQawFXYhTyjpjPnsymaqxL4",
+    "kind": "transaction",
+    "amount": 0,
+    "parameters": {
+      "entrypoint": "remove_liquidity",
+      "value": {
+        "prim": "Pair",
+        "args": [
+          { "int": "200119992519101583032808" },
+          [
+            {
+              "prim": "Elt",
+              "args": [{ "int": "0" }, { "int": "98829794820940785782501" }]
+              "98829794820940777403208"
+            },
+            {
+              "prim": "Elt",
+              "args": [{ "int": "1" }, { "int": "101290900650" }]
+            }
+          ]
+        ]
+      }
+    }
+  }
+]
+```

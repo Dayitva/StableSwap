@@ -12,6 +12,7 @@ import CONFIG from "../config";
 import { toast } from "react-toastify";
 import { getUserAddress } from "../utils/wallet";
 import { fetchMaxBalanceFA12, fetchMaxBalanceFA2 } from "../utils/balance";
+import BigNumber from "bignumber.js";
 
 function AddLiquidity() {
   const slippages = [0.25, 0.5, 1.0];
@@ -39,8 +40,8 @@ function AddLiquidity() {
       setShowLoading(true);
       const data = await addLiquidity(
         fromToken,
-        parseInt(fromValue * 10 ** fromToken.decimals),
-        parseInt(min * 10 ** fromToken.decimals)
+        new BigNumber(fromValue).multipliedBy(10 ** fromToken.decimals),
+        new BigNumber(min).multipliedBy(10 ** 18)
       );
       setShowLoading(false);
       if (data.success) {
@@ -103,9 +104,17 @@ function AddLiquidity() {
     }
     console.log(maxBalance);
     if (type === "from") {
-      setFromValue(maxBalance / 10 ** fromToken.decimals);
+      let formatterMaxBalance = new BigNumber(maxBalance).dividedBy(
+        10 ** fromToken.decimals
+      );
+      setFromValue(formatterMaxBalance);
+      updateValue(formatterMaxBalance);
     } else if (type === "to") {
-      setToValue(maxBalance / 10 ** toToken.decimals);
+      let formatterMaxBalance = new BigNumber(maxBalance).dividedBy(
+        10 ** toToken.decimals
+      );
+      setToValue(formatterMaxBalance);
+      updateValue(formatterMaxBalance);
     }
   };
 

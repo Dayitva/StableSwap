@@ -16,6 +16,7 @@ import SlippageBar from "./slippage/SlippageBar";
 import TimeSlippageBar from "./slippage/TimeSlippageBar";
 import config from "../config";
 import { fetchMaxBalanceFA12, fetchMaxBalanceFA2 } from "../utils/balance";
+import BigNumber from "bignumber.js";
 
 function Swap() {
   const { changeWhich, setFromToken, setToToken, fromToken, toToken } =
@@ -25,7 +26,7 @@ function Swap() {
   const slippages = [0.25, 0.5, 1.0];
   const [currentSlippage, setCurrentSlippage] = useState(slippages[0]);
   const [minReturn, setMinReturn] = useState(0);
-  const durations = [1, 5, 10, 20];
+  const durations = [5, 10, 20];
   const [duration, setDuration] = useState(durations[0]);
 
   const { fromValue, toValue, setFromValue, setToValue } = useSwapCalculation();
@@ -115,8 +116,10 @@ function Swap() {
     try {
       const data = await exchange(
         fromToken,
-        parseInt(fromValue * 10 ** fromToken.decimals),
-        parseInt(minReturn * 10 ** toToken.decimals),
+        new BigNumber(fromValue).multipliedBy(10 ** fromToken.decimals),
+        new BigNumber(minReturn)
+          .multipliedBy(10 ** toToken.decimals)
+          .toFixed(0),
         validUpto
       );
       setShowLoading(false);
@@ -157,9 +160,18 @@ function Swap() {
     }
     console.log(maxBalance);
     if (type === "from") {
-      setFromValue(maxBalance / 10 ** fromToken.decimals);
+      let formattedMaxBalance = new BigNumber(maxBalance).dividedBy(
+        10 ** fromToken.decimals
+      );
+      setFromValue(formattedMaxBalance);
+      updateToPrice(formattedMaxBalance);
     } else if (type === "to") {
-      setToValue(maxBalance / 10 ** toToken.decimals);
+      let formattedMaxBalance = new BigNumber(maxBalance).dividedBy(
+        10 ** toToken.decimals
+      );
+
+      setToValue(formattedMaxBalance);
+      updateFromPrice(formattedMaxBalance);
     }
   };
 
@@ -229,21 +241,15 @@ function Swap() {
         </div>
         <div className="flex justify-between items-center text-xs sm:text-base">
           <p>Fee: </p>
-          <p>
-            {config.fee}%
-          </p>
+          <p>{config.fee}%</p>
         </div>
         <div className="flex justify-between items-center text-xs sm:text-base">
           <p>Exchange Rate: </p>
-          <p>
-            {(toValue/fromValue).toFixed(4)}
-          </p>
+          <p>{(toValue / fromValue).toFixed(4)}</p>
         </div>
         <div className="flex justify-between items-center text-xs sm:text-base">
           <p>Price impact: </p>
-          <p>
-            {((fromValue - toValue)/ fromValue * 100).toFixed(4)}%
-          </p>
+          <p>{(((fromValue - toValue) / fromValue) * 100).toFixed(4)}%</p>
         </div>
         <div className="flex justify-between items-center text-xs sm:text-base">
           <p>Minimum received: </p>

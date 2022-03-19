@@ -7,9 +7,10 @@ FEE = 15                        # Fee for exchanges
 ADMIN_FEE_POOL1 = [0, 0]         # Counter to track Admin fee
 ADMIN_FEE_POOL2 = [0, 0]         # Counter to track Admin fee
 TOKEN_POOL1 = [50000, 50000]         # Liquidity Pools
-TOKEN_POOL2 = [50000, 50000]         # Liquidity Pools
+TOKEN_POOL2 = [1000, 1000]         # Liquidity Pools
 LP_SUPPLY1 = sum(TOKEN_POOL1)
 LP_SUPPLY2 = sum(TOKEN_POOL2)
+FEE_COLLECTED = 0
 
 
 def get_D(xp):
@@ -68,6 +69,8 @@ def get_y(i, j, x, _xp):
 
 
 def xchg(i, dx, xp, afp, range=False):
+    global FEE_COLLECTED
+
     j = 1 - i
     x = xp[i] + dx
     dy = 0
@@ -87,13 +90,16 @@ def xchg(i, dx, xp, afp, range=False):
     fee_collected = (dy * FEE) / 10000
     dy = dy - fee_collected
     afp[j] += (fee_collected / 2)
+    FEE_COLLECTED += (fee_collected / 2)
 
     xp[i] += dx
     xp[j] = xp[j] - dy
-    return dy
+    return dy, afp
 
 
 def add_liquidity(_amount0, _amount1, xp, lps):
+    global FEE_COLLECTED
+
     token_supply_initial = xp[0] + xp[1]
     D0 = get_D(xp)
 
@@ -102,20 +108,17 @@ def add_liquidity(_amount0, _amount1, xp, lps):
 
     D1 = get_D(xp)
 
-    print("D0:", D0)
-    print("D1:", D1)
-    print((D1 - D0)/ D0)
+    # print("D0:", D0)
+    # print("D1:", D1)
 
-    # lp_amount = token_supply_initial * (D1 - D0) / D0
-    lp_amount = lps * (D1 - D0) / D0
+    lp_amount = (token_supply_initial - FEE_COLLECTED) * (D1 - D0) / D0
     lps += lp_amount
 
     return lp_amount, lps
 
 
 def remove_liquidity(_amount, xp, afp, lps):
-
-    token_supply = xp[0] + xp[1]
+    global FEE_COLLECTED
 
     value0 = (xp[0] - afp[0]) * _amount / lps
     xp[0] = xp[0] - value0
@@ -123,6 +126,7 @@ def remove_liquidity(_amount, xp, afp, lps):
     value1 = (xp[1] - afp[1]) * _amount / lps
     xp[1] = xp[1] - value1
 
+    FEE_COLLECTED -= FEE_COLLECTED * (_amount / lps)
     lps -= _amount
 
     return value0, value1, lps
@@ -143,72 +147,52 @@ def remove_liquidity(_amount, xp, afp, lps):
 #     print(TOKEN_POOL)
 #     print(ADMIN_FEE_POOL)
 
-
-LP_AMOUNTS1 = []
-LP_AMOUNTS2 = []
-
+lp_tokens1, LP_SUPPLY1 = add_liquidity(50000, 50000, TOKEN_POOL1, LP_SUPPLY1)
+print("For", 50000, "of token 0 and", 50000, "of token 1, you get", lp_tokens1, "LP tokens.")
+print(LP_SUPPLY1)
 print(TOKEN_POOL1)
-# print(TOKEN_POOL2)
 
-_amount0 = 50000
-_amount1 = 50000
-lp_tokens1, LP_SUPPLY1 = add_liquidity(
-    _amount0, _amount1, TOKEN_POOL1, LP_SUPPLY1)
-# lp_tokens2, LP_SUPPLY2 = add_liquidity(
-#     _amount0, _amount1, TOKEN_POOL2, LP_SUPPLY2)
-LP_AMOUNTS1.append(lp_tokens1)
-# LP_AMOUNTS2.append(lp_tokens2)
-print("For", _amount0, "of token 0 and", _amount1, "of token 1, you get", lp_tokens1, " LP tokens.")
-# print("For", _amount0, "of token 0 and", _amount1, "of token 1, you get", lp_tokens2, " LP tokens.")
-
+_amount1 = xchg(0, 10000, TOKEN_POOL1, ADMIN_FEE_POOL1)
+print("For", 10000, "of token", 0, "you get", _amount1, "of token", 0)
+print(LP_SUPPLY1)
 print(TOKEN_POOL1)
-# print(TOKEN_POOL2)
 
-_amount0 = 50000
-index = 0
-_amount1 = xchg(index, _amount0, TOKEN_POOL1, ADMIN_FEE_POOL1)
-# _amount2 = xchg(index, _amount0, TOKEN_POOL2, ADMIN_FEE_POOL2, range=True)
-print("For", _amount0, "of token", index, "you get", _amount1, "of token", 1 - index)
-# print("For", _amount0, "of token", index, "you get", _amount2, "of token", 1 - index)
-
+_amount1 = xchg(1, 20000, TOKEN_POOL1, ADMIN_FEE_POOL1)
+print("For", 20000, "of token", 1, "you get", _amount1, "of token", 1)
+print(LP_SUPPLY1)
 print(TOKEN_POOL1)
-# print(TOKEN_POOL2)
 
-_amount0 = 50000
-index = 1
-_amount1 = xchg(index, _amount0, TOKEN_POOL1, ADMIN_FEE_POOL1)
-# _amount2 = xchg(index, _amount0, TOKEN_POOL2, ADMIN_FEE_POOL2, range=True)
-print("For", _amount0, "of token", index, "you get", _amount1, "of token", 1 - index)
-# print("For", _amount0, "of token", index, "you get", _amount2, "of token", 1 - index)
-
+_amount1 = xchg(0, 9999.935, TOKEN_POOL1, ADMIN_FEE_POOL1)
+print("For", 9999.935, "of token", 0, "you get", _amount1, "of token", 0)
+print(LP_SUPPLY1)
 print(TOKEN_POOL1)
-# print(TOKEN_POOL2)
 
-_amount0 = 10
-_amount1 = 0
-lp_tokens1, LP_SUPPLY1 = add_liquidity(
-    _amount0, _amount1, TOKEN_POOL1, LP_SUPPLY1)
-# lp_tokens2, LP_SUPPLY2 = add_liquidity(
-#     _amount0, _amount1, TOKEN_POOL2, LP_SUPPLY2)
-LP_AMOUNTS1.append(lp_tokens1)
-# LP_AMOUNTS2.append(lp_tokens2)
-print("For", _amount0, "of token 0 and", _amount1, "of token 1, you get", lp_tokens1, " LP tokens.")
-# print("For", _amount0, "of token 0 and", _amount1, "of token 1, you get", lp_tokens2, " LP tokens.")
+print("Fee:")
+print(FEE_COLLECTED)
 
+lp_tokens1, LP_SUPPLY1 = add_liquidity(100000, 100000, TOKEN_POOL1, LP_SUPPLY1)
+print("For", 100000, "of token 0 and", 100000, "of token 1, you get", lp_tokens1, "LP tokens.")
+print(LP_SUPPLY1)
 print(TOKEN_POOL1)
-# print(TOKEN_POOL2)
 
-_amount0 = 200150.70012587606
-_amount1 = 200150.70012587606
-_val0, _val1, LP_SUPPLY1 = remove_liquidity(
-    _amount0, TOKEN_POOL1, ADMIN_FEE_POOL1, LP_SUPPLY1)
-# _val2, _val3, LP_SUPPLY2 = remove_liquidity(
-#     _amount1, TOKEN_POOL2, ADMIN_FEE_POOL2, LP_SUPPLY2)
-print("For", _amount0, "of LP tokens you get", _val0 + _val1, "tokens.")
-# print("For", _amount0, "of LP tokens you get", _val2 + _val3, "tokens.")
-
+print(FEE_COLLECTED)
+_val0, _val1, LP_SUPPLY1 = remove_liquidity(199970.00909642936, TOKEN_POOL1, ADMIN_FEE_POOL1, LP_SUPPLY1)
+_amount1 = _val0 + _val1
+print("For", 199970.00909642936, "of LP tokens you get", _amount1, "tokens.")
+print(LP_SUPPLY1)
 print(TOKEN_POOL1)
-# print(TOKEN_POOL2)
+print(FEE_COLLECTED)
+
+print(FEE_COLLECTED)
+_val0, _val1, LP_SUPPLY1 = remove_liquidity(199999.99999999997, TOKEN_POOL1, ADMIN_FEE_POOL1, LP_SUPPLY1)
+_amount1 = _val0 + _val1
+print("For", 199999.99999999997, "of LP tokens you get", _amount1, "tokens.")
+print(LP_SUPPLY1)
+print(TOKEN_POOL1)
+print(FEE_COLLECTED)
+
+# LP_AMOUNTS1 = []
+# LP_AMOUNTS2 = []
 
 # NO_OF_TRANSACTIONS = 1000
 # ADD_LIQUIDITY_SIZE = 1000

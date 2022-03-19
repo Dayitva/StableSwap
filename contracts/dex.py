@@ -85,6 +85,7 @@ class Dex(sp.Contract, TokenUtility):
             admin=_admin,
             eighteen=1000000000000000000,
             fee=sp.nat(15),
+            fee_pool = sp.nat(0),
             lp_token=_lp_token,
             metadata=sp.big_map(l={
                 "": sp.utils.bytes_of_string("tezos-storage:content"),
@@ -342,6 +343,7 @@ class Dex(sp.Contract, TokenUtility):
         fee_collected = sp.local('fee', ((dy.value * self.data.fee) / 10000))
         dy.value = sp.as_nat(dy.value - fee_collected.value)
         self.data.token_pool[j].admin_fee += (fee_collected.value / 2)
+        self.data.fee_pool += (fee_collected.value / 2)
         self.data.token_pool[i].pool += dx
         self.data.token_pool[j].pool = sp.as_nat(
             self.data.token_pool[j].pool - dy.value)
@@ -384,7 +386,7 @@ class Dex(sp.Contract, TokenUtility):
         # sp.trace({'D0': D0.value})
         # sp.trace({"D1-D0": D1.value-D0.value})
 
-        lp_amount = token_supply_initial.value * \
+        lp_amount = sp.as_nat(token_supply_initial.value - self.data.fee_pool) * \
             sp.as_nat(D1.value - D0.value) / D0.value
         sp.verify(lp_amount >= min_token, Error.POOL_STATE)
 
@@ -417,8 +419,7 @@ class Dex(sp.Contract, TokenUtility):
         sp.verify(sp.amount == sp.tez(0), Error.NO_TEZ)
         sp.set_type(min_tokens, sp.TMap(sp.TNat, sp.TNat))
 
-        token_supply = sp.local(
-            'ts1', self.data.token_pool[0].pool + self.data.token_pool[1].pool)
+        self.data.fee_pool = sp.as_nat(self.data.fee_pool - (self.data.fee_pool * (_amount / self.data.lp_supply)))
 
         value = sp.local('val1', sp.as_nat(
             self.data.token_pool[0].pool - self.data.token_pool[0].admin_fee) * _amount / self.data.lp_supply)

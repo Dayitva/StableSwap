@@ -178,16 +178,16 @@ def test():
     dex.remove_liquidity(_amount = 100 * DECIMALS_E, min_tokens = {0: 1, 1: 1}).run(sender=alice, valid=False)
     
     scenario.h2("Test 5: Adding liquidity by Alice. Should fail as she is asking for more min tokens than possible.")
-    dex.add_liquidity(_amount0 = 200 * DECIMALS_0, _amount1 = 0 * DECIMALS_1, min_token=200).run(sender=alice, valid=False)
+    dex.add_liquidity(_amount0 = 200 * DECIMALS_0, _amount1 = 0 * DECIMALS_1, min_token = 201 * DECIMALS_E).run(sender=alice, valid=False)
 
     scenario.h2("Test 6: Adding liquidity by Alice. Should fail as she is adding more liquidity than what she is approved for.")
-    dex.add_liquidity(_amount0 = 100001 * DECIMALS_0, _amount1 = 200 * DECIMALS_1, min_token=400).run(sender=alice, valid=False)
+    dex.add_liquidity(_amount0 = 100001 * DECIMALS_0, _amount1 = 200 * DECIMALS_1, min_token=400 * DECIMALS_E).run(sender=alice, valid=False)
 
     scenario.h2("Test 7: Adding liquidity by Alice. Should fail as she is sending tez along with the transaction.")
-    dex.add_liquidity(_amount0 = 200 * DECIMALS_0, _amount1 = 0 * DECIMALS_1, min_token=200).run(sender=alice, amount=sp.mutez(1), valid=False)
+    dex.add_liquidity(_amount0 = 200 * DECIMALS_0, _amount1 = 0 * DECIMALS_1, min_token=200 * DECIMALS_E).run(sender=alice, amount=sp.mutez(1), valid=False)
 
     scenario.h2("Test 8: Adding liquidity by Alice. Should succeed with correct return values.")
-    dex.add_liquidity(_amount0 = 200 * DECIMALS_0, _amount1 = 200 * DECIMALS_1, min_token=400).run(sender=alice)
+    dex.add_liquidity(_amount0 = 200 * DECIMALS_0, _amount1 = 200 * DECIMALS_1, min_token=400 * DECIMALS_E).run(sender=alice)
     scenario.verify(dex.data.token_pool[0].pool == 50200 * DECIMALS_E)
     scenario.verify(dex.data.token_pool[1].pool == 50200 * DECIMALS_E)
 

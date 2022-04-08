@@ -3,7 +3,7 @@ const config = {
   kusdBigmapId: 65911,
   UsdtzAddress: "KT1CNQL6xRn5JaTUcMmxwSc5YQjwpyHkDR5r",
   usdtzBigmapId: 65914,
-  StableSwapAddress: "KT1LJesKshgXJRQawFXYhTyjpjPnsymaqxL4",
+  StableSwapAddress: "KT1QhyLUFAnD2Gm7KRNoATTjMDdnYVUQHCNZ",
   lpBigmapId: 89965,
 
   // Config parameters that are used.
@@ -41,9 +41,9 @@ const config = {
   ],
   lpToken: {
     symbol: "LLP",
-    address: "KT1BsG4t7FLTGEURr7Qz9KecrAJtTzdHrrm1",
+    address: "KT1P98uAMHLW86tHABEk6ZZbejpj3BmZmuxn",
     isFA2: false,
-    balanceBigmap: 168488,
+    balanceBigmap: 230903,
     decimals: 18,
   },
 };

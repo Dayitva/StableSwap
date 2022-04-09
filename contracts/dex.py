@@ -478,7 +478,7 @@ wusdc_id = sp.nat(0)
 wusdc_decimals = sp.nat(10 ** 6)
 wusdc_is_fa2 = sp.bool(True)
 admin = sp.address("tz1WNKahMHz1bkuAfZrsvtmjBhh4GJzw8YcU")
-kusd_wusdc_lp = sp.address("KT1BsG4t7FLTGEURr7Qz9KecrAJtTzdHrrm1")
+kusd_wusdc_lp = sp.address("KT1TaynG42eaZEmSSsprWe16e6oTUH9yNJAo")
 
 sp.add_compilation_target("kUSD-wUSDC", Dex(
     # KT1LJesKshgXJRQawFXYhTyjpjPnsymaqxL4
@@ -492,4 +492,24 @@ sp.add_compilation_target("kUSD-wUSDC", Dex(
     x_is_fa2=kusd_is_fa2,
     y_is_fa2=wusdc_is_fa2,
     _admin=admin,
+))
+
+kusd_mainnet_address = sp.address("KT1K9gCRgaLRFKTErYt1wVxA3Frb9FjasjTV")
+wusdc_mainnet_address = sp.address("KT18fp5rcTW7mbWDmzFwjLDUhs5MeJmagDSZ")
+kusd_mainnet_id = sp.nat(0)
+wusdc_mainnet_id = sp.nat(17)
+mainnet_admin = sp.address("tz1YmV5mHeu45QpQAsZ7WfwvrmEtEGnQy3GJ")
+mainnet_lp = sp.address("KT1-LP")
+
+sp.add_compilation_target("kUSD-wUSDC-Mainnet", Dex(
+    x_address=kusd_mainnet_address,
+    y_address=wusdc_mainnet_address,
+    _lp_token=mainnet_lp,
+    x_decimals=kusd_decimals,
+    y_decimals=wusdc_decimals,
+    x_token_id=kusd_mainnet_id,
+    y_token_id=wusdc_mainnet_id,
+    x_is_fa2=kusd_is_fa2,
+    y_is_fa2=wusdc_is_fa2,
+    _admin=mainnet_admin,
 ))

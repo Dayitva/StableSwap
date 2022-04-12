@@ -43,7 +43,7 @@ const config = {
     symbol: "LLP",
     address: "KT1TaynG42eaZEmSSsprWe16e6oTUH9yNJAo",
     isFA2: false,
-    balanceBigmap: 233599,
+    balanceBigmap: 233591,
     decimals: 18,
   },
 };

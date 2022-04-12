@@ -46,6 +46,7 @@ export default function Balance() {
       } else {
         balance = await fetchMaxBalanceFA12(userAddress, token.bigmapId);
       }
+      console.log(token.name, balance);
       balances.push({
         name: token.name,
         balance: new BigNumber(balance)
@@ -59,6 +60,7 @@ export default function Balance() {
   useEffect(() => {
     const fetchData = async () => {
       setBalances(await fetchUserBalances(tokens));
+      console.log(balances);
     };
     fetchData();
     setInterval(() => {

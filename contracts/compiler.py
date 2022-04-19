@@ -14,7 +14,7 @@ kusd_contract_metadata = """
 llp_contract_metadata = """
 { "name": "Liquibrium LP contract", "description": "FA1.2 Implementation of LLP", "authors": ["@liquibrium"], "homepage":  "https://liquibrium.finance", "interfaces": [ "TZIP-007-2021-01-29"] }
 """
-admin = sp.address("tz1WNKahMHz1bkuAfZrsvtmjBhh4GJzw8YcU")
+admin = sp.address("tz1YmV5mHeu45QpQAsZ7WfwvrmEtEGnQy3GJ")
 
 def main():
     # Token 1
@@ -39,7 +39,7 @@ def main():
             "decimals": "18",
             "name": "Liquibrium LP",
             "symbol": "LLP",
-            "icon": 'https://placekitten.com/100/100'
+            "icon": 'ipfs://QmVidZ8ysiNEYGcQzMbZmqMM3k36i5pi48PzHjfroXZwY6'
         },
         contract_metadata={
             "": llp_contract_metadata

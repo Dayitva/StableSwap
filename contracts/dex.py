@@ -1,8 +1,8 @@
 import smartpy as sp
 from contracts.utility import TokenUtility
 from contracts.errors import Error
-fa12 = sp.io.import_script_from_url("file:./contracts/faucetFA12.py")
-fa2 = sp.io.import_script_from_url("file:./contracts/faucetFA2.py")
+fa12 = sp.io.import_script_from_url("file:./contracts/fa1.2.py")
+fa2 = sp.io.import_script_from_url("file:./contracts/fa2.py")
 
 admin = sp.address("tz1WNKahMHz1bkuAfZrsvtmjBhh4GJzw8YcU")
 kusd = sp.address("KT1WJUr74D5bkiQM2RE1PALV7R8MUzzmDzQ9")
@@ -85,6 +85,7 @@ class Dex(sp.Contract, TokenUtility):
             admin=_admin,
             eighteen=1000000000000000000,
             fee=sp.nat(15),
+            fee_pool = sp.nat(0),
             lp_token=_lp_token,
             metadata=sp.big_map(l={
                 "": sp.utils.bytes_of_string("tezos-storage:content"),
@@ -342,6 +343,7 @@ class Dex(sp.Contract, TokenUtility):
         fee_collected = sp.local('fee', ((dy.value * self.data.fee) / 10000))
         dy.value = sp.as_nat(dy.value - fee_collected.value)
         self.data.token_pool[j].admin_fee += (fee_collected.value / 2)
+        self.data.fee_pool += (fee_collected.value / 2)
         self.data.token_pool[i].pool += dx
         self.data.token_pool[j].pool = sp.as_nat(
             self.data.token_pool[j].pool - dy.value)
@@ -384,7 +386,7 @@ class Dex(sp.Contract, TokenUtility):
         # sp.trace({'D0': D0.value})
         # sp.trace({"D1-D0": D1.value-D0.value})
 
-        lp_amount = token_supply_initial.value * \
+        lp_amount = sp.as_nat(token_supply_initial.value - self.data.fee_pool) * \
             sp.as_nat(D1.value - D0.value) / D0.value
         sp.verify(lp_amount >= min_token, Error.POOL_STATE)
 
@@ -417,8 +419,7 @@ class Dex(sp.Contract, TokenUtility):
         sp.verify(sp.amount == sp.tez(0), Error.NO_TEZ)
         sp.set_type(min_tokens, sp.TMap(sp.TNat, sp.TNat))
 
-        token_supply = sp.local(
-            'ts1', self.data.token_pool[0].pool + self.data.token_pool[1].pool)
+        self.data.fee_pool = sp.as_nat(self.data.fee_pool - (self.data.fee_pool * (_amount / self.data.lp_supply)))
 
         value = sp.local('val1', sp.as_nat(
             self.data.token_pool[0].pool - self.data.token_pool[0].admin_fee) * _amount / self.data.lp_supply)
@@ -477,7 +478,7 @@ wusdc_id = sp.nat(0)
 wusdc_decimals = sp.nat(10 ** 6)
 wusdc_is_fa2 = sp.bool(True)
 admin = sp.address("tz1WNKahMHz1bkuAfZrsvtmjBhh4GJzw8YcU")
-kusd_wusdc_lp = sp.address("KT1BsG4t7FLTGEURr7Qz9KecrAJtTzdHrrm1")
+kusd_wusdc_lp = sp.address("KT1TaynG42eaZEmSSsprWe16e6oTUH9yNJAo")
 
 sp.add_compilation_target("kUSD-wUSDC", Dex(
     # KT1LJesKshgXJRQawFXYhTyjpjPnsymaqxL4
@@ -491,4 +492,28 @@ sp.add_compilation_target("kUSD-wUSDC", Dex(
     x_is_fa2=kusd_is_fa2,
     y_is_fa2=wusdc_is_fa2,
     _admin=admin,
+))
+
+kusd_mainnet_address = sp.address("KT1K9gCRgaLRFKTErYt1wVxA3Frb9FjasjTV")
+usdtz_mainnet_address = sp.address("KT1LN4LPSqTMS7Sd2CJw4bbDGRkMv2t68Fy9")
+kusd_mainnet_id = sp.nat(0)
+usdtz_mainnet_id = sp.nat(0)
+kusd_decimals = sp.nat(10 ** 18)
+usdtz_decimals = sp.nat(10 ** 6)
+usdtz_is_fa2 = sp.bool(False)
+kusd_is_fa2 = sp.bool(False)
+mainnet_admin = sp.address("tz1YmV5mHeu45QpQAsZ7WfwvrmEtEGnQy3GJ")
+mainnet_lp = sp.address("KT1UzZVdbPLk5U3w6hVei1Z715YvMLPFfmfk")
+
+sp.add_compilation_target("kUSD-wUSDC-Mainnet", Dex(
+    x_address=kusd_mainnet_address,
+    y_address=usdtz_mainnet_address,
+    _lp_token=mainnet_lp,
+    x_decimals=kusd_decimals,
+    y_decimals=usdtz_decimals,
+    x_token_id=kusd_mainnet_id,
+    y_token_id=usdtz_mainnet_id,
+    x_is_fa2=kusd_is_fa2,
+    y_is_fa2=usdtz_is_fa2,
+    _admin=mainnet_admin,
 ))

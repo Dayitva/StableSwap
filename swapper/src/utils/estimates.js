@@ -1,12 +1,5 @@
 import config from "../config";
 
-/**
- *
- * @param {Array<Number>} tokenPool
- * @param {Number} A
- * @param {Number} N_COINS
- * @returns {Number}
- */
 function getD(tokenPool, A, N_COINS) {
   // tokenPool = [token1_amount, token2_amount];
   let S = tokenPool[0] + tokenPool[1];
@@ -79,11 +72,11 @@ function estimateTokensByLp(tokenPool, _amount, lpSupply) {
   let tokenOut = {};
 
   // For first token.
-  let val = tokenPool[0].multipliedBy(_amount).dividedBy(lpSupply);
+  let val = tokenPool[0].multipliedBy(_amount).dividedToIntegerBy(lpSupply);
   // val /= 10 ** 18 / config.tokens[0].decimals;
   tokenOut[0] = val;
 
-  val = tokenPool[1].multipliedBy(_amount).dividedBy(lpSupply);
+  val = tokenPool[1].multipliedBy(_amount).dividedToIntegerBy(lpSupply);
   // val /= 10 ** 18 / config.tokens[1].decimals;
   tokenOut[1] = val;
 

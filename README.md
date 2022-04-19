@@ -1,6 +1,6 @@
 # Liquibrium
 
-A decentralised stablecoin exchange on Tezos allowing users to trade similar assets at low slippage.
+A decentralised stablecoin exchange on Tezos allowing users to trade similar and pegged assets at low slippage.
 
 ## Docs
 

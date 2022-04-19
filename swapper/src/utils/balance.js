@@ -8,9 +8,10 @@ export const fetchMaxBalanceFA12 = async (userAddress, bigmapId) => {
   const { data } = await axios.get(url);
   const userData = data.find((val) => val.key === addr);
   if (userData) {
-    return parseInt(userData.value.balance);
+    console.log("Before parseInt", userData.value.balance);
+    return userData.value.balance;
   }
-  return 0;
+  return "0";
 };
 
 export const fetchMaxBalanceFA2 = async (userAddress, bigmapId, tokenId) => {
@@ -23,7 +24,7 @@ export const fetchMaxBalanceFA2 = async (userAddress, bigmapId, tokenId) => {
     (val) => val.key.address === addr && val.key.nat === tokenId.toString()
   );
   if (userData) {
-    return parseInt(userData.value);
+    return userData.value;
   }
-  return 0;
+  return "0";
 };

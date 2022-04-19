@@ -1,8 +1,8 @@
 import smartpy as sp
 from contracts.utility import TokenUtility
 from contracts.errors import Error
-fa12 = sp.io.import_script_from_url("file:./contracts/faucetFA12.py")
-fa2 = sp.io.import_script_from_url("file:./contracts/faucetFA2.py")
+fa12 = sp.io.import_script_from_url("file:./contracts/fa1.2.py")
+fa2 = sp.io.import_script_from_url("file:./contracts/fa2.py")
 
 admin = sp.address("tz1WNKahMHz1bkuAfZrsvtmjBhh4GJzw8YcU")
 kusd = sp.address("KT1WJUr74D5bkiQM2RE1PALV7R8MUzzmDzQ9")
@@ -495,21 +495,25 @@ sp.add_compilation_target("kUSD-wUSDC", Dex(
 ))
 
 kusd_mainnet_address = sp.address("KT1K9gCRgaLRFKTErYt1wVxA3Frb9FjasjTV")
-wusdc_mainnet_address = sp.address("KT18fp5rcTW7mbWDmzFwjLDUhs5MeJmagDSZ")
+usdtz_mainnet_address = sp.address("KT1LN4LPSqTMS7Sd2CJw4bbDGRkMv2t68Fy9")
 kusd_mainnet_id = sp.nat(0)
-wusdc_mainnet_id = sp.nat(17)
+usdtz_mainnet_id = sp.nat(0)
+kusd_decimals = sp.nat(10 ** 18)
+usdtz_decimals = sp.nat(10 ** 6)
+usdtz_is_fa2 = sp.bool(False)
+kusd_is_fa2 = sp.bool(False)
 mainnet_admin = sp.address("tz1YmV5mHeu45QpQAsZ7WfwvrmEtEGnQy3GJ")
-mainnet_lp = sp.address("KT1-LP")
+mainnet_lp = sp.address("KT1UzZVdbPLk5U3w6hVei1Z715YvMLPFfmfk")
 
 sp.add_compilation_target("kUSD-wUSDC-Mainnet", Dex(
     x_address=kusd_mainnet_address,
-    y_address=wusdc_mainnet_address,
+    y_address=usdtz_mainnet_address,
     _lp_token=mainnet_lp,
     x_decimals=kusd_decimals,
-    y_decimals=wusdc_decimals,
+    y_decimals=usdtz_decimals,
     x_token_id=kusd_mainnet_id,
-    y_token_id=wusdc_mainnet_id,
+    y_token_id=usdtz_mainnet_id,
     x_is_fa2=kusd_is_fa2,
-    y_is_fa2=wusdc_is_fa2,
+    y_is_fa2=usdtz_is_fa2,
     _admin=mainnet_admin,
 ))

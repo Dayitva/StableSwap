@@ -33,7 +33,7 @@ function RemoveLiquidity() {
         1: o[1] - (slippage * o[1]) / 100,
       };
     });
-  }, [slippage]);
+  }, [slippage, lpAmount]);
 
   function handleChangeLpEvent(lpValue) {
     setLpAmount(lpValue);
@@ -53,16 +53,16 @@ function RemoveLiquidity() {
     ];
     let tokenAmount = estimateTokensByLp(
       tokenPool,
-      new BigNumber(newValue * 10 ** 18),
+      new BigNumber(newValue).multipliedBy(new BigNumber(10 ** 18)),
       new BigNumber(data.lp_supply)
     );
     console.log({
-      0: tokenAmount[0].toFixed(6),
-      1: tokenAmount[1].toFixed(6),
+      0: tokenAmount[0],
+      1: tokenAmount[1],
     });
     setOutTokens({
-      0: parseFloat(tokenAmount[0].toFixed(6)),
-      1: parseFloat(tokenAmount[1].toFixed(6)),
+      0: tokenAmount[0].toFixed(),
+      1: tokenAmount[1].toFixed(),
     });
     // setOutTokens(tokenAmount);
   }
@@ -79,13 +79,22 @@ function RemoveLiquidity() {
     }
     try {
       setShowLoading(true);
-      const data = await removeLiquidity(
-        parseInt(lpAmount * 10 ** 18),
-        parseInt(
-          parseInt(outTokens[0]) / 10 ** (18 - config.tokens[0].decimals)
+      console.log(
+        new BigNumber(lpAmount).multipliedBy(
+          new BigNumber("1000000000000000000")
         ),
-        parseInt(
-          parseInt(outTokens[1]) / 10 ** (18 - config.tokens[1].decimals)
+        1,
+        1
+      );
+      const data = await removeLiquidity(
+        new BigNumber(lpAmount).multipliedBy(
+          new BigNumber("1000000000000000000")
+        ),
+        new BigNumber(outTokens[0]).dividedToIntegerBy(
+          new BigNumber(10 ** (18 - config.tokens[0].decimals))
+        ),
+        new BigNumber(outTokens[1]).dividedToIntegerBy(
+          new BigNumber(10 ** (18 - config.tokens[1].decimals))
         )
       );
       setShowLoading(false);
@@ -118,10 +127,16 @@ function RemoveLiquidity() {
         0
       );
     } else {
+      console.log("fetch max balance");
       maxBalance = await fetchMaxBalanceFA12(userAddress, token.balanceBigmap);
     }
-    console.log(maxBalance);
-    setLpAmount(maxBalance / 10 ** 18);
+    console.log("Max Balance", maxBalance);
+    const maxFormattedBalance = new BigNumber(maxBalance)
+      .dividedBy(new BigNumber(10 ** 18))
+      .toFixed();
+    setLpAmount(maxFormattedBalance);
+    updateOutTokens(maxFormattedBalance);
+    console.log("Check the decimals, ", maxFormattedBalance);
   };
 
   return (

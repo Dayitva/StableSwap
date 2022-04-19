@@ -81,6 +81,7 @@ export const exchange = async (fromToken, amount, minReturn, validUpto) => {
 
     const fromTokenContract = await tezos.wallet.at(fromToken.address);
     const dexContract = await tezos.wallet.at(config.StableSwapAddress);
+    console.log(fromToken.isFA2 ? "It's FA2" : "Not FA2");
 
     const batch = await tezos.wallet
       .batch()
@@ -91,7 +92,7 @@ export const exchange = async (fromToken, amount, minReturn, validUpto) => {
                 add_operator: {
                   owner: pkh,
                   operator: config.StableSwapAddress,
-                  token_id: fromToken.id,
+                  token_id: 0,
                 },
               },
             ])

@@ -70,7 +70,7 @@ function Swap() {
   async function updateFromPrice(toValue) {
     console.log(fromToken, toToken);
     const { data } = await axios.get(
-      `https://api.hangzhounet.tzkt.io/v1/contracts/${CONFIG.StableSwapAddress}/storage`
+      `https://api.tzkt.io/v1/contracts/${CONFIG.StableSwapAddress}/storage`
     );
     let tokenPool = [
       parseInt(data.token_pool[0].pool) / 10 ** 18,
@@ -89,7 +89,7 @@ function Swap() {
     console.log(fromToken.tokenId, toToken.tokenId);
 
     const { data } = await axios.get(
-      `https://api.hangzhounet.tzkt.io/v1/contracts/${CONFIG.StableSwapAddress}/storage`
+      `https://api.tzkt.io/v1/contracts/${CONFIG.StableSwapAddress}/storage`
     );
     console.log("Hello Worl");
     let tokenPool = [

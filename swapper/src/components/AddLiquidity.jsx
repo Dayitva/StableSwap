@@ -71,7 +71,7 @@ function AddLiquidity() {
   );
   const updateValue = async (val) => {
     const { data } = await axios.get(
-      `https://api.hangzhounet.tzkt.io/v1/contracts/${CONFIG.StableSwapAddress}/storage`
+      `https://api.tzkt.io/v1/contracts/${CONFIG.StableSwapAddress}/storage`
     );
 
     let tokenPool = [

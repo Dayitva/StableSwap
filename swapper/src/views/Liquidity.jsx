@@ -12,7 +12,7 @@ function Liquidity() {
 
   async function getBalance(userAddress, bigmapId) {
     const { data } = await axios.get(
-      `https://api.hangzhounet.tzkt.io/v1/bigmaps/${bigmapId}/keys`
+      `https://api.tzkt.io/v1/bigmaps/${bigmapId}/keys`
     );
     const requiredEl = data.find((el) => {
       return el.key === userAddress;

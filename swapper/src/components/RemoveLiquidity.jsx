@@ -41,7 +41,7 @@ function RemoveLiquidity() {
   }
   async function updateOutTokens(newValue) {
     const { data } = await axios.get(
-      `https://api.hangzhounet.tzkt.io/v1/contracts/${CONFIG.StableSwapAddress}/storage`
+      `https://api.tzkt.io/v1/contracts/${CONFIG.StableSwapAddress}/storage`
     );
     let tokenPool = [
       new BigNumber(data.token_pool[0].pool).minus(

@@ -4,8 +4,10 @@ import PoolStats from "../components/PoolStats";
 import Swap from "../components/Swap";
 import Navbar from "../components/Navbar";
 import Balance from "../components/Balance";
+import useWallet from "../hooks/useWallet";
 
 function Exchange() {
+  const { wallet } = useWallet();
   return (
     <div className="px-4">
       <Navbar />
@@ -14,7 +16,7 @@ function Exchange() {
           <PoolStats />
         </div>
         <div className="mx-auto max-w-xl relative mt-4">
-          <Balance />
+          {wallet && <Balance />}
         </div>
         <div className="mt-8 mx-auto max-w-xl relative">
           <Swap />

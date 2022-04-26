@@ -16,7 +16,7 @@ const routes = [
   { id: 1, name: "Home", path: "/" },
   { id: 2, name: "Exchange", path: "/exchange" },
   { id: 3, name: "Liquidity", path: "/liquidity" },
-  { id: 4, name: "Faucet", path: "/faucet" },
+  // { id: 4, name: "Faucet", path: "/faucet" },
 ];
 
 function Navbar() {

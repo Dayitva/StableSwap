@@ -43,8 +43,8 @@ function PoolStats() {
         </div>
         <div className={balanceClass}>
           <img
-            src="https://cloudflare-ipfs.com/ipfs/QmQfHU9mYLRDU4yh2ihm3zrvVFxDrLPiXNYtMovUQE2S2t"
-            alt="wUSDC"
+            src="https://cloudflare-ipfs.com/ipfs/Qmb2GiHN9EjcrN29J6y9PsXu3ZDosXTv6uLUWGZfRRSzS2/usdtz.png"
+            alt="USDtz"
             className="w-4 h-4"
           />
 

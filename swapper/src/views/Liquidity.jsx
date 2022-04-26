@@ -48,7 +48,7 @@ function Liquidity() {
           <PoolStats />
         </div>
         <div className="mx-auto max-w-xl relative mt-4">
-          <Balance />
+          {wallet && <Balance />}
         </div>
         {/* Main Content Goes Here... */}
         <div className="sm:mt-20 mt-6 mx-auto max-w-2xl relative mb-20">

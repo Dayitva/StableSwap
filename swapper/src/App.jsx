@@ -35,7 +35,7 @@ function App() {
           <Route path="/" component={Home} exact />
           <Route path="/exchange" component={Exchange} exact />
           <Route path="/liquidity" component={Liquidity} exact />
-          <Route path="/faucet" component={Faucet} exact />
+          {/* <Route path="/faucet" component={Faucet} exact /> */}
         </Switch>
       </BrowserRouter>
     </div>

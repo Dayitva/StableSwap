@@ -13,7 +13,7 @@ const tokens = [
     tokenId: 0,
   },
   {
-    name: "wUSDC",
+    name: "USDtz",
     fa2: true,
     bigmapId: config.tokens[1].balanceBigmap,
     decimals: config.tokens[1].decimals,

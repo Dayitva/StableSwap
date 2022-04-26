@@ -174,7 +174,7 @@ function RemoveLiquidity() {
             <span className="font-medium"> {outTokens[0] / 10 ** 18} kUSD</span>
           </p>
           <p className="text-gray-100 flex items-center justify-between text-xs sm:text-base">
-            <span>Amount of wUSDC:</span>{" "}
+            <span>Amount of USDtz:</span>{" "}
             <span className="font-medium">{outTokens[1] / 10 ** 18} wUSDC</span>
           </p>
         </div>

@@ -13,6 +13,7 @@ const rpcURL = config.rpcUrl;
 const wallet = new BeaconWallet(options);
 
 const getActiveAccount = async () => {
+  console.log("Getinng Active account.");
   return await wallet.client.getActiveAccount();
 };
 
@@ -23,6 +24,7 @@ const connectWallet = async () => {
   console.log("Hello Connecting wallet.");
 
   if (!account) {
+    console.log("Opening ppopup for wallet.");
     await wallet.requestPermissions({
       network: { type: preferredNetwork },
     });
@@ -41,9 +43,9 @@ const disconnectWallet = async () => {
 const checkIfWalletConnected = async (wallet) => {
   try {
     const activeAccount = await wallet.client.getActiveAccount();
-    if (!activeAccount) {
-      await connectWallet();
-    }
+    // if (!activeAccount) {
+    //   await connectWallet();
+    // }
 
     return {
       success: true,

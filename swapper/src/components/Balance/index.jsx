@@ -92,10 +92,8 @@ export default function Balance() {
         </h2>
         <div className="mt-2 flex items-center justify-around">
           {balances.map((balance, index) => (
-            <p className="text-xs">
-              <span key={index} className="font-semibold">
-                {balance.name}:
-              </span>{" "}
+            <p className="text-xs" key={index}>
+              <span className="font-semibold">{balance.name}:</span>{" "}
               {balance.balance}
             </p>
           ))}

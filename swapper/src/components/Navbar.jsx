@@ -40,7 +40,7 @@ function Navbar() {
       }
     };
     func();
-  }, [setWallet]);
+  }, []);
 
   return (
     <div className="fixed left-0 right-0 top-0 sm:h-24 h-16 shadow-md border-b-2 border-gray-900 z-40 bg-dark">
@@ -78,6 +78,7 @@ function Navbar() {
             }
             bg="bg-gradient-to-r from-purple-500 to-blue-500 font-semibold"
             onClick={!wallet ? handleConnectWallet : handleDisconnectWallet}
+            // onClick={handleConnectWallet}
           />
           <button
             onClick={() => {

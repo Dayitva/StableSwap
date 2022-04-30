@@ -6,7 +6,7 @@ N_COINS = 2                     # Number of tokens in pool
 FEE = 15                        # Fee for exchanges
 ADMIN_FEE_POOL1 = [0, 0]         # Counter to track Admin fee
 ADMIN_FEE_POOL2 = [0, 0]         # Counter to track Admin fee
-TOKEN_POOL1 = [50000, 50000]         # Liquidity Pools
+TOKEN_POOL1 = [61, 9]         # Liquidity Pools
 TOKEN_POOL2 = [1000, 1000]         # Liquidity Pools
 LP_SUPPLY1 = sum(TOKEN_POOL1)
 LP_SUPPLY2 = sum(TOKEN_POOL2)
@@ -94,7 +94,7 @@ def xchg(i, dx, xp, afp, range=False):
 
     xp[i] += dx
     xp[j] = xp[j] - dy
-    return dy, afp
+    return dy
 
 
 def add_liquidity(_amount0, _amount1, xp, lps):
@@ -147,49 +147,71 @@ def remove_liquidity(_amount, xp, afp, lps):
 #     print(TOKEN_POOL)
 #     print(ADMIN_FEE_POOL)
 
-lp_tokens1, LP_SUPPLY1 = add_liquidity(50000, 50000, TOKEN_POOL1, LP_SUPPLY1)
-print("For", 50000, "of token 0 and", 50000, "of token 1, you get", lp_tokens1, "LP tokens.")
+# lp_tokens1, LP_SUPPLY1 = add_liquidity(50000, 50000, TOKEN_POOL1, LP_SUPPLY1)
+# print("For", 50000, "of token 0 and", 50000, "of token 1, you get", lp_tokens1, "LP tokens.")
+# print(LP_SUPPLY1)
+# print(TOKEN_POOL1)
+
+# print(LP_SUPPLY1)
+# print(TOKEN_POOL1)
+
+# vol = 0.1 * sum(TOKEN_POOL1)
+
+# for i in range(365):
+#     t0 = random.random() * vol
+#     t1 = vol - t0
+#     _ = xchg(0, t0, TOKEN_POOL1, ADMIN_FEE_POOL1)
+#     _ = xchg(1, t1, TOKEN_POOL1, ADMIN_FEE_POOL1)
+
+# print("Fee: $",sum(ADMIN_FEE_POOL1))
+# print("Interest after 1 year:",(sum(ADMIN_FEE_POOL1)/sum(TOKEN_POOL1))*100, "%")
+
+# print(LP_SUPPLY1)
+# print(TOKEN_POOL1)
+
+# _amount1 = xchg(0, 10000, TOKEN_POOL1, ADMIN_FEE_POOL1)
+# print("For", 10000, "of token", 0, "you get", _amount1, "of token", 0)
+# print(LP_SUPPLY1)
+# print(TOKEN_POOL1)
+
+# _amount1 = xchg(1, 20000, TOKEN_POOL1, ADMIN_FEE_POOL1)
+# print("For", 20000, "of token", 1, "you get", _amount1, "of token", 1)
+# print(LP_SUPPLY1)
+# print(TOKEN_POOL1)
+
+_amount1 = xchg(0, 10, TOKEN_POOL1, ADMIN_FEE_POOL1)
+print("For", 10, "of token", 0, "you get", _amount1, "of token", 1)
 print(LP_SUPPLY1)
 print(TOKEN_POOL1)
 
-_amount1 = xchg(0, 10000, TOKEN_POOL1, ADMIN_FEE_POOL1)
-print("For", 10000, "of token", 0, "you get", _amount1, "of token", 0)
+_amount1 = xchg(0, 10, TOKEN_POOL1, ADMIN_FEE_POOL1)
+print("For", 10, "of token", 0, "you get", _amount1, "of token", 1)
 print(LP_SUPPLY1)
 print(TOKEN_POOL1)
 
-_amount1 = xchg(1, 20000, TOKEN_POOL1, ADMIN_FEE_POOL1)
-print("For", 20000, "of token", 1, "you get", _amount1, "of token", 1)
-print(LP_SUPPLY1)
-print(TOKEN_POOL1)
+# print("Fee:")
+# print(FEE_COLLECTED)
 
-_amount1 = xchg(0, 9999.935, TOKEN_POOL1, ADMIN_FEE_POOL1)
-print("For", 9999.935, "of token", 0, "you get", _amount1, "of token", 0)
-print(LP_SUPPLY1)
-print(TOKEN_POOL1)
+# lp_tokens1, LP_SUPPLY1 = add_liquidity(1000, 0, TOKEN_POOL1, LP_SUPPLY1)
+# print("For", 1000, "of token 0 and", 0, "of token 1, you get", lp_tokens1, "LP tokens.")
+# print(LP_SUPPLY1)
+# print(TOKEN_POOL1)
 
-print("Fee:")
-print(FEE_COLLECTED)
+# # print(FEE_COLLECTED)
+# _val0, _val1, LP_SUPPLY1 = remove_liquidity(999.7225268554358, TOKEN_POOL1, ADMIN_FEE_POOL1, LP_SUPPLY1)
+# _amount1 = _val0 + _val1
+# print("For", 999.7225268554358, "of LP tokens you get", _amount1, "tokens.")
+# print(LP_SUPPLY1)
+# print(TOKEN_POOL1)
+# print(FEE_COLLECTED)
 
-lp_tokens1, LP_SUPPLY1 = add_liquidity(100000, 100000, TOKEN_POOL1, LP_SUPPLY1)
-print("For", 100000, "of token 0 and", 100000, "of token 1, you get", lp_tokens1, "LP tokens.")
-print(LP_SUPPLY1)
-print(TOKEN_POOL1)
-
-print(FEE_COLLECTED)
-_val0, _val1, LP_SUPPLY1 = remove_liquidity(199970.00909642936, TOKEN_POOL1, ADMIN_FEE_POOL1, LP_SUPPLY1)
-_amount1 = _val0 + _val1
-print("For", 199970.00909642936, "of LP tokens you get", _amount1, "tokens.")
-print(LP_SUPPLY1)
-print(TOKEN_POOL1)
-print(FEE_COLLECTED)
-
-print(FEE_COLLECTED)
-_val0, _val1, LP_SUPPLY1 = remove_liquidity(199999.99999999997, TOKEN_POOL1, ADMIN_FEE_POOL1, LP_SUPPLY1)
-_amount1 = _val0 + _val1
-print("For", 199999.99999999997, "of LP tokens you get", _amount1, "tokens.")
-print(LP_SUPPLY1)
-print(TOKEN_POOL1)
-print(FEE_COLLECTED)
+# print(FEE_COLLECTED)
+# _val0, _val1, LP_SUPPLY1 = remove_liquidity(199999.99999999997, TOKEN_POOL1, ADMIN_FEE_POOL1, LP_SUPPLY1)
+# _amount1 = _val0 + _val1
+# print("For", 199999.99999999997, "of LP tokens you get", _amount1, "tokens.")
+# print(LP_SUPPLY1)
+# print(TOKEN_POOL1)
+# print(FEE_COLLECTED)
 
 # LP_AMOUNTS1 = []
 # LP_AMOUNTS2 = []
